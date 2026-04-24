@@ -8,3 +8,11 @@ export function trouverBiome(biome){
         });
     return biomeTrouve;
    }
+
+export function creerListeBiomeHtml(biome){
+            return `<h2>Biomes disponibles</h2>
+            <ul>
+                ${BIOMES.map(biome => `<li>${biome}</li>`).join("")}
+            </ul>
+            `;
+}
