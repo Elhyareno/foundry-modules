@@ -24,7 +24,11 @@ export class GaiaExplorationDialog extends FormApplication {
   async _updateObject(event, formData) {
     const biome = formData.biome ?? "jungle";
     const rollType = formData.rollType ?? "event";
-    ui.notifications.info(`Type choisi : ${rollType}`);
+    if (rollType === "event") {
+        await game.gaiaExploration.rollEvent(biome);
+    } else {
+        ui.notifications.info(`Type pas encore disponible : ${rollType}`);
+    }
     await game.gaiaExploration.rollEvent(biome);
   }
 }
