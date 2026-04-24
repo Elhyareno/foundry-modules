@@ -34,7 +34,7 @@ Hooks.once("ready", () => {
     },
 
     async rollEvent(biome = "jungle") {
-        const nomNormalisee = BIOMES.nomNormalisee(biome);
+        const nomNormalisee = normaliserTexte(biome);
         const biomeTrouve = BIOMES.find(biomeValide => {
             return normaliserTexte(biomeValide) === nomNormalisee;
         });
