@@ -3,12 +3,32 @@ import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
-  ChatMessage.create(
-    {
+
+  ChatMessage.create({
         content: "Le module gaiaExploration est bien chargé"
-    }
-  );
+  });
+  
+  const generator = new GaiaGenerator();
+
   game.gaiaExploration = {
+    generator,
+
+    openDialog() {
+      new GaiaExplorationDialog().render(true);
+    },
+
+    async rollEvent(biome = "jungle") {
+      const event = generator.generateEvent(biome);
+      const content = generator.formatEvent(event, biome);
+
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker(),
+        content
+      });
+
+      return event;
+    },
+
     envoyerEvenementTest(){
         const evenement = {
             titre: "Mue de l'essaim",
@@ -46,4 +66,3 @@ Hooks.on("getSceneControlButtons", controls => {
     }
   });
 });
-
