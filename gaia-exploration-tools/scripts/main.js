@@ -33,17 +33,21 @@ Hooks.once("ready", () => {
       new GaiaExplorationDialog().render(true);
     },
 
-    async rollEvent(biome = "jungle") {  
-        const nomNormalisee = normaliserTexte(biome);
-        if (!BIOMES.includes(nomNormalisee)) {
+    async rollEvent(biome = "jungle") {
+        const nomNormalisee = BIOMES.nomNormalisee(biome);
+        const biomeTrouve = BIOMES.find(biomeValide => {
+            return normaliserTexte(biomeValide) === nomNormalisee;
+        });
+
+        if (!biomeTrouve) {
             ChatMessage.create({
                 content: `<p>Biome inconnu : ${biome}</p>
                 <p>Biomes disponibles : ${BIOMES.join(", ")}</p>`
             });
             return null;
             }
-      const event = generator.generateEvent(nomNormalisee);
-      const content = generator.formatEvent(event, nomNormalisee);
+      const event = generator.generateEvent(biomeTrouve);
+      const content = generator.formatEvent(event, biomeTrouve);
 
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker(),
