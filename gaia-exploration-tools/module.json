@@ -1,0 +1,21 @@
+{
+  "id": "gaia-exploration-tools",
+  "title": "Gaïa Exploration Tools",
+  "description": "Outils d'exploration pour la planète Gaïa : événements, curiosités, biomes et traces de factions.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Mat"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/gaia-exploration.css"
+  ]
+}
