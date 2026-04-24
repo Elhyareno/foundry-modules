@@ -1,4 +1,5 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
+import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 
 Hooks.once("ready", () => {
   console.log("Gaïa Exploration Tools | Module prêt.");
@@ -8,11 +9,15 @@ Hooks.once("ready", () => {
   game.gaiaExploration = {
     generator,
 
-    rollEvent(biome = "jungle") {
+    openDialog() {
+      new GaiaExplorationDialog().render(true);
+    },
+
+    async rollEvent(biome = "jungle") {
       const event = generator.generateEvent(biome);
       const content = generator.formatEvent(event, biome);
 
-      ChatMessage.create({
+      await ChatMessage.create({
         speaker: ChatMessage.getSpeaker(),
         content
       });
@@ -20,6 +25,22 @@ Hooks.once("ready", () => {
       return event;
     }
   };
+});
 
-  console.log("Gaïa Exploration Tools | Commande disponible : game.gaiaExploration.rollEvent('jungle')");
+Hooks.on("getSceneControlButtons", controls => {
+  const tokenControls = controls.find(control => control.name === "token");
+
+  if (!tokenControls) {
+    return;
+  }
+
+  tokenControls.tools.push({
+    name: "gaia-exploration",
+    title: "Exploration de Gaïa",
+    icon: "fas fa-seedling",
+    button: true,
+    onClick: () => {
+      game.gaiaExploration.openDialog();
+    }
+  });
 });

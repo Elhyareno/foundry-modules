@@ -1,0 +1,14 @@
+<form class="gaia-exploration-form">
+  <div class="form-group">
+    <label for="gaia-biome">Biome</label>
+    <select name="biome" id="gaia-biome">
+      {{#each biomes}}
+        <option value="{{this}}">{{this}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <p class="notes">
+    Génère un événement d'exploration pour le biome choisi et l'envoie dans le chat.
+  </p>
+</form>

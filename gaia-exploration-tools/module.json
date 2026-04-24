@@ -17,5 +17,8 @@
   ],
   "styles": [
     "styles/gaia-exploration.css"
+  ],
+  "templates": [
+    "templates/gaia-exploration-dialog.hbs"
   ]
 }

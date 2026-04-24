@@ -4,8 +4,18 @@
 
 .gaia-card h2 {
   margin-top: 0;
+  border-bottom: 1px solid rgba(120, 120, 120, 0.4);
+  padding-bottom: 4px;
 }
 
 .gaia-card p {
   margin: 4px 0;
+}
+
+.gaia-exploration-form .form-group {
+  margin-bottom: 8px;
+}
+
+.gaia-exploration-form select {
+  width: 100%;
 }
