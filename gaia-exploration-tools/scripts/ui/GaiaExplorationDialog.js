@@ -25,6 +25,8 @@ export class GaiaExplorationDialog extends FormApplication {
     const rollType = formData.rollType ?? "event";
     if (rollType === "event") {
         await game.gaiaExploration.rollEvent(biome);
+    } else if(rollType === "curiosity"){
+        await game.gaiaExploration.rollCuriosities(biome);
     } else {
         ui.notifications.info(`Type pas encore disponible : ${rollType}`);
     }
