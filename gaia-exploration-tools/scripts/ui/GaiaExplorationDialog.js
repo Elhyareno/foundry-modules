@@ -23,14 +23,7 @@ export class GaiaExplorationDialog extends FormApplication {
 
   async _updateObject(event, formData) {
     const biome = formData.biome ?? "jungle";
-
-    const generator = game.gaiaExploration?.generator;
-
-    if (!generator) {
-      ui.notifications.error("Gaïa Exploration Tools n'est pas prêt.");
-      return;
-    }
-
+    const generator = game.gaiaExploration.rollEvent(biome);
     const generatedEvent = generator.generateEvent(biome);
     const content = generator.formatEvent(generatedEvent, biome);
 
