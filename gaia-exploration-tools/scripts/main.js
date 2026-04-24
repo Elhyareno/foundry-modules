@@ -13,7 +13,7 @@ Hooks.once("ready", () => {
 
     listBiomes(){
         ChatMessage.create({
-            content = creerListeBiomesHtml()
+            content: creerListeBiomesHtml()
         });
     },
 
@@ -24,7 +24,10 @@ Hooks.once("ready", () => {
     async rollEvent(biome = "jungle") {
         const biomeTrouve = trouverBiome(biome);
         if (!biomeTrouve) {
-            creerMessageBiomeInconnuHtml(biome);
+            const content = creerMessageBiomeInconnuHtml(biome);
+            ChatMessage.create({
+                content
+            });
             return null;
             }
         const event = generator.generateEvent(biomeTrouve);

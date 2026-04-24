@@ -18,8 +18,7 @@ export function creerListeBiomesHtml(){
 }
 
 export function creerMessageBiomeInconnuHtml(biome){
-     ChatMessage.create({
-                content: `<p>Biome inconnu : ${biome}</p>
-                <p>Biomes disponibles : ${BIOMES.join(", ")}</p>`
-            });
+     return `<p>Biome inconnu : ${biome}</p>
+            <p>Biomes disponibles : ${BIOMES.join(", ")}</p>
+            `;
 }
