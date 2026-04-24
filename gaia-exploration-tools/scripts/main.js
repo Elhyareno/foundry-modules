@@ -13,7 +13,7 @@ Hooks.once("ready", () => {
     generator,
 
     listBiomes(){
-        await envoyerMessageChat(creerListeBiomesHtml());
+        envoyerMessageChat(creerListeBiomesHtml());
     },
 
     openDialog() {
@@ -23,13 +23,13 @@ Hooks.once("ready", () => {
     async rollEvent(biome = "jungle") {
         const biomeTrouve = trouverBiome(biome);
         if (!biomeTrouve) {
-            await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
+            envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
             return null;
             }
         const event = generator.generateEvent(biomeTrouve);
         const content = generator.formatEvent(event, biomeTrouve);
 
-      await envoyerMessageChat(content);
+      envoyerMessageChat(content);
       return event;
     }
   };
