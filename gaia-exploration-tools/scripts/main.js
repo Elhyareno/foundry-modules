@@ -1,7 +1,7 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { BIOMES } from "./data/biomes.js";
-import { creerListeBiomesHtml, trouverBiome } from "./utils/biomes.js";
+import { creerListeBiomesHtml, trouverBiome, creerMessageBiomeInconnuHtml } from "./utils/biomes.js";
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
@@ -24,10 +24,7 @@ Hooks.once("ready", () => {
     async rollEvent(biome = "jungle") {
         const biomeTrouve = trouverBiome(biome);
         if (!biomeTrouve) {
-            ChatMessage.create({
-                content: `<p>Biome inconnu : ${biome}</p>
-                <p>Biomes disponibles : ${BIOMES.join(", ")}</p>`
-            });
+            creerMessageBiomeInconnuHtml(biome);
             return null;
             }
         const event = generator.generateEvent(biomeTrouve);
