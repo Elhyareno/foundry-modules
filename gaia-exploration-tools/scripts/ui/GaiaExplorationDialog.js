@@ -23,10 +23,6 @@ export class GaiaExplorationDialog extends FormApplication {
 
   async _updateObject(event, formData) {
     const biome = formData.biome ?? "jungle";
-    const generator = game.gaiaExploration.rollEvent(biome);
-    const generatedEvent = generator.generateEvent(biome);
-    const content = generator.formatEvent(generatedEvent, biome);
-
-    await envoyerMessageChat(content);
-  }
+    await game.gaiaExploration.rollEvent(biome);
+    }
 }
