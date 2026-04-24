@@ -9,7 +9,8 @@ Hooks.once("ready", () => {
 
   game.gaiaExploration = {
     generator,
-    listBiome(){
+
+    listBiomes(){
         const content = `
             <h2>Biomes disponibles</h2>
             <ul>
@@ -26,6 +27,12 @@ Hooks.once("ready", () => {
     },
 
     async rollEvent(biome = "jungle") {
+      if (!BIOMES.includes(biome)) {
+        ChatMessage.create({
+            content: `Biome inconnu : ${biome}`
+        });
+        return null;
+        }
       const event = generator.generateEvent(biome);
       const content = generator.formatEvent(event, biome);
 
