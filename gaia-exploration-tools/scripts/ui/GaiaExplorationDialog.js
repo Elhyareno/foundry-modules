@@ -29,6 +29,5 @@ export class GaiaExplorationDialog extends FormApplication {
     } else {
         ui.notifications.info(`Type pas encore disponible : ${rollType}`);
     }
-    await game.gaiaExploration.rollEvent(biome);
   }
 }
