@@ -1,5 +1,4 @@
 import { BIOMES } from "../data/biomes.js";
-import { envoyerMessageChat } from "../utils/chat.js";
 
 export class GaiaExplorationDialog extends FormApplication {
   static get defaultOptions() {
