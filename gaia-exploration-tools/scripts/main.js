@@ -1,8 +1,7 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { BIOMES } from "./data/biomes.js";
-import { normaliserTexte } from "./utils/text.js";
-import { creerListeBiomeHtml, trouverBiome } from "./utils/biomes.js";
+import { creerListeBiomesHtml, trouverBiome } from "./utils/biomes.js";
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
@@ -13,9 +12,8 @@ Hooks.once("ready", () => {
     generator,
 
     listBiomes(){
-        const content = creerListeBiomeHtml(BIOMES);
         ChatMessage.create({
-            content
+            content = creerListeBiomesHtml()
         });
     },
 
