@@ -16,7 +16,8 @@ export class GaiaExplorationDialog extends FormApplication {
 
   getData() {
     return {
-      biomes: BIOMES
+      biomes: BIOMES,
+      rollType: event
     };
   }
 
