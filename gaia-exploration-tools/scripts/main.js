@@ -2,6 +2,7 @@ import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { BIOMES } from "./data/biomes.js";
 import { creerListeBiomesHtml, trouverBiome, creerMessageBiomeInconnuHtml } from "./utils/biomes.js";
+import { envoyerMessageChat } from "./utils/chat.js";
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
@@ -12,9 +13,7 @@ Hooks.once("ready", () => {
     generator,
 
     listBiomes(){
-        ChatMessage.create({
-            content: creerListeBiomesHtml()
-        });
+        await envoyerMessageChat(creerListeBiomesHtml());
     },
 
     openDialog() {
@@ -24,20 +23,13 @@ Hooks.once("ready", () => {
     async rollEvent(biome = "jungle") {
         const biomeTrouve = trouverBiome(biome);
         if (!biomeTrouve) {
-            const content = creerMessageBiomeInconnuHtml(biome);
-            ChatMessage.create({
-                content
-            });
+            await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
             return null;
             }
         const event = generator.generateEvent(biomeTrouve);
         const content = generator.formatEvent(event, biomeTrouve);
 
-      await ChatMessage.create({
-        speaker: ChatMessage.getSpeaker(),
-        content
-      });
-
+      await envoyerMessageChat(content);
       return event;
     }
   };
