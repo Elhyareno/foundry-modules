@@ -38,13 +38,13 @@ export class GaiaGenerator {
     `;
   }
 
-  generateCuriosities(){
-    const entries = this.curiositiesByBiome[biome];
+  generateCuriosity(biome){
+    const entries = this.curiositiyByBiome[biome];
 
     if (!entries){
         return {
         title: "Biome inconnu",
-        description: `Aucune table de cutiosité trouvée pour le biome : ${biome}.`,
+        description: `Aucune table de curiosité trouvée pour le biome : ${biome}.`,
         tags: ["erreur"]
       };
     }
@@ -53,7 +53,7 @@ export class GaiaGenerator {
     return table.roll();
   }
 
-  formatCuriosities(curiosities, biome) {
+  formatCuriosity(curiosities, biome) {
     const tags = curiosities.tags.join(", ");
 
     return `

@@ -33,17 +33,17 @@ Hooks.once("ready", () => {
       return event;
     },
 
-    async rollCuriosities(biome = "jungle") {
+    async rollCuriosity(biome = "jungle") {
         const biomeTrouve = trouverBiome(biome);
         if (!biomeTrouve) {
             await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
             return null;
             }
-        const curiosities = generator.generateCuriosities(biomeTrouve);
-        const content = generator.formatCuriosities(curiosities, biomeTrouve);
+        const curiosity = generator.generateCuriosity(biomeTrouve);
+        const content = generator.formatCuriosity(curiosity, biomeTrouve);
 
       await envoyerMessageChat(content);
-      return curiosities;
+      return curiosity;
     }
   };
 });
