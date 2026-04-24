@@ -39,7 +39,7 @@ export class GaiaGenerator {
   }
 
   generateCuriosity(biome){
-    const entries = this.curiositiyByBiome[biome];
+    const entries = this.curiositiesByBiome[biome];
 
     if (!entries){
         return {
