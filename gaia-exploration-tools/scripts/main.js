@@ -2,6 +2,7 @@ import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { BIOMES } from "./data/biomes.js";
 import { normaliserTexte } from "./utils/text.js";
+import { trouverBiomes } from "./utils/biomes.js";
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
@@ -28,12 +29,7 @@ Hooks.once("ready", () => {
     },
 
     async rollEvent(biome = "jungle") {
-        const nomNormalisee = normaliserTexte(biome);
-        const biomeTrouve = BIOMES.find(biomeValide => {
-            return normaliserTexte(biomeValide) === nomNormalisee;
-        });
-
-        if (!biomeTrouve) {
+        if (!trouverBiomes(biome)) {
             ChatMessage.create({
                 content: `<p>Biome inconnu : ${biome}</p>
                 <p>Biomes disponibles : ${BIOMES.join(", ")}</p>`
