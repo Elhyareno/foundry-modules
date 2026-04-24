@@ -44,3 +44,12 @@ Hooks.on("getSceneControlButtons", controls => {
     }
   });
 });
+
+Hooks.once("ready", () => {
+  ui.notifications.info("Gaïa Exploration Tools chargé.");
+  ChatMessage.create(
+    {
+        content: "Le module gaiaExploration est bien chargé"
+    }
+  )
+});
