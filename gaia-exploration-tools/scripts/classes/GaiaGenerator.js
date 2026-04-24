@@ -53,14 +53,14 @@ export class GaiaGenerator {
     return table.roll();
   }
 
-  formatCuriosity(curiosities, biome) {
-    const tags = curiosities.tags.join(", ");
+  formatCuriosity(curiosity, biome) {
+    const tags = curiosity.tags.join(", ");
 
     return `
       <div class="gaia-card">
-        <h2>${curiosities.title}</h2>
+        <h2>${curiosity.title}</h2>
         <p><strong>Biome :</strong> ${biome}</p>
-        <p>${curiosities.description}</p>
+        <p>${curiosity.description}</p>
         <p><strong>Tags :</strong> ${tags}</p>
       </div>
     `;
