@@ -23,5 +23,5 @@ export class GaiaExplorationDialog extends FormApplication {
   async _updateObject(event, formData) {
     const biome = formData.biome ?? "jungle";
     await game.gaiaExploration.rollEvent(biome);
-    }
+  }
 }

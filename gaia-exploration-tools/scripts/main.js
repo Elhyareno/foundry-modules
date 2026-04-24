@@ -34,21 +34,3 @@ Hooks.once("ready", () => {
     }
   };
 });
-
-Hooks.on("getSceneControlButtons", controls => {
-  const tokenControls = controls.find(control => control.name === "token");
-
-  if (!tokenControls) {
-    return;
-  }
-
-  tokenControls.tools.push({
-    name: "gaia-exploration",
-    title: "Exploration de Gaïa",
-    icon: "fas fa-seedling",
-    button: true,
-    onClick: () => {
-      game.gaiaExploration.openDialog();
-    }
-  });
-});
