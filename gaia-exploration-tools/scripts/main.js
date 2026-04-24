@@ -46,8 +46,8 @@ Hooks.once("ready", () => {
             });
             return null;
             }
-      const event = generator.generateEvent(biomeTrouve);
-      const content = generator.formatEvent(event, biomeTrouve);
+        const event = generator.generateEvent(biomeTrouve);
+        const content = generator.formatEvent(event, biomeTrouve);
 
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker(),
