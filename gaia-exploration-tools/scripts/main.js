@@ -2,6 +2,13 @@ import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { BIOMES } from "./data/biomes.js";
 
+function normaliserTexte(texte) {
+  return texte
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
 
@@ -26,15 +33,17 @@ Hooks.once("ready", () => {
       new GaiaExplorationDialog().render(true);
     },
 
-    async rollEvent(biome = "jungle") {
-      if (!BIOMES.includes(biome)) {
-        ChatMessage.create({
-            content: `Biome inconnu : ${biome}`
-        });
-        return null;
-        }
-      const event = generator.generateEvent(biome);
-      const content = generator.formatEvent(event, biome);
+    async rollEvent(biome = "jungle") {  
+        const nomNormalisee = normaliserTexte(biome);
+        if (!BIOMES.includes(nomNormalisee)) {
+            ChatMessage.create({
+                content: `<p>Biome inconnu : ${biome}</p>
+                <p>Biomes disponibles : ${BIOMES.join(", ")}</p>`
+            });
+            return null;
+            }
+      const event = generator.generateEvent(nomNormalisee);
+      const content = generator.formatEvent(event, nomNormalisee);
 
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker(),
