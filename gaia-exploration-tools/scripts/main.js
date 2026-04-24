@@ -1,5 +1,6 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
+import { BIOMES } from "./data/biomes.js";
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
@@ -8,6 +9,13 @@ Hooks.once("ready", () => {
 
   game.gaiaExploration = {
     generator,
+    listBiome(){
+        const message=BIOMES;
+        const content = "test";
+        ChatMessage.create({
+            message
+        });
+    },
 
     openDialog() {
       new GaiaExplorationDialog().render(true);
