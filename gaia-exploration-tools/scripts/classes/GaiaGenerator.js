@@ -1,9 +1,11 @@
 import { RandomTable } from "./RandomTable.js";
 import { EVENTS_BY_BIOME } from "../data/events.js";
+import { CURIOSITIES_BY_BIOME } from "../data/curiosities.js";
 
 export class GaiaGenerator {
-  constructor(eventsByBiome = EVENTS_BY_BIOME) {
+  constructor(eventsByBiome = EVENTS_BY_BIOME, curiositiesByBiome = CURIOSITIES_BY_BIOME) {
     this.eventsByBiome = eventsByBiome;
+    this.curiositiesByBiome = curiositiesByBiome;
   }
 
   generateEvent(biome) {
@@ -35,4 +37,33 @@ export class GaiaGenerator {
       </div>
     `;
   }
+
+  generateCuriosities(){
+    const entries = this.curiositiesByBiome[biome];
+
+    if (!entries){
+        return {
+        title: "Biome inconnu",
+        description: `Aucune table de cutiosité trouvée pour le biome : ${biome}.`,
+        tags: ["erreur"]
+      };
+    }
+
+    const table = new RandomTable(`Curiosités : ${biome}`, entries);
+    return table.roll();
+  }
+
+  formatCuriosities(curiosities, biome) {
+    const tags = curiosities.tags.join(", ");
+
+    return `
+      <div class="gaia-card">
+        <h2>${curiosities.title}</h2>
+        <p><strong>Biome :</strong> ${biome}</p>
+        <p>${curiosities.description}</p>
+        <p><strong>Tags :</strong> ${tags}</p>
+      </div>
+    `;
+  }
+
 }
