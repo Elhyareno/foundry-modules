@@ -10,10 +10,14 @@ Hooks.once("ready", () => {
   game.gaiaExploration = {
     generator,
     listBiome(){
-        const message=BIOMES;
-        const content = "test";
+        const content = `
+            <h2>Biomes disponibles</h2>
+            <ul>
+                ${BIOMES.map(biome => `<li>${biome}</li>`).join("")}
+            </ul>
+            `;
         ChatMessage.create({
-            message
+            content
         });
     },
 
