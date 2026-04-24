@@ -12,8 +12,8 @@ Hooks.once("ready", () => {
   game.gaiaExploration = {
     generator,
 
-    listBiomes(){
-        envoyerMessageChat(creerListeBiomesHtml());
+    async listBiomes(){
+        await envoyerMessageChat(creerListeBiomesHtml());
     },
 
     openDialog() {
@@ -23,13 +23,13 @@ Hooks.once("ready", () => {
     async rollEvent(biome = "jungle") {
         const biomeTrouve = trouverBiome(biome);
         if (!biomeTrouve) {
-            envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
+            await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
             return null;
             }
         const event = generator.generateEvent(biomeTrouve);
         const content = generator.formatEvent(event, biomeTrouve);
 
-      envoyerMessageChat(content);
+      await envoyerMessageChat(content);
       return event;
     }
   };
