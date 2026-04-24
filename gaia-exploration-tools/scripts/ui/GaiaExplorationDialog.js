@@ -1,4 +1,5 @@
 import { BIOMES } from "../data/biomes.js";
+import { envoyerMessageChat } from "../utils/chat.js";
 
 export class GaiaExplorationDialog extends FormApplication {
   static get defaultOptions() {
@@ -33,9 +34,6 @@ export class GaiaExplorationDialog extends FormApplication {
     const generatedEvent = generator.generateEvent(biome);
     const content = generator.formatEvent(generatedEvent, biome);
 
-    await ChatMessage.create({
-      speaker: ChatMessage.getSpeaker(),
-      content
-    });
+    await envoyerMessageChat(content);
   }
 }
