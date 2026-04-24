@@ -29,7 +29,8 @@ Hooks.once("ready", () => {
     },
 
     async rollEvent(biome = "jungle") {
-        if (!trouverBiomes(biome)) {
+        const biomeTrouve = trouverBiomes(biome);
+        if (!biomeTrouve) {
             ChatMessage.create({
                 content: `<p>Biome inconnu : ${biome}</p>
                 <p>Biomes disponibles : ${BIOMES.join(", ")}</p>`

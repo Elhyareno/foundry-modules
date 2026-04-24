@@ -6,4 +6,5 @@ export function trouverBiomes(biome){
         const biomeTrouve = BIOMES.find(biomeValide => {
             return normaliserTexte(biomeValide) === nomNormalisee;
         });
+    return biomeTrouve;
    }
