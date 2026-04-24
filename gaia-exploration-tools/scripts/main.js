@@ -1,13 +1,7 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { BIOMES } from "./data/biomes.js";
-
-function normaliserTexte(texte) {
-  return texte
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+import { normaliserTexte } from "./utils/text.js";
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
