@@ -8,6 +8,11 @@ export class GaiaExplorationService {
         this.generator = generator;
         this.rollTypes = createRollTypes(generator);
         this.excludedEntries = {};
+        this.typeToProperty = {
+            event: "eventsByBiome",
+            curiosity: "curiositiesByBiome",
+            resource: "resourcesByBiome"
+        };
     }
 
     async listBiomes(){
@@ -28,7 +33,7 @@ export class GaiaExplorationService {
 
 
       const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? new Set();
-      const allEntries = this.generator[`${rollType}sByBiome`]?.[biomeTrouve] ?? [];
+      const allEntries = this.generator[this.typeToProperty[rollType]]?.[biomeTrouve] ?? [];
       const availableEntries = allEntries.filter(e => !typeExclusions.has(e.id));
       if (availableEntries.length === 0) {
         await envoyerMessageChat("<p>Toutes les entrées ont été découvertes.</p>");
