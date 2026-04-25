@@ -1,0 +1,12 @@
+{
+  "id": "sanguimancer-resource",
+  "title": "Sanguimancer Resource",
+  "description": "Gestion de la ressource sanguimancie",
+  "version": "1.0.0",
+  "authors": [{ "name": "Mat" }],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": ["scripts/main.js"]
+}

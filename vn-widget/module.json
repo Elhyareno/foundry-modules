@@ -1,0 +1,21 @@
+{
+  "id": "vn-widget",
+  "title": "Vitality Network Widget",
+  "description": "Ajoute un widget Vitality Network sur la fiche des personnages.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Mat"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": [
+    "scripts/vn.js"
+  ],
+  "styles": [
+    "styles/vn.css"
+  ]
+}
