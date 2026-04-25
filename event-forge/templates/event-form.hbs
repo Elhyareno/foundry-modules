@@ -14,13 +14,26 @@
   </div>
 
   <div class="form-group">
-    <label>DD réel</label>
-    <input type="number" name="dc" value="20" required />
+    <label>Niveau de l’événement</label>
+    <select name="eventLevel">
+      {{#each levels}}
+        <option value="{{this.value}}">{{this.label}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Difficulté relative</label>
+    <select name="difficultyKey">
+      {{#each difficulties}}
+        <option value="{{this.key}}">{{this.label}}</option>
+      {{/each}}
+    </select>
   </div>
 
   <div class="form-group">
     <label>Cacher le DD aux joueurs</label>
-    <input type="checkbox" name="hideDc" />
+    <input type="checkbox" name="hideDc" checked />
   </div>
 
   <div class="form-group">

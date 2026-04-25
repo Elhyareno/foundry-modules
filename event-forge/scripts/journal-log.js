@@ -16,7 +16,23 @@ export async function getOrCreateJournal() {
   return journal;
 }
 
-export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, success, failure, criticalSuccess, criticalFailure, testDisplay, difficultyLabel }) {
+export async function logEventCreation({
+  eventId,
+  title,
+  skillLabel,
+  dc,
+  fluff,
+  success,
+  failure,
+  criticalSuccess,
+  criticalFailure,
+  testDisplay,
+  difficultyLabel,
+  eventLevel,
+  baseDc,
+  difficultyAdjustment,
+  rarity
+}) {
   const journal = await getOrCreateJournal();
 
   await JournalEntryPage.create({
@@ -26,10 +42,13 @@ export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, 
       content: `
         <h1>${title}</h1>
         <p><strong>ID :</strong> ${eventId}</p>
-        <p><strong>Compétence :</strong> ${skillLabel}</p>
-        <p><strong>DD réel :</strong> ${dc}</p>
-        <p><strong>DD caché :</strong> ${hideDc ? "Oui" : "Non"}</p>
-        <p><strong>Difficulté :</strong> ${foundry.utils.escapeHTML(difficultyLabel)}</p>
+        <p><strong>Compétence :</strong> ${foundry.utils.escapeHTML(skillLabel)}</p>
+        <p><strong>Niveau de l’événement :</strong> ${eventLevel}</p>
+        <p><strong>DD de base :</strong> ${baseDc}</p>
+        <p><strong>Difficulté relative :</strong> ${foundry.utils.escapeHTML(difficultyLabel)} (${difficultyAdjustment >= 0 ? "+" : ""}${difficultyAdjustment})</p>
+        <p><strong>Rareté indicative :</strong> ${foundry.utils.escapeHTML(rarity)}</p>
+        <p><strong>DD final :</strong> ${dc}</p>
+        <p><strong>DD caché aux joueurs :</strong> ${hideDc ? "Oui" : "Non"}</p>
 
         <h2>Ambiance</h2>
         <p>${fluff}</p>
