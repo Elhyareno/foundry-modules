@@ -53,12 +53,47 @@ export function getSpellcastingDCRank(actor) {
   ];
 
   for (const candidate of candidates) {
-    const value = Number(candidate);
+    const rank = normalizeProficiencyRank(candidate);
 
-    if (Number.isFinite(value)) {
-      return value;
+    if (rank !== null) {
+      return rank;
     }
   }
 
   return 1;
+}
+
+function normalizeProficiencyRank(value) {
+  if (value === null || value === undefined) return null;
+
+  const numericValue = Number(value);
+
+  if (Number.isFinite(numericValue)) {
+    return numericValue;
+  }
+
+  const textValue = String(value)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  const ranks = {
+    untrained: 0,
+    nonqualifie: 0,
+    "non-qualifie": 0,
+
+    trained: 1,
+    qualifie: 1,
+
+    expert: 2,
+
+    master: 3,
+    maitre: 3,
+
+    legendary: 4,
+    legendaire: 4
+  };
+
+  return ranks[textValue] ?? null;
 }

@@ -28,6 +28,8 @@ async function regenerateVitality(actor) {
   const regen = getVitalityRegen(actor);
   const next = Math.min(current + regen, max);
   const gained = next - current;
+  const rank = getSpellcastingDCRank(actor);
+    const regen = getVitalityRegen(actor);
 
   if (gained <= 0) return;
 
@@ -44,6 +46,7 @@ async function regenerateVitality(actor) {
         </p>
         <p>
           Maîtrise du DD de sort : <strong>${getProficiencyLabel(getSpellcastingDCRank(actor))}</strong>
+          <small>(rang ${rank}, régénération +${regen})</small>
         </p>
         <p>
           Réserve actuelle : <strong>${next}/${max}</strong>
