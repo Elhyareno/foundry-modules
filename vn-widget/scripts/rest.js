@@ -1,4 +1,4 @@
-import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
+import { getVitalityMax, getVitalityValue, rechargeVitality } from "./resource.js";
 import { isVitalityActor } from "./actor.js";
 
 const REST_RECHARGE_DELAY_MS = 250;
@@ -72,7 +72,7 @@ export async function rechargeVitalityOnRest(actor) {
 
   if (current >= max) return;
 
-  await setVitality(actor, max);
+  await rechargeVitality(actor);
 
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),
