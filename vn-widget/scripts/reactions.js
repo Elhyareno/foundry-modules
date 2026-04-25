@@ -128,71 +128,70 @@ function getActorOwners(actor) {
   });
 }
 
+let spotHealingListenerRegistered = false;
+
 export function registerSpotHealingChatListener() {
-  Hooks.on("renderChatMessageHTML", (message, html) => {
-    bindSpotHealingButtons(html);
+  if (spotHealingListenerRegistered) return;
+  spotHealingListenerRegistered = true;
+
+  document.addEventListener("click", async (event) => {
+    const button = event.target.closest(`button[data-action="${SPOT_HEALING_ACTION}"]`);
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    await handleSpotHealingButtonClick(button);
   });
 
-  Hooks.on("renderChatMessage", (message, html) => {
-    const element = html instanceof HTMLElement ? html : html[0];
-    bindSpotHealingButtons(element);
-  });
+  console.log("vn-widget | Spot Healing chat listener registered.");
 }
 
-function bindSpotHealingButtons(html) {
-  if (!html) return;
+async function handleSpotHealingButtonClick(button) {
+  if (button.disabled) return;
 
-  const buttons = html.querySelectorAll(`button[data-action="${SPOT_HEALING_ACTION}"]`);
+  const mystic = game.actors.get(button.dataset.mysticId);
+  const target = game.actors.get(button.dataset.targetId);
+  const damageTaken = Number(button.dataset.damageTaken ?? 0);
 
-  for (const button of buttons) {
-    if (button.dataset.vnBound === "true") continue;
-    button.dataset.vnBound = "true";
-
-    button.addEventListener("click", async () => {
-      const mystic = game.actors.get(button.dataset.mysticId);
-      const target = game.actors.get(button.dataset.targetId);
-      const damageTaken = Number(button.dataset.damageTaken ?? 0);
-
-      if (!mystic || !target) {
-        ui.notifications.warn("Spot Healing : acteur introuvable.");
-        return;
-      }
-
-      const amount = await askSpotHealingAmount(mystic, target, damageTaken);
-
-      if (amount === null) return;
-
-      const result = await transferVitalityToActor(mystic, target, amount);
-
-      if (!result) {
-        ui.notifications.warn("Spot Healing : transfert impossible.");
-        return;
-      }
-
-      button.disabled = true;
-      button.textContent = "Transfer Vitality utilisé";
-
-      await ChatMessage.create({
-        speaker: ChatMessage.getSpeaker({ actor: mystic }),
-        content: `
-          <div class="vn-chat">
-            <div class="vn-chat-title">🩹 Spot Healing</div>
-            <p>
-              <strong>${mystic.name}</strong> transfère
-              <strong>${result.healed}</strong> point${result.healed > 1 ? "s" : ""}
-              de Vitality Network à <strong>${target.name}</strong>.
-            </p>
-            <p>
-              ${target.name} : <strong>${result.targetHP}/${result.targetMaxHP}</strong> PV.
-            </p>
-            <p>
-              Vitality restante : <strong>${result.remainingVitality}</strong>.
-            </p>
-          </div>
-        `
-      });
-    });
+  if (!mystic || !target) {
+    ui.notifications.warn("Spot Healing : acteur introuvable.");
+    return;
   }
+
+  const amount = await askSpotHealingAmount(mystic, target, damageTaken);
+
+  if (amount === null) return;
+
+  const result = await transferVitalityToActor(mystic, target, amount);
+
+  if (!result) {
+    ui.notifications.warn("Spot Healing : transfert impossible.");
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Transfer Vitality utilisé";
+
+  await ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor: mystic }),
+    content: `
+      <div class="vn-chat">
+        <div class="vn-chat-title">🩹 Spot Healing</div>
+        <p>
+          <strong>${mystic.name}</strong> transfère
+          <strong>${result.healed}</strong> point${result.healed > 1 ? "s" : ""}
+          de Vitality Network à <strong>${target.name}</strong>.
+        </p>
+        <p>
+          ${target.name} : <strong>${result.targetHP}/${result.targetMaxHP}</strong> PV.
+        </p>
+        <p>
+          Vitality restante : <strong>${result.remainingVitality}</strong>.
+        </p>
+      </div>
+    `
+  });
 }
 
 async function askSpotHealingAmount(mystic, target, damageTaken) {
