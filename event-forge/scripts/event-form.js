@@ -1,46 +1,42 @@
 import { logEventCreation } from "./journal-log.js";
 
-const DEFAULT_SKILLS = [
-  { key: "acr", label: "Acrobatics" },
-  { key: "arc", label: "Arcana" },
-  { key: "ath", label: "Athletics" },
-  { key: "cra", label: "Crafting" },
-  { key: "dec", label: "Deception" },
-  { key: "dip", label: "Diplomacy" },
-  { key: "itm", label: "Intimidation" },
-  { key: "med", label: "Medicine" },
-  { key: "nat", label: "Nature" },
-  { key: "occ", label: "Occultism" },
-  { key: "prf", label: "Performance" },
-  { key: "rel", label: "Religion" },
-  { key: "soc", label: "Society" },
-  { key: "ste", label: "Stealth" },
-  { key: "sur", label: "Survival" },
-  { key: "thi", label: "Thievery" }
-];
-
-const SF2E_EXTRA_SKILLS = [
-  { key: "com", label: "Computers" },
-  { key: "pil", label: "Piloting" }
+const FALLBACK_SKILLS = [
+  { key: "acrobatics", label: "Acrobatics" },
+  { key: "arcana", label: "Arcana" },
+  { key: "athletics", label: "Athletics" },
+  { key: "crafting", label: "Crafting" },
+  { key: "deception", label: "Deception" },
+  { key: "diplomacy", label: "Diplomacy" },
+  { key: "intimidation", label: "Intimidation" },
+  { key: "medicine", label: "Medicine" },
+  { key: "nature", label: "Nature" },
+  { key: "occultism", label: "Occultism" },
+  { key: "performance", label: "Performance" },
+  { key: "religion", label: "Religion" },
+  { key: "society", label: "Society" },
+  { key: "stealth", label: "Stealth" },
+  { key: "survival", label: "Survival" },
+  { key: "thievery", label: "Thievery" }
 ];
 
 function getAvailableSkills() {
-  const actors = game.actors.filter(actor => actor.type === "character");
+  const actor =
+    canvas.tokens.controlled[0]?.actor ??
+    game.actors.find(a => a.type === "character" && a.system?.skills);
 
-  const hasComputers = actors.some(actor => actor.system.skills?.com);
-  const hasPiloting = actors.some(actor => actor.system.skills?.pil);
+  const skills = actor?.system?.skills;
 
-  const skills = [...DEFAULT_SKILLS];
-
-  if (hasComputers) {
-    skills.push({ key: "com", label: "Computers" });
+  if (!skills) {
+    return FALLBACK_SKILLS;
   }
 
-  if (hasPiloting) {
-    skills.push({ key: "pil", label: "Piloting" });
-  }
-
-  return skills.sort((a, b) => a.label.localeCompare(b.label));
+  return Object.entries(skills)
+    .filter(([key, skill]) => !skill.lore)
+    .map(([key, skill]) => ({
+      key,
+      label: skill.label ?? skill.slug ?? key
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 
