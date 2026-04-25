@@ -1,12 +1,9 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { transferVitalityToTarget, transferMaxVitalityToTarget } from "./healing.js";
 import { bindRestButton } from "./rest.js";
+import { isVitalityActor } from "./actor.js";
 
-/**
- * Update the vitality panel with current values
- * @param {HTMLElement} panel - The panel element
- * @param {Actor} actor - The actor
- */
+
 export function updatePanel(panel, actor) {
   const max = getVitalityMax(actor);
   const val = getVitalityValue(actor, max);
@@ -16,15 +13,10 @@ export function updatePanel(panel, actor) {
   panel.querySelector(".vn-amount-input").value = val;
 }
 
-/**
- * Render the vitality network widget on the actor sheet
- * @param {ActorSheet} app - The actor sheet app
- * @param {jQuery} html - The jQuery element of the sheet
- */
+
 export async function renderVitalityWidget(app, html) {
   const actor = app.actor;
-  if (!actor) return;
-  if (actor.type !== "character") return;
+  if (!isVitalityActor(actor)) return;
 
   const root = html[0];
 
