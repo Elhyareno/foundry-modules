@@ -74,7 +74,7 @@ export class GaiaGenerator {
     if (!entries){
       return{
         title: "Biome inconnu",
-        description: "Aucune table de ressources trouvé pour le biome",
+        description: `Aucune table de ressources trouvé pour le biome: ${biome}`,
         value: 0,
         tags: ["erreur"]
       }
@@ -85,7 +85,7 @@ export class GaiaGenerator {
   }
 
   formatResource(resource, biome){
-    const tags = resource.tags.join(", ")
+    const tags = resource.tags.join(", ");
 
     return `
       <div class="gaia-card">
