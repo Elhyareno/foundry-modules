@@ -74,6 +74,33 @@ export async function handleEventRoll({
     `
   });
 
+  if (hideDc) {
+    const gmUsers = game.users.filter(user => user.isGM && user.active);
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      whisper: gmUsers.map(user => user.id),
+      content: `
+        <div class="event-forge-gm-dc">
+          <h3>DD caché : ${foundry.utils.escapeHTML(title)}</h3>
+          <p><strong>Personnage :</strong> ${foundry.utils.escapeHTML(actor.name)}</p>
+          <p><strong>Compétence :</strong> ${foundry.utils.escapeHTML(skillData.label ?? skill)}</p>
+          <p><strong>Résultat :</strong> ${total}</p>
+          <p><strong>DD final :</strong> ${dc}</p>
+          <p><strong>Niveau :</strong> ${eventLevel}</p>
+          <p><strong>DD de base :</strong> ${baseDc}</p>
+          <p>
+            <strong>Difficulté :</strong>
+            ${foundry.utils.escapeHTML(difficultyLabel)}
+            (${difficultyAdjustment >= 0 ? "+" : ""}${difficultyAdjustment})
+          </p>
+          <p><strong>Rareté indicative :</strong> ${foundry.utils.escapeHTML(rarity ?? "—")}</p>
+          <p><strong>Degré :</strong> ${foundry.utils.escapeHTML(resultLabel)}</p>
+        </div>
+      `
+    });
+  }
+
   await logEventResult({
     eventId,
     title,
