@@ -46,3 +46,14 @@
   border-left: 3px solid #7a684b;
   background: rgba(40, 32, 24, 0.06);
 }
+
+.event-forge-gm-dc {
+  border-left: 4px solid #7a3f3f;
+  padding-left: 10px;
+  background: rgba(80, 20, 20, 0.08);
+}
+
+.event-forge-gm-dc h3 {
+  margin-top: 0;
+  font-size: 1.1em;
+}
