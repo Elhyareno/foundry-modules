@@ -7,6 +7,7 @@ export class GaiaExplorationService {
     constructor(generator){
         this.generator = generator;
         this.rollTypes = createRollTypes(generator);
+        this.excludedEntries = {};
     }
 
     async listBiomes(){
@@ -25,8 +26,19 @@ export class GaiaExplorationService {
         return null;
       }
 
+
+      const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? new Set();
+      const allEntries = this.generator[`${rollType}sByBiome`]?.[biomeTrouve] ?? [];
+      const availableEntries = allEntries.filter(e => !typeExclusions.has(e.id));
+      if (availableEntries.length === 0) {
+        await envoyerMessageChat("<p>Toutes les entrées ont été découvertes.</p>");
+        return null;
+        }
+      const randomIndex = Math.floor(Math.random() * availableEntries.length);
+      const result = availableEntries[randomIndex];
       const result = generateFn(biomeTrouve);
       const content = formatFn(result, biomeTrouve);
+
       const rerollButton = `
         <button 
             type="button"
@@ -143,5 +155,19 @@ export class GaiaExplorationService {
         }, { parent: journal });
 
         ui.notifications.info("Ajouté au journal !");
+        }
+    excludeEntry(type, biome, entryId) {
+
+        if (!this.excludedEntries[type]) {
+            this.excludedEntries[type] = {};
+        }
+
+        if (!this.excludedEntries[type][biome]) {
+            this.excludedEntries[type][biome] = new Set();
+        }
+
+        this.excludedEntries[type][biome].add(entryId);
+
+        ui.notifications.info("Entrée retirée de la table !");
         }
   }

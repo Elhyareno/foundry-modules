@@ -45,3 +45,20 @@ Hooks.on("renderChatMessage", (message, html) => {
     await game.gaiaExploration.addToJournal(rollType, biome, entryId);
   });
 });
+
+Hooks.on("renderChatMessage", (message, html) => {
+
+  html.find(".gaia-remove-entry").click(ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const button = ev.currentTarget;
+
+    const rollType = button.dataset.rollType;
+    const biome = button.dataset.biome;
+    const entryId = button.dataset.entryId;
+
+    game.gaiaExploration.excludeEntry(rollType, biome, entryId);
+  });
+
+});
