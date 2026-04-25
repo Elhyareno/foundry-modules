@@ -1,5 +1,5 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
-import { isVitalityActor } from "./actor.js";
+import { isVitalityActor, getSpellcastingDCRank } from "./actor.js";
 
 export async function handleCombatUpdate(combat, changed, options, userId) {
   if (!game.user.isGM) return;
@@ -25,7 +25,7 @@ export async function handleCombatUpdate(combat, changed, options, userId) {
 async function regenerateVitality(actor) {
   const max = getVitalityMax(actor);
   const current = getVitalityValue(actor, max);
-  const regen = 4;
+  const regen = getVitalityRegen(actor);
   const next = Math.min(current + regen, max);
   const gained = next - current;
 
@@ -43,9 +43,42 @@ async function regenerateVitality(actor) {
           <strong>${gained}</strong> point${gained > 1 ? "s" : ""} de Vitality Network.
         </p>
         <p>
+          Maîtrise du DD de sort : <strong>${getProficiencyLabel(getSpellcastingDCRank(actor))}</strong>
+        </p>
+        <p>
           Réserve actuelle : <strong>${next}/${max}</strong>
         </p>
       </div>
     `
   });
+}
+
+/**
+ * Get Vitality Network regeneration amount from spellcasting DC proficiency.
+ *
+ * @param {Actor} actor - The actor
+ * @returns {number}
+ */
+function getVitalityRegen(actor) {
+  const rank = getSpellcastingDCRank(actor);
+
+  if (rank >= 4) return 8;
+  if (rank >= 3) return 6;
+
+  return 4;
+}
+
+/**
+ * Get a readable proficiency label.
+ *
+ * @param {number} rank - Proficiency rank
+ * @returns {string}
+ */
+function getProficiencyLabel(rank) {
+  if (rank >= 4) return "légendaire";
+  if (rank >= 3) return "maître";
+  if (rank >= 2) return "expert";
+  if (rank >= 1) return "qualifié";
+
+  return "non qualifié";
 }
