@@ -160,7 +160,7 @@ export class GaiaExplorationService {
 
         ui.notifications.info("Ajouté au journal !");
         }
-    excludeEntry(type, biome, entryId) {
+    async excludeEntry(type, biome, entryId) {
 
         if (!this.excludedEntries[type]) {
             this.excludedEntries[type] = {};

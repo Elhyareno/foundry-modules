@@ -57,7 +57,7 @@ Hooks.on("renderChatMessage", (message, html) => {
 
 Hooks.on("renderChatMessage", (message, html) => {
 
-  html.find(".gaia-remove-entry").click(ev => {
+  html.find(".gaia-remove-entry").click(async ev => {
     ev.preventDefault();
     ev.stopPropagation();
 
