@@ -32,7 +32,7 @@ export class GaiaExplorationService {
     }
 
     async rollByType(type, biome = "jungle") {
-      const config = rollTypes[type];
+      const config = this.rollTypes[type];
 
       if (!config) {
         ui.notifications.warn(`Type de tirage inconnu : ${type}`);

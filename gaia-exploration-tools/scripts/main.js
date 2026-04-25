@@ -1,14 +1,17 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
-import { creerListeBiomesHtml, trouverBiome, creerMessageBiomeInconnuHtml } from "./utils/biomes.js";
-import { envoyerMessageChat } from "./utils/chat.js";
-import { createRollTypes } from "./config/rollTypes.js";
+import { GaiaExplorationService } from "./services/GaiaExplorationService.js";
 
 
 Hooks.once("ready", () => {
   
   const generator = new GaiaGenerator();
+  const service = new GaiaExplorationService(generator);
   const rollTypes = createRollTypes(generator);
+
+  service.openDialog = function () {
+    new GaiaExplorationDialog().render(true);
+  };
   
   game.gaiaExploration = service;
 
