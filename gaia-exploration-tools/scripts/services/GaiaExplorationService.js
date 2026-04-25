@@ -105,6 +105,15 @@ export class GaiaExplorationService {
         }
 
         const dateLabel = getWorldTimeLabel();
+        const intros = [
+            "Consigné",
+            "Noté dans les archives",
+            "Gravé dans le journal de l'expédition",
+            "Ajouté aux mémoires de Gaïa",
+            "Inscrit dans les relevés de terrain"
+        ];
+
+        const intro = intros[Math.floor(Math.random() * intros.length)];
 
         await JournalEntryPage.create({
             name: `${dateLabel} - ${entry.title}`,
@@ -112,7 +121,7 @@ export class GaiaExplorationService {
             text: {
             content: `
                 <h2>${entry.title}</h2>
-                <p><em>Consigné ${dateLabel}, alors que les pas des explorateurs troublaient encore la poussière vivante de Gaïa.</em></p>
+                <p><em>${intro} ${dateLabel}. Les instruments hésitent encore, mais la découverte est indéniable.</em></p>
                 <p><strong>Type :</strong> ${type}</p>
                 <p><strong>Biome :</strong> ${biome}</p>
                 <p>${entry.description}</p>
