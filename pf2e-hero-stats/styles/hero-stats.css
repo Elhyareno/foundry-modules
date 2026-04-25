@@ -1,0 +1,137 @@
+/* ========================================
+   PF2e Hero Stats - Main Stylesheet
+   ======================================== */
+
+.hero-stats-report {
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.05) 100%);
+  border-radius: 8px;
+  border-left: 4px solid #8B5A00;
+  margin: 12px 0;
+}
+
+.hero-stats-report h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #8B5A00;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.hero-stats-report p {
+  margin: 4px 0;
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+.hero-stats-report strong {
+  color: #D4AF37;
+  font-weight: bold;
+}
+
+/* Dice Statistics Section */
+.hero-stats-dice {
+  margin-bottom: 16px;
+  padding: 8px;
+  background: rgba(139, 90, 0, 0.1);
+  border-radius: 4px;
+}
+
+.hero-stats-dice h3::before {
+  content: "📊 ";
+}
+
+/* Hero Points Section */
+.hero-stats-points {
+  margin-bottom: 16px;
+  padding: 8px;
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 4px;
+}
+
+.hero-stats-points h3::before {
+  content: "⭐ ";
+}
+
+.hero-stats-points ul {
+  list-style: none;
+  padding-left: 12px;
+  margin: 8px 0 0 0;
+}
+
+.hero-stats-points li {
+  padding: 4px 0;
+  font-size: 0.9em;
+  margin: 2px 0;
+}
+
+.hero-stats-points li::before {
+  content: "▸ ";
+  color: #D4AF37;
+  margin-right: 4px;
+  font-weight: bold;
+}
+
+/* Summary Report */
+.hero-stats-report.summary {
+  border-left-color: #4A90E2;
+}
+
+.hero-stats-report.summary h3 {
+  color: #4A90E2;
+}
+
+.hero-stats-report.summary h3::before {
+  content: "⚔️ ";
+}
+
+/* Minimal Report */
+.hero-stats-report.minimal {
+  border-left-color: #50C878;
+  padding: 8px;
+}
+
+.hero-stats-report.minimal h3 {
+  display: none;
+}
+
+.hero-stats-report.minimal p {
+  font-size: 0.9em;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-stats-report {
+    padding: 8px;
+    border-left-width: 3px;
+  }
+
+  .hero-stats-dice,
+  .hero-stats-points {
+    padding: 6px;
+  }
+
+  .hero-stats-report h3 {
+    font-size: 1.1em;
+  }
+
+  .hero-stats-points ul {
+    padding-left: 8px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .hero-stats-report {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  }
+
+  .hero-stats-dice {
+    background: rgba(139, 90, 0, 0.15);
+  }
+
+  .hero-stats-points {
+    background: rgba(212, 175, 55, 0.15);
+  }
+}

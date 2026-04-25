@@ -1,0 +1,32 @@
+{
+  "id": "pf2e-hero-stats",
+  "title": "PF2e Hero Stats",
+  "description": "Suit les statistiques des jets de dés et assiste la gestion des points d'héroïsme.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Mat"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "7.0.0"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/hero-stats.css"
+  ]
+}
