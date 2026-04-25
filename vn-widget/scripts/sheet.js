@@ -1,5 +1,6 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { transferVitalityToTarget, transferMaxVitalityToTarget } from "./healing.js";
+import { bindRestButton } from "./rest.js";
 
 /**
  * Update the vitality panel with current values
@@ -27,7 +28,6 @@ export async function renderVitalityWidget(app, html) {
 
   const root = html[0];
 
-  // Bind rest button handler
   bindRestButton(root, actor);
 
   const pfsTabButton = root.querySelector('a.item[data-tab="pfs"]');
@@ -66,6 +66,7 @@ export async function renderVitalityWidget(app, html) {
     updatePanel(pfsPanel, actor);
     return;
   }
+
   pfsPanel.dataset.vnBound = "true";
 
   pfsPanel.addEventListener("click", async (event) => {
@@ -96,42 +97,8 @@ export async function renderVitalityWidget(app, html) {
 
     const maxNow = getVitalityMax(actor);
     const val = Math.max(0, Math.min(Number(input.value), maxNow));
+
     await setVitality(actor, val);
     updatePanel(pfsPanel, actor);
   });
-}
-
-/**
- * Bind rest button to recharge vitality
- * @param {HTMLElement} root - The root HTML element of the sheet
- * @param {Actor} actor - The actor
- */
-function bindRestButton(root, actor) {
-  const selectors = [
-    '[data-action="rest-for-the-night"]',
-    '[data-action="rest"]',
-    '.rest',
-    'button.rest'
-  ];
-
-  const btn = root.querySelector(selectors.join(","));
-  if (!btn) return;
-
-  if (btn.dataset.vnBound === "true") return;
-  btn.dataset.vnBound = "true";
-
-  btn.addEventListener("click", () => {
-    setTimeout(() => {
-      rechargeVitalityOnRest(actor);
-    }, 150);
-  });
-}
-
-/**
- * Recharge vitality when actor rests
- * @param {Actor} actor - The actor
- */
-async function rechargeVitalityOnRest(actor) {
-  const { rechargeVitalityOnRest: recharge } = await import("./rest.js");
-  await recharge(actor);
 }
