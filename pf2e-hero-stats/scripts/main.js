@@ -7,6 +7,7 @@ import {
   getTotalHeroPointsUsed,
   getTotalHeroPointsGained,
   giveOneHeroPointToParty,
+  resetPartyHeroPoints,
   resetHeroPointsLog
 } from "./hero-points.js";
 
@@ -63,6 +64,10 @@ function exposeApi() {
       await resetDiceStats();
       await resetHeroPointsLog();
       ui.notifications.info("PF2e/SF2e Hero Stats : toutes les données ont été réinitialisées.");
+    },
+
+    resetPartyHeroPoints: async (value = 0) => {
+      return resetPartyHeroPoints(value);
     }
   };
 

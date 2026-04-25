@@ -216,10 +216,29 @@ export async function giveOneHeroPointToParty() {
   const lines = [];
 
   for (const actor of actors) {
-    const given = await addHeroPoint(actor, 1, "Distribution au groupe");
-    totalGiven += given;
+    try {
+      const current = getHeroPoints(actor);
+      const max = getMaxHeroPoints(actor);
 
-    lines.push(`<li><strong>${actor.name}</strong> : +${given}</li>`);
+      if (current >= max) {
+        lines.push(`<li><strong>${actor.name}</strong> : déjà au maximum (${current}/${max})</li>`);
+        continue;
+      }
+
+      const given = await addHeroPoint(actor, 1, "Distribution au groupe");
+      totalGiven += given;
+
+      lines.push(`<li><strong>${actor.name}</strong> : +${given} (${current} → ${current + given})</li>`);
+    } catch (error) {
+      console.error("pf2e-hero-stats | Impossible d'ajouter un point d'héroïsme à", actor, error);
+
+      lines.push(`
+        <li>
+          <strong>${actor.name}</strong> :
+          <span style="color: darkred;">erreur pendant l'ajout</span>
+        </li>
+      `);
+    }
   }
 
   await ChatMessage.create({
@@ -235,6 +254,46 @@ export async function giveOneHeroPointToParty() {
   });
 
   return totalGiven;
+}
+
+export async function resetPartyHeroPoints(value = 0) {
+  const actors = getPartyCharacters();
+
+  let totalChanged = 0;
+  const lines = [];
+
+  for (const actor of actors) {
+    try {
+      const current = getHeroPoints(actor);
+      const changed = await setHeroPoints(actor, value, `Remise à ${value}`);
+
+      totalChanged += Math.abs(changed);
+
+      lines.push(`<li><strong>${actor.name}</strong> : ${current} → ${getHeroPoints(actor)}</li>`);
+    } catch (error) {
+      console.error("pf2e-hero-stats | Impossible de remettre les points d'héroïsme de", actor, error);
+
+      lines.push(`
+        <li>
+          <strong>${actor.name}</strong> :
+          <span style="color: darkred;">erreur pendant la remise à zéro</span>
+        </li>
+      `);
+    }
+  }
+
+  await ChatMessage.create({
+    content: `
+      <section class="hero-stats-report summary">
+        <h3>⭐ Remise des points d'héroïsme</h3>
+        <ul>${lines.join("")}</ul>
+        <p>Modifications totales : <strong>${totalChanged}</strong></p>
+      </section>
+    `,
+    whisper: ChatMessage.getWhisperRecipients("GM")
+  });
+
+  return totalChanged;
 }
 
 /* =========================
