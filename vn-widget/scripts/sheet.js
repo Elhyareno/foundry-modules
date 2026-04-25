@@ -1,6 +1,5 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { transferVitalityToTarget, transferMaxVitalityToTarget } from "./healing.js";
-import { bindRestButton } from "./rest.js";
 import { isVitalityActor } from "./actor.js";
 
 
@@ -19,8 +18,6 @@ export async function renderVitalityWidget(app, html) {
   if (!isVitalityActor(actor)) return;
 
   const root = html[0];
-
-  bindRestButton(root, actor);
 
   const pfsTabButton = root.querySelector('a.item[data-tab="pfs"]');
   const pfsPanel = root.querySelector('section.tab[data-tab="pfs"]');
