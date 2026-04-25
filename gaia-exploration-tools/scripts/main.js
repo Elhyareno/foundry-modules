@@ -44,6 +44,19 @@ Hooks.once("ready", () => {
 
       await envoyerMessageChat(content);
       return curiosity;
+    },
+
+    async rollResource(biome = "jungle"){
+      const biomeTrouve = trouverBiome(biome);
+      if (!biomeTrouve){
+        await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
+        return null;
+      }
+      const resource = generator.generateResources(biomeTrouve);
+      const content = generator.formatResources(resource, biomeTrouve);
+
+      await envoyerMessageChat(content);
+      return resource;
     }
   };
 });
