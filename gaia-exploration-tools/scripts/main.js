@@ -12,5 +12,9 @@ Hooks.once("ready", () => {
   
   game.gaiaExploration = service;
 
+  openDialog() {
+    new GaiaExplorationDialog().render(true);
+  }
+
   ui.notifications.info("Gaïa Exploration Tools chargé.");
 });
