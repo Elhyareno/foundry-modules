@@ -30,8 +30,11 @@ export async function handlePreUpdateActorForRest(actor, changed, options, userI
 /**
  * Heuristic for SF2e/PF2e rest updates.
  *
- * Rest validation usually updates actor HP/resources and creates a system rest chat message.
- * We avoid button-click listening entirely.
+ * The useful trace found during testing:
+ * rest validation goes through SF2e's restForTheNight flow and produces
+ * an actor update followed by a rest chat message.
+ *
+ * This avoids button-click listening entirely.
  *
  * @param {object} changed
  * @param {object} options
@@ -42,13 +45,11 @@ function looksLikeRestUpdate(changed, options) {
 
   return (
     text.includes("rest") ||
-    text.includes("restforthe-night") ||
     text.includes("restforthenight") ||
+    text.includes("rest-for-the-night") ||
     text.includes("daily") ||
     text.includes("stamina") ||
-    text.includes("resolve") ||
-    text.includes("attributes") ||
-    text.includes("resources")
+    text.includes("resolve")
   );
 }
 
