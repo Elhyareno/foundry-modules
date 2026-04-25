@@ -68,7 +68,7 @@ export class GaiaGenerator {
     `;
   }
 
-  generateResources(biome){
+  generateResource(biome){
     const entries = this.resourcesByBiome[biome];
 
     if (!entries){
@@ -84,7 +84,7 @@ export class GaiaGenerator {
     return table.roll();
   }
 
-  formatResources(resource, biome){
+  formatResource(resource, biome){
     const tags = resource.tags.join(", ")
 
     return `

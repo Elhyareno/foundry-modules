@@ -52,8 +52,8 @@ Hooks.once("ready", () => {
         await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
         return null;
       }
-      const resource = generator.generateResources(biomeTrouve);
-      const content = generator.formatResources(resource, biomeTrouve);
+      const resource = generator.generateResource(biomeTrouve);
+      const content = generator.formatResource(resource, biomeTrouve);
 
       await envoyerMessageChat(content);
       return resource;
