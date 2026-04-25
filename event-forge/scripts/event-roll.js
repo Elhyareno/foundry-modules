@@ -1,13 +1,14 @@
 import { logEventResult } from "./journal-log.js";
 
 export async function handleEventRoll({ skill, dc, title, eventId }) {
-  const actor = canvas.tokens.controlled[0]?.actor;
+  const token = canvas.tokens.controlled[0];
 
-  if (!actor) {
+  if (!token?.actor) {
     ui.notifications.warn("Sélectionne d’abord ton personnage.");
     return;
   }
 
+  const actor = token.actor;
   const skillData = actor.system.skills?.[skill];
 
   if (!skillData) {
@@ -15,11 +16,17 @@ export async function handleEventRoll({ skill, dc, title, eventId }) {
     return;
   }
 
-  const modifier = skillData.mod ?? 0;
+  const modifier =
+    skillData.totalModifier ??
+    skillData.mod ??
+    skillData.value ??
+    0;
+
   const roll = await new Roll(`1d20 + ${modifier}`).evaluate();
 
+  const d20 = roll.dice[0]?.total ?? 0;
   const total = roll.total;
-  const degree = getDegreeOfSuccess(roll.dice[0].total, total, dc);
+  const degree = getDegreeOfSuccess(d20, total, dc);
 
   const resultLabel = {
     criticalSuccess: "Réussite critique",
@@ -32,7 +39,7 @@ export async function handleEventRoll({ skill, dc, title, eventId }) {
     speaker: ChatMessage.getSpeaker({ actor }),
     flavor: `
       <div class="event-forge-result">
-        <h3>${actor.name} tente : ${title}</h3>
+        <h3>${foundry.utils.escapeHTML(actor.name)} tente : ${foundry.utils.escapeHTML(title)}</h3>
         <p><strong>Résultat :</strong> ${total} contre DD ${dc}</p>
         <p><strong>${resultLabel}</strong></p>
       </div>
