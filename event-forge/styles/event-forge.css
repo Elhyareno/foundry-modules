@@ -25,3 +25,12 @@
   border-left: 4px solid #7a5c35;
   padding-left: 10px;
 }
+
+.event-forge-result h3 {
+  font-size: 1.1em;
+  margin: 0 0 6px;
+}
+
+.event-forge-result p {
+  margin: 4px 0;
+}
