@@ -49,6 +49,65 @@ function looksLikeRestUpdate(changed, options) {
  *
  * @param {Actor} actor - The actor resting
  */
+/**export async function rechargeVitalityOnRest(actor) {
+  const max = getVitalityMax(actor);
+  const current = getVitalityValue(actor, max);
+
+  if (current >= max) return;
+
+  await setVitality(actor, max);
+
+  await ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: `
+      <div class="vn-chat">
+        <div class="vn-chat-title">🌙 Repos</div>
+        <p>
+          <strong>${actor.name}</strong> recharge entièrement son Vitality Network.
+        </p>
+        <p>
+          Réserve actuelle : <strong>${max}/${max}</strong>
+        </p>
+      </div>
+    `
+  });
+}*/
+
+import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
+import { isVitalityActor } from "./actor.js";
+
+const DEBUG_REST = true;
+
+export async function handleActorRestUpdate(actor, changed, options, userId) {
+  if (!game.user.isGM) return;
+  if (!isVitalityActor(actor)) return;
+
+  if (DEBUG_REST) {
+    console.log("VN REST DEBUG | updateActor", {
+      actor: actor.name,
+      changed,
+      options,
+      userId
+    });
+  }
+
+  if (!looksLikeRestUpdate(changed, options)) return;
+
+  await rechargeVitalityOnRest(actor);
+}
+
+function looksLikeRestUpdate(changed, options) {
+  const text = JSON.stringify({ changed, options }).toLowerCase();
+
+  return (
+    text.includes("rest") ||
+    text.includes("daily") ||
+    text.includes("overnight") ||
+    text.includes("stamina") ||
+    text.includes("resolve")
+  );
+}
+
 export async function rechargeVitalityOnRest(actor) {
   const max = getVitalityMax(actor);
   const current = getVitalityValue(actor, max);
