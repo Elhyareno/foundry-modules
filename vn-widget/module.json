@@ -13,7 +13,7 @@
     "verified": "14"
   },
   "esmodules": [
-    "scripts/vn.js"
+    "scripts/main.js"
   ],
   "styles": [
     "styles/vn.css"
