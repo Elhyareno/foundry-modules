@@ -16,7 +16,7 @@ export class GaiaExplorationService {
     new DialogClass().render(true);
     }
 
-    async rollFromGenerator(biome, generateFn, formatFn, gmOnly = false) {
+    async rollFromGenerator(biome, generateFn, formatFn, gmOnly = false, rollType = "event") {
       const biomeTrouve = trouverBiome(biome);
 
       if (!biomeTrouve) {
@@ -26,8 +26,17 @@ export class GaiaExplorationService {
 
       const result = generateFn(biomeTrouve);
       const content = formatFn(result, biomeTrouve);
+      const rerollButton = `
+        <button 
+            type="button"
+            class="gaia-reroll"
+            data-roll-type="${rollType}"
+            data-biome="${biomeTrouve}">
+            Relancer
+        </button>
+        `;
 
-      await envoyerMessageChat(content, gmOnly);
+      await envoyerMessageChat(content + rerollButton, gmOnly);
       return result;
     }
 
@@ -43,7 +52,8 @@ export class GaiaExplorationService {
         biome,
         config.generate,
         config.format,
-        gmOnly
+        gmOnly,
+        type    
       );
     }
 

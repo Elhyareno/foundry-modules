@@ -84,7 +84,7 @@ export class GaiaGenerator {
     return table.roll();
   }
 
-  formatResource(resource, biome){
+  formatResource(resource, biome) {
     const tags = resource.tags.join(", ");
 
     return `
