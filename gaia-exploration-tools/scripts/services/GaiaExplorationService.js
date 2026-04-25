@@ -116,7 +116,7 @@ export class GaiaExplorationService {
 
         if (!config) return;
 
-        const entries = this.generator[this.typeToProperty[rollType]]?.[biome];
+        const entries = this.generator[this.typeToProperty[type]]?.[biome];
 
         const entry = entries?.find(e => e.id === entryId);
 
