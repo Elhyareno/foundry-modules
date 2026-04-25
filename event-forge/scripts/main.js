@@ -27,7 +27,9 @@ Hooks.on("renderChatMessage", (message, html) => {
       successText: button.dataset.success,
       failureText: button.dataset.failure,
       criticalSuccessText: button.dataset.criticalSuccess,
-      criticalFailureText: button.dataset.criticalFailure
+      criticalFailureText: button.dataset.criticalFailure,
+      hideDc: button.dataset.hideDc === "true",
+      difficultyLabel: button.dataset.difficultyLabel
     });
   });
 });

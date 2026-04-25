@@ -16,7 +16,7 @@ export async function getOrCreateJournal() {
   return journal;
 }
 
-export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, success, failure, criticalSuccess, criticalFailure }) {
+export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, success, failure, criticalSuccess, criticalFailure, testDisplay, difficultyLabel }) {
   const journal = await getOrCreateJournal();
 
   await JournalEntryPage.create({
@@ -27,7 +27,9 @@ export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, 
         <h1>${title}</h1>
         <p><strong>ID :</strong> ${eventId}</p>
         <p><strong>Compétence :</strong> ${skillLabel}</p>
-        <p><strong>DD :</strong> ${dc}</p>
+        <p><strong>DD réel :</strong> ${dc}</p>
+        <p><strong>DD caché :</strong> ${hideDc ? "Oui" : "Non"}</p>
+        <p><strong>Difficulté :</strong> ${foundry.utils.escapeHTML(difficultyLabel)}</p>
 
         <h2>Ambiance</h2>
         <p>${fluff}</p>

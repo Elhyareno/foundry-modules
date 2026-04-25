@@ -14,8 +14,26 @@
   </div>
 
   <div class="form-group">
-    <label>DD</label>
+    <label>DD réel</label>
     <input type="number" name="dc" value="20" required />
+  </div>
+
+  <div class="form-group">
+    <label>Cacher le DD aux joueurs</label>
+    <input type="checkbox" name="hideDc" />
+  </div>
+
+  <div class="form-group">
+    <label>Difficulté affichée</label>
+    <select name="difficultyLabel">
+      <option value="Incredibly easy">Incredibly easy (-10)</option>
+      <option value="Very easy">Very easy (-5)</option>
+      <option value="Easy">Easy (-2)</option>
+      <option value="Standard" selected>Standard</option>
+      <option value="Hard">Hard (+2)</option>
+      <option value="Very hard">Very hard (+5)</option>
+      <option value="Incredibly hard">Incredibly hard (+10)</option>
+    </select>
   </div>
 
   <div class="form-group">

@@ -66,6 +66,11 @@ export class EventForgeForm extends FormApplication {
     const skills = getAvailableSkills();
     const skillLabel = skills.find(s => s.key === skill)?.label ?? skill;
     const dc = Number(formData.dc);
+    const hideDc = Boolean(formData.hideDc);
+    const difficultyLabel = formData.difficultyLabel || "Standard";
+    const testDisplay = hideDc
+      ? `${skillLabel} — Difficulté : ${difficultyLabel}`
+      : `${skillLabel} DD ${dc}`;
     const fluff = formData.fluff;
     const criticalSuccess = formData.criticalSuccess?.trim() || "";
     const success = formData.success?.trim() || "";
@@ -77,7 +82,7 @@ export class EventForgeForm extends FormApplication {
         <h2>${title}</h2>
         <p class="event-forge-fluff">${fluff}</p>
 
-        <p><strong>Test demandé :</strong> ${skillLabel} DD ${dc}</p>
+        <p><strong>Test demandé :</strong> ${testDisplay}</p>
 
         <button
           class="event-forge-roll"
@@ -85,6 +90,8 @@ export class EventForgeForm extends FormApplication {
           data-title="${foundry.utils.escapeHTML(title)}"
           data-skill="${skill}"
           data-dc="${dc}"
+          data-hide-dc="${hideDc}"
+          data-difficulty-label="${foundry.utils.escapeHTML(difficultyLabel)}"
           data-critical-success="${foundry.utils.escapeHTML(criticalSuccess)}"
           data-success="${foundry.utils.escapeHTML(success)}"
           data-failure="${foundry.utils.escapeHTML(failure)}"
@@ -109,7 +116,9 @@ export class EventForgeForm extends FormApplication {
           success,
           failure,
           criticalFailure,
-          results: []
+          results: [],
+          testDisplay,
+          difficultyLabel
         }
       }
     });
@@ -123,7 +132,9 @@ export class EventForgeForm extends FormApplication {
       success,
       failure,
       criticalSuccess,
-      criticalFailure
+      criticalFailure,
+      testDisplay,
+      difficultyLabel
     });
   }
 }

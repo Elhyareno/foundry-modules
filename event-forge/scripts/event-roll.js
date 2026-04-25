@@ -1,6 +1,6 @@
 import { logEventResult } from "./journal-log.js";
 
-export async function handleEventRoll({ skill, dc, title, eventId, successText, failureText, criticalSuccessText, criticalFailureText }) {
+export async function handleEventRoll({ skill, dc, title, eventId, successText, failureText, criticalSuccessText, criticalFailureText, hideDc, difficultyLabel }) {
   const token = canvas.tokens.controlled[0];
 
   if (!token?.actor) {
@@ -50,7 +50,10 @@ export async function handleEventRoll({ skill, dc, title, eventId, successText, 
       <div class="event-forge-result">
         <h3>${foundry.utils.escapeHTML(actor.name)} tente ${foundry.utils.escapeHTML(skillData.label ?? skill)}</h3>
         <p class="event-forge-muted">Événement : ${foundry.utils.escapeHTML(title)}</p>
-        <p><strong>Résultat :</strong> ${total} contre DD ${dc}</p>
+        <p>
+          <strong>Résultat :</strong>
+          ${hideDc ? `${total} contre difficulté ${foundry.utils.escapeHTML(difficultyLabel)}` : `${total} contre DD ${dc}`}
+        </p>
         ${outcomeText ? `<p class="event-forge-outcome">${foundry.utils.escapeHTML(outcomeText)}</p>` : ""}
         <p><strong>${resultLabel}</strong></p>
       </div>
