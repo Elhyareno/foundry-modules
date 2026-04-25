@@ -3,25 +3,27 @@ import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { creerListeBiomesHtml, trouverBiome, creerMessageBiomeInconnuHtml } from "./utils/biomes.js";
 import { envoyerMessageChat } from "./utils/chat.js";
 
-const rollTypes = {
-  event: {
-    generate: b => generator.generateEvent(b),
-    format: (result, b) => generator.formatEvent(result, b)
-  },
-  curiosity: {
-    generate: b => generator.generateCuriosity(b),
-    format: (result, b) => generator.formatCuriosity(result, b)
-  },
-  resource: {
-    generate: b => generator.generateResource(b),
-    format: (result, b) => generator.formatResource(result, b)
-  }
-};
+
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
 
   const generator = new GaiaGenerator();
+  
+  const rollTypes = {
+    event: {
+      generate: b => generator.generateEvent(b),
+      format: (result, b) => generator.formatEvent(result, b)
+    },
+    curiosity: {
+      generate: b => generator.generateCuriosity(b),
+      format: (result, b) => generator.formatCuriosity(result, b)
+    },
+    resource: {
+      generate: b => generator.generateResource(b),
+      format: (result, b) => generator.formatResource(result, b)
+    }
+  };
 
   game.gaiaExploration = {
     generator,
