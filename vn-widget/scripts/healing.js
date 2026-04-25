@@ -47,3 +47,40 @@ export async function transferMaxVitalityToTarget(source) {
   await target.update({ "system.attributes.hp.value": hp.value + heal });
   await setVitality(source, vn - heal);
 }
+export async function transferVitalityToActor(source, target, requestedAmount = null) {
+  if (!source || !target) return null;
+
+  const hp = getHP(target);
+  if (!hp) return null;
+
+  const missing = hp.max - hp.value;
+  if (missing <= 0) return null;
+
+  const vitality = getVitalityValue(source);
+  if (vitality <= 0) return null;
+
+  const desiredAmount = requestedAmount === null
+    ? vitality
+    : Number(requestedAmount);
+
+  if (!Number.isFinite(desiredAmount) || desiredAmount <= 0) return null;
+
+  const healed = Math.min(desiredAmount, missing, vitality);
+
+  if (healed <= 0) return null;
+
+  await target.update({
+    "system.attributes.hp.value": hp.value + healed
+  });
+
+  await setVitality(source, vitality - healed);
+
+  return {
+    source,
+    target,
+    healed,
+    remainingVitality: vitality - healed,
+    targetHP: hp.value + healed,
+    targetMaxHP: hp.max
+  };
+}
