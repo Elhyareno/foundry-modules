@@ -7,7 +7,7 @@ export class GaiaExplorationService {
     constructor(generator){
         this.generator = generator;
         this.rollTypes = createRollTypes(generator);
-        this.excludedEntries = {};
+        this.excludedEntries = game.settings.get("gaia-exploration-tools", "excludedEntries") ?? {};
         this.typeToProperty = {
             event: "eventsByBiome",
             curiosity: "curiositiesByBiome",
@@ -32,9 +32,9 @@ export class GaiaExplorationService {
       }
 
 
-      const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? new Set();
+      const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? [];
       const allEntries = this.generator[this.typeToProperty[rollType]]?.[biomeTrouve] ?? [];
-      const availableEntries = allEntries.filter(e => !typeExclusions.has(e.id));
+      const availableEntries = allEntries.filter(e => !typeExclusions.includes(e.id));
       if (availableEntries.length === 0) {
         await envoyerMessageChat("<p>Toutes les entrées ont été découvertes.</p>");
         return null;
@@ -167,10 +167,14 @@ export class GaiaExplorationService {
         }
 
         if (!this.excludedEntries[type][biome]) {
-            this.excludedEntries[type][biome] = new Set();
+            this.excludedEntries[type][biome] = [];
         }
 
-        this.excludedEntries[type][biome].add(entryId);
+        if (!this.excludedEntries[type][biome].includes(entryId)) {
+        this.excludedEntries[type][biome].push(entryId);
+        }
+        
+        await game.settings.set("gaia-exploration-tools", "excludedEntries", this.excludedEntries);
 
         ui.notifications.info("Entrée retirée de la table !");
         }

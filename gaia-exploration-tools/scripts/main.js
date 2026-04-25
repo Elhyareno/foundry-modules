@@ -2,6 +2,15 @@ import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { GaiaExplorationService } from "./services/GaiaExplorationService.js";
 
+Hooks.once("init", () => {
+  game.settings.register("gaia-exploration-tools", "excludedEntries", {
+    name: "Entrées exclues",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {}
+  });
+});
 
 Hooks.once("ready", () => {
   
@@ -58,7 +67,7 @@ Hooks.on("renderChatMessage", (message, html) => {
     const biome = button.dataset.biome;
     const entryId = button.dataset.entryId;
 
-    game.gaiaExploration.excludeEntry(rollType, biome, entryId);
+    await game.gaiaExploration.excludeEntry(rollType, biome, entryId);
   });
 
 });
