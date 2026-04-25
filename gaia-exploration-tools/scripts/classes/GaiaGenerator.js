@@ -92,6 +92,7 @@ export class GaiaGenerator {
         <h2>${resource.title}</h2>
         <p><strong>Biome :</strong> ${biome}</p>
         <p>${resource.description}</p>
+        <p><strong>Valeur :</strong> ${resource.value}</p>
         <p><strong>Tags :</strong> ${tags}</p>
       </div>
     `;
