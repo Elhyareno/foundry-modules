@@ -1,5 +1,49 @@
 import { logEventCreation } from "./journal-log.js";
 
+const DEFAULT_SKILLS = [
+  { key: "acr", label: "Acrobatics" },
+  { key: "arc", label: "Arcana" },
+  { key: "ath", label: "Athletics" },
+  { key: "cra", label: "Crafting" },
+  { key: "dec", label: "Deception" },
+  { key: "dip", label: "Diplomacy" },
+  { key: "itm", label: "Intimidation" },
+  { key: "med", label: "Medicine" },
+  { key: "nat", label: "Nature" },
+  { key: "occ", label: "Occultism" },
+  { key: "prf", label: "Performance" },
+  { key: "rel", label: "Religion" },
+  { key: "soc", label: "Society" },
+  { key: "ste", label: "Stealth" },
+  { key: "sur", label: "Survival" },
+  { key: "thi", label: "Thievery" }
+];
+
+const SF2E_EXTRA_SKILLS = [
+  { key: "com", label: "Computers" },
+  { key: "pil", label: "Piloting" }
+];
+
+function getAvailableSkills() {
+  const actors = game.actors.filter(actor => actor.type === "character");
+
+  const hasComputers = actors.some(actor => actor.system.skills?.com);
+  const hasPiloting = actors.some(actor => actor.system.skills?.pil);
+
+  const skills = [...DEFAULT_SKILLS];
+
+  if (hasComputers) {
+    skills.push({ key: "com", label: "Computers" });
+  }
+
+  if (hasPiloting) {
+    skills.push({ key: "pil", label: "Piloting" });
+  }
+
+  return skills.sort((a, b) => a.label.localeCompare(b.label));
+}
+
+
 export class EventForgeForm extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -14,24 +58,7 @@ export class EventForgeForm extends FormApplication {
 
   getData() {
     return {
-      skills: [
-        { key: "acrobatics", label: "Acrobaties" },
-        { key: "arcana", label: "Arcanes" },
-        { key: "athletics", label: "Athlétisme" },
-        { key: "crafting", label: "Artisanat" },
-        { key: "deception", label: "Duperie" },
-        { key: "diplomacy", label: "Diplomatie" },
-        { key: "intimidation", label: "Intimidation" },
-        { key: "medicine", label: "Médecine" },
-        { key: "nature", label: "Nature" },
-        { key: "occultism", label: "Occultisme" },
-        { key: "performance", label: "Représentation" },
-        { key: "religion", label: "Religion" },
-        { key: "society", label: "Société" },
-        { key: "stealth", label: "Discrétion" },
-        { key: "survival", label: "Survie" },
-        { key: "thievery", label: "Vol" }
-      ]
+      skills: getAvailableSkills()
     };
   }
 
@@ -40,7 +67,8 @@ export class EventForgeForm extends FormApplication {
 
     const title = formData.title;
     const skill = formData.skill;
-    const skillLabel = this.getData().skills.find(s => s.key === skill)?.label ?? skill;
+    const skills = getAvailableSkills();
+    const skillLabel = skills.find(s => s.key === skill)?.label ?? skill;
     const dc = Number(formData.dc);
     const fluff = formData.fluff;
     const success = formData.success;
