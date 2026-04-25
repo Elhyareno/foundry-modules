@@ -6,7 +6,9 @@ import {
 } from "./settings.js";
 
 import {
+  computeOutcomeFromTotalAndDC,
   duplicateData,
+  getDCValue,
   getDegreeOfSuccess,
   getMessageActor,
   getNaturalD20FromRoll,
@@ -106,8 +108,12 @@ export async function recordDiceRoll(message, roll) {
   if (naturalD20 === null) return;
 
   const rawOutcome = getDegreeOfSuccess(message);
-  const outcome = normalizeOutcome(rawOutcome);
+    let outcome = normalizeOutcome(rawOutcome);
 
+    if (!outcome) {
+    const dc = getDCValue(message);
+    outcome = computeOutcomeFromTotalAndDC(roll.total, dc, naturalD20);
+    }
   const data = duplicateData(getStatsData());
   const actorStats = getOrCreateActorStats(data, actor);
 

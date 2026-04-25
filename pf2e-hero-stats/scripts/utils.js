@@ -185,3 +185,35 @@ export function duplicateData(data) {
 export function nowIso() {
   return new Date().toISOString();
 }
+
+export function getDCValue(message) {
+  const context = getSystemContext(message);
+  const dc = context.dc;
+
+  if (typeof dc === "number") return dc;
+  if (typeof dc?.value === "number") return dc.value;
+  if (typeof dc?.dc === "number") return dc.dc;
+
+  return null;
+}
+
+export function computeOutcomeFromTotalAndDC(total, dc, naturalD20 = null) {
+  if (typeof total !== "number" || typeof dc !== "number") return null;
+
+  let degree = total >= dc + 10
+    ? 3
+    : total >= dc
+      ? 2
+      : total <= dc - 10
+        ? 0
+        : 1;
+
+  // Règle PF2e/SF2e : 20 naturel augmente le degré d'un cran,
+  // 1 naturel baisse le degré d'un cran.
+  if (naturalD20 === 20) degree += 1;
+  if (naturalD20 === 1) degree -= 1;
+
+  degree = Math.clamp(degree, 0, 3);
+
+  return normalizeOutcome(degree);
+}
