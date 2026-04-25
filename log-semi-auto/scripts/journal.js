@@ -13,26 +13,26 @@ export async function finishCombatLog(combat) {
     log.result = determineBattleResult(log);
 
     if (getSetting("sendPublicSummary")) {
-    await ChatMessage.create({
-        speaker: ChatMessage.getSpeaker(),
-        content: buildPublicSummary(log)
-    });
+        await ChatMessage.create({
+            speaker: ChatMessage.getSpeaker(),
+            content: buildPublicSummary(log)
+        });
     }
 
     if (getSetting("sendPrivateReports")) {
-    await sendPrivatePlayerReports(log);
+        await sendPrivatePlayerReports(log);
     }
 
     if (getSetting("sendGmArchivePrompt")) {
-    await sendGmSavePrompt(log);
+        await sendGmSavePrompt(log);
     }
 
-delete combatLogs[combat.id];
+    delete combatLogs[combat.id];
 }
 
 export async function createCombatJournalPage(log) {
-const journalName = getSetting("journalName");
-let journal = game.journal.find(j => j.name === journalName);
+  const journalName = getSetting("journalName");
+  let journal = game.journal.find(j => j.name === journalName);
   if (!journal) {
     journal = await JournalEntry.create({
       name: journalName

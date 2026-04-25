@@ -4,206 +4,204 @@ import { createRollTypes } from "../config/rollTypes.js";
 import { getWorldTimeLabel } from "../utils/worldTime.js";
 
 export class GaiaExplorationService {
-    constructor(generator){
-        this.generator = generator;
-        this.rollTypes = createRollTypes(generator);
-        this.excludedEntries = game.settings.get("gaia-exploration-tools", "excludedEntries") ?? {};
-        this.typeToProperty = {
-            event: "eventsByBiome",
-            curiosity: "curiositiesByBiome",
-            resource: "resourcesByBiome"
-        };
-    }
+  constructor(generator) {
+    this.generator = generator;
+    this.rollTypes = createRollTypes(generator);
+    this.excludedEntries = game.settings.get("gaia-exploration-tools", "excludedEntries") ?? {};
+    this.typeToProperty = {
+      event: "eventsByBiome",
+      curiosity: "curiositiesByBiome",
+      resource: "resourcesByBiome"
+    };
+  }
 
-    async listBiomes(){
-        await envoyerMessageChat(creerListeBiomesHtml());
-    }
+  async listBiomes() {
+    await envoyerMessageChat(creerListeBiomesHtml());
+  }
 
-    openDialog(DialogClass) {
+  openDialog(DialogClass) {
     new DialogClass().render(true);
+  }
+
+  async rollFromGenerator(biome, generateFn, formatFn, gmOnly = false, rollType = "event") {
+    const biomeTrouve = trouverBiome(biome);
+
+    if (!biomeTrouve) {
+      await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome), gmOnly);
+      return null;
     }
 
-    async rollFromGenerator(biome, generateFn, formatFn, gmOnly = false, rollType = "event") {
-      const biomeTrouve = trouverBiome(biome);
+    const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? [];
 
-      if (!biomeTrouve) {
-        await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome), gmOnly);
-        return null;
-      }
+    const allEntries = this.generator[this.typeToProperty[rollType]]?.[biomeTrouve] ?? [];
 
-        const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? [];
+    const custom = game.settings.get("gaia-exploration-tools", "customEntries") ?? {};
 
-        const allEntries = this.generator[this.typeToProperty[rollType]]?.[biomeTrouve] ?? [];
+    const customEntries = custom[rollType]?.[biomeTrouve] ?? [];
 
-        const custom = game.settings.get("gaia-exploration-tools", "customEntries") ?? {};
+    const uniqueEntries = new Map();
 
-        const customEntries = custom[rollType]?.[biomeTrouve] ?? [];
+    for (const entry of [...allEntries, ...customEntries]) {
+      uniqueEntries.set(entry.id, entry);
+    }
 
-        const uniqueEntries = new Map();
+    const mergedEntries = Array.from(uniqueEntries.values());
 
-        for (const entry of [...allEntries, ...customEntries]) {
-        uniqueEntries.set(entry.id, entry);
-        }
+    const availableEntries = mergedEntries.filter(e => !typeExclusions.includes(e.id));
 
-        const mergedEntries = Array.from(uniqueEntries.values());
+    if (availableEntries.length === 0) {
+      await envoyerMessageChat("<p>Toutes les entrées ont été découvertes.</p>");
+      return null;
+    }
 
-
-        const availableEntries = mergedEntries.filter(e => !typeExclusions.includes(e.id));
-
-        if (availableEntries.length === 0) {
-            await envoyerMessageChat("<p>Toutes les entrées ont été découvertes.</p>");
-            return null;
-        }
-        const randomIndex = Math.floor(Math.random() * availableEntries.length);
-        const result = availableEntries[randomIndex];
-        const content = formatFn(result, biomeTrouve);
-        const rerollButton = `
-        <button 
-            type="button"
-            class="gaia-reroll"
-            data-roll-type="${rollType}"
-            data-biome="${biomeTrouve}"
-            data-gm-only="${gmOnly}">
-            Relancer
-        </button>
-        `;
+    const randomIndex = Math.floor(Math.random() * availableEntries.length);
+    const result = availableEntries[randomIndex];
+    const content = formatFn(result, biomeTrouve);
+    const rerollButton = `
+      <button 
+        type="button"
+        class="gaia-reroll"
+        data-roll-type="${rollType}"
+        data-biome="${biomeTrouve}"
+        data-gm-only="${gmOnly}">
+        Relancer
+      </button>
+    `;
 
     const journalButton = `
-        <button
-            type="button"
-            class="gaia-add-journal"
-            data-roll-type="${rollType}"
-            data-biome="${biomeTrouve}"
-            data-entry-id="${result.id}">
-            Ajouter au journal
-        </button>
-        `;
+      <button
+        type="button"
+        class="gaia-add-journal"
+        data-roll-type="${rollType}"
+        data-biome="${biomeTrouve}"
+        data-entry-id="${result.id}">
+        Ajouter au journal
+      </button>
+    `;
 
     const removeButton = `
-    <button
+      <button
         type="button"
         class="gaia-remove-entry"
         data-roll-type="${rollType}"
         data-biome="${biomeTrouve}"
         data-entry-id="${result.id}">
         Retirer de la table
-    </button>
+      </button>
     `;
 
-      await envoyerMessageChat(content + rerollButton + journalButton + removeButton, gmOnly);
-      return result;
-    }
-
-
-
-    async rollByType(type, biome = "jungle", gmOnly = false) {
-      const config = this.rollTypes[type];
-
-      if (!config) {
-        ui.notifications.warn(`Type de tirage inconnu : ${type}`);
-        return null;
-      }
-
-      return this.rollFromGenerator(
-        biome,
-        config.generate,
-        config.format,
-        gmOnly,
-        type    
-      );
-    }
-
-    async rollEvent(biome = "jungle", gmOnly = false) {
-      return this.rollByType("event", biome, gmOnly);
-    }
-
-    async rollCuriosity(biome = "jungle", gmOnly = false) {
-      return this.rollByType("curiosity", biome, gmOnly);
-    }
-
-    async rollResource(biome = "jungle", gmOnly = false) {
-      return this.rollByType("resource", biome, gmOnly);
-    }
-
-    async addToJournal(type, biome, entryId) {
-        const config = this.rollTypes[type];
-
-        if (!config) return;
-
-        const entries = this.generator[this.typeToProperty[type]]?.[biome];
-
-        const entry = entries?.find(e => e.id === entryId);
-
-        if (!entry) {
-            ui.notifications.warn("Entrée introuvable");
-            return;
-        }
-
-        let journal = game.journal.getName("Journal d'exploration");
-
-        if (!journal) {
-            journal = await JournalEntry.create({
-            name: "Journal d'exploration"
-            });
-        }
-
-        const dateLabel = getWorldTimeLabel();
-        const intros = [
-            "Consigné",
-            "Noté dans les archives",
-            "Gravé dans le journal de l'expédition",
-            "Ajouté aux mémoires de Gaïa",
-            "Inscrit dans les relevés de terrain"
-        ];
-
-        const intro = intros[Math.floor(Math.random() * intros.length)];
-
-        await JournalEntryPage.create({
-            name: `${dateLabel} - ${entry.title}`,
-            type: "text",
-            text: {
-            content: `
-                <h2>${entry.title}</h2>
-                <p><em>${intro} ${dateLabel}. Les instruments hésitent encore, mais la découverte est indéniable.</em></p>
-                <p><strong>Type :</strong> ${type}</p>
-                <p><strong>Biome :</strong> ${biome}</p>
-                <p>${entry.description}</p>
-            `
-            }
-        }, { parent: journal });
-
-        ui.notifications.info("Ajouté au journal !");
-        }
-    async excludeEntry(type, biome, entryId) {
-
-        if (!this.excludedEntries[type]) {
-            this.excludedEntries[type] = {};
-        }
-
-        if (!this.excludedEntries[type][biome]) {
-            this.excludedEntries[type][biome] = [];
-        }
-
-        if (!this.excludedEntries[type][biome].includes(entryId)) {
-        this.excludedEntries[type][biome].push(entryId);
-        }
-        
-        await game.settings.set("gaia-exploration-tools", "excludedEntries", this.excludedEntries);
-
-        ui.notifications.info("Entrée retirée de la table !");
-        }
-
-    async addCustomEntry(type, biome, entry) {
-
-        const custom = game.settings.get("gaia-exploration-tools", "customEntries") ?? {};
-
-        if (!custom[type]) custom[type] = {};
-        if (!custom[type][biome]) custom[type][biome] = [];
-
-        custom[type][biome].push(entry);
-
-        await game.settings.set("gaia-exploration-tools", "customEntries", custom);
-
-        ui.notifications.info("Entrée ajoutée !");
-        }
+    await envoyerMessageChat(content + rerollButton + journalButton + removeButton, gmOnly);
+    return result;
   }
+
+
+  async rollByType(type, biome = "jungle", gmOnly = false) {
+    const config = this.rollTypes[type];
+
+    if (!config) {
+      ui.notifications.warn(`Type de tirage inconnu : ${type}`);
+      return null;
+    }
+
+    return this.rollFromGenerator(
+      biome,
+      config.generate,
+      config.format,
+      gmOnly,
+      type    
+    );
+  }
+
+  async rollEvent(biome = "jungle", gmOnly = false) {
+    return this.rollByType("event", biome, gmOnly);
+  }
+
+  async rollCuriosity(biome = "jungle", gmOnly = false) {
+    return this.rollByType("curiosity", biome, gmOnly);
+  }
+
+  async rollResource(biome = "jungle", gmOnly = false) {
+    return this.rollByType("resource", biome, gmOnly);
+  }
+
+  async addToJournal(type, biome, entryId) {
+    const config = this.rollTypes[type];
+
+    if (!config) return;
+
+    const entries = this.generator[this.typeToProperty[type]]?.[biome];
+
+    const entry = entries?.find(e => e.id === entryId);
+
+    if (!entry) {
+      ui.notifications.warn("Entrée introuvable");
+      return;
+    }
+
+    let journal = game.journal.getName("Journal d'exploration");
+
+    if (!journal) {
+      journal = await JournalEntry.create({
+        name: "Journal d'exploration"
+      });
+    }
+
+    const dateLabel = getWorldTimeLabel();
+    const intros = [
+      "Consigné",
+      "Noté dans les archives",
+      "Gravé dans le journal de l'expédition",
+      "Ajouté aux mémoires de Gaïa",
+      "Inscrit dans les relevés de terrain"
+    ];
+
+    const intro = intros[Math.floor(Math.random() * intros.length)];
+
+    await JournalEntryPage.create({
+      name: `${dateLabel} - ${entry.title}`,
+      type: "text",
+      text: {
+        content: `
+          <h2>${entry.title}</h2>
+          <p><em>${intro} ${dateLabel}. Les instruments hésitent encore, mais la découverte est indéniable.</em></p>
+          <p><strong>Type :</strong> ${type}</p>
+          <p><strong>Biome :</strong> ${biome}</p>
+          <p>${entry.description}</p>
+        `
+      }
+    }, { parent: journal });
+
+    ui.notifications.info("Ajouté au journal !");
+  }
+
+  async excludeEntry(type, biome, entryId) {
+    if (!this.excludedEntries[type]) {
+      this.excludedEntries[type] = {};
+    }
+
+    if (!this.excludedEntries[type][biome]) {
+      this.excludedEntries[type][biome] = [];
+    }
+
+    if (!this.excludedEntries[type][biome].includes(entryId)) {
+      this.excludedEntries[type][biome].push(entryId);
+    }
+    
+    await game.settings.set("gaia-exploration-tools", "excludedEntries", this.excludedEntries);
+
+    ui.notifications.info("Entrée retirée de la table !");
+  }
+
+  async addCustomEntry(type, biome, entry) {
+    const custom = game.settings.get("gaia-exploration-tools", "customEntries") ?? {};
+
+    if (!custom[type]) custom[type] = {};
+    if (!custom[type][biome]) custom[type][biome] = [];
+
+    custom[type][biome].push(entry);
+
+    await game.settings.set("gaia-exploration-tools", "customEntries", custom);
+
+    ui.notifications.info("Entrée ajoutée !");
+  }
+}

@@ -12,16 +12,15 @@ Hooks.once("init", () => {
     default: {}
   });
   game.settings.register("gaia-exploration-tools", "customEntries", {
-  name: "Entrées personnalisées",
-  scope: "world",
-  config: false,
-  type: Object,
-  default: {}
+    name: "Entrées personnalisées",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {}
   });
 });
 
 Hooks.once("ready", () => {
-  
   const generator = new GaiaGenerator();
   const service = new GaiaExplorationService(generator);
 

@@ -25,22 +25,22 @@ export class GaiaEntryDialog extends FormApplication {
     const description = formData.description;
     const score = Number(formData.score);
     const tags = (formData.tags ?? "")
-    .split(",")
-    .map(tag => tag.trim())
-    .filter(tag => tag.length > 0);
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
     const entry = {
-        id: `${type}-${biome}-${Date.now()}`,
-        title,
-        description,
-        tags
-        };
+      id: `${type}-${biome}-${Date.now()}`,
+      title,
+      description,
+      tags
+    };
 
     if (type === "event") {
-    entry.danger = score;
+      entry.danger = score;
     }
 
     if (type === "resource") {
-    entry.value = score;
+      entry.value = score;
     }
 
     await game.gaiaExploration.addCustomEntry(type, biome, entry);

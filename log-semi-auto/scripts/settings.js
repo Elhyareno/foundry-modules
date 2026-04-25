@@ -36,6 +36,42 @@ export function registerSettings() {
     type: Boolean,
     default: true
   });
+
+  game.settings.register(MODULE_ID, "autoAwardXp", {
+    name: "Attribuer automatiquement l'XP",
+    hint: "Ajoute automatiquement l'XP de la rencontre aux personnages joueurs alliés à la fin du combat.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, "xpMessageVisibility", {
+    name: "Visibilité du message d'XP",
+    hint: "Détermine qui voit le message d'attribution d'XP.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      public: "Public",
+      gm: "MJ uniquement",
+      none: "Aucun message"
+    },
+    default: "public"
+  });
+
+  game.settings.register(MODULE_ID, "xpFallbackMode", {
+    name: "Calcul XP si aucune valeur trouvée",
+    hint: "Méthode utilisée si l'ennemi n'a pas de valeur d'XP explicite.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      levelBased: "Selon le niveau de la créature",
+      none: "Ne rien ajouter"
+    },
+    default: "levelBased"
+  });
 }
 
 export function getSetting(key) {

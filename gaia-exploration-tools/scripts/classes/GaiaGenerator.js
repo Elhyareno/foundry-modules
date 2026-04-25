@@ -40,11 +40,11 @@ export class GaiaGenerator {
     `;
   }
 
-  generateCuriosity(biome){
+  generateCuriosity(biome) {
     const entries = this.curiositiesByBiome[biome];
 
-    if (!entries){
-        return {
+    if (!entries) {
+      return {
         title: "Biome inconnu",
         description: `Aucune table de curiosité trouvée pour le biome : ${biome}.`,
         tags: ["erreur"]
@@ -68,16 +68,16 @@ export class GaiaGenerator {
     `;
   }
 
-  generateResource(biome){
+  generateResource(biome) {
     const entries = this.resourcesByBiome[biome];
 
-    if (!entries){
-      return{
+    if (!entries) {
+      return {
         title: "Biome inconnu",
         description: `Aucune table de ressources trouvé pour le biome: ${biome}`,
         value: 0,
         tags: ["erreur"]
-      }
+      };
     }
 
     const table = new RandomTable(`Ressources : ${biome}`, entries);
