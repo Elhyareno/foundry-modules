@@ -70,9 +70,68 @@ function areActorsAdjacent(actorA, actorB) {
   const tokenB = getActiveToken(actorB);
 
   if (!tokenA || !tokenB) return false;
-  if (tokenA.scene?.id !== tokenB.scene?.id) return false;
+
+  const sceneA = tokenA.scene?.id ?? tokenA.document?.parent?.id;
+  const sceneB = tokenB.scene?.id ?? tokenB.document?.parent?.id;
+
+  if (sceneA && sceneB && sceneA !== sceneB) return false;
 
   return areTokensAdjacent(tokenA, tokenB);
+}
+
+function areTokensAdjacent(tokenA, tokenB) {
+  const gridSize = Number(canvas.grid?.size ?? canvas.scene?.grid?.size ?? 100);
+  const gridDistance = Number(canvas.scene?.grid?.distance ?? 5);
+
+  const boundsA = getTokenPixelBounds(tokenA, gridSize);
+  const boundsB = getTokenPixelBounds(tokenB, gridSize);
+
+  const gapX = Math.max(
+    boundsB.left - boundsA.right,
+    boundsA.left - boundsB.right,
+    0
+  );
+
+  const gapY = Math.max(
+    boundsB.top - boundsA.bottom,
+    boundsA.top - boundsB.bottom,
+    0
+  );
+
+  const gapSquares = Math.max(gapX, gapY) / gridSize;
+  const gapDistance = gapSquares * gridDistance;
+
+  // Adjacent = bords au contact ou séparés d'une case.
+  // Petite marge pour les arrondis de grille.
+  return gapDistance <= gridDistance + 0.01;
+}
+
+function getTokenPixelBounds(token, gridSize) {
+  // Foundry placeable Token
+  if (token.bounds) {
+    return {
+      left: token.bounds.x,
+      right: token.bounds.x + token.bounds.width,
+      top: token.bounds.y,
+      bottom: token.bounds.y + token.bounds.height
+    };
+  }
+
+  // TokenDocument ou fallback depuis document
+  const document = token.document ?? token;
+
+  const x = Number(token.x ?? document.x ?? 0);
+  const y = Number(token.y ?? document.y ?? 0);
+
+  const width = Number(document.width ?? token.w / gridSize ?? 1);
+  const height = Number(document.height ?? token.h / gridSize ?? 1);
+
+  return {
+    left: x,
+    right: x + (width * gridSize),
+    top: y,
+    bottom: y + (height * gridSize)
+  };
 }
 
 function areTokensAdjacent(tokenA, tokenB) {
