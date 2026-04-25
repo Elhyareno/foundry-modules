@@ -19,3 +19,9 @@
 .gaia-exploration-form select {
   width: 100%;
 }
+
+.gaia-reroll {
+  margin-top: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+}

@@ -19,6 +19,8 @@ Hooks.once("ready", () => {
 
 Hooks.on("renderChatMessage", (message, html, data) => {
   html.find(".gaia-reroll").click(ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
     const button = ev.currentTarget;
 
     const rollType = button.dataset.rollType;

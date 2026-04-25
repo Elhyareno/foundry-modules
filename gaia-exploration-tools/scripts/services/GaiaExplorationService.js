@@ -31,7 +31,8 @@ export class GaiaExplorationService {
             type="button"
             class="gaia-reroll"
             data-roll-type="${rollType}"
-            data-biome="${biomeTrouve}">
+            data-biome="${biomeTrouve}"
+            data-gm-only="${gmOnly}">
             Relancer
         </button>
         `;
