@@ -59,7 +59,6 @@ async function resetCombatAwardData(encounterId = null) {
 
 export async function evaluateHeroAwards({ actor, actorStats, message, roll, rollType, naturalD20, outcome }) {
   if (!actor || actor.type !== "character") return;
-
   if (isPrivateMessage(message)) return;
 
   if (getSetting("awardIgnoreFlatChecks") && rollType === "flat") {
@@ -90,14 +89,32 @@ async function evaluateNatural20Award({ actor, message, rollType, naturalD20 }) 
 
   if (mode === "auto") {
     const given = await addHeroPoint(actor, 1, "20 naturel");
+
     if (given > 0) {
       await markNatural20Award(actor.id);
-      await whisperAwardResult(actor, `20 naturel sur un jet de type <strong>${rollType}</strong>. Point ajouté automatiquement.`);
+
+      await postPublicInfo({
+        title: "⭐ Héroïsme",
+        body: `<strong>${actor.name}</strong> obtient un point d'héroïsme après un <strong>20 naturel</strong>.`,
+        speaker: message?.speaker
+      });
+
+      await whisperAwardResult(
+        actor,
+        `20 naturel sur un jet de type <strong>${rollType}</strong>. Point ajouté automatiquement.`
+      );
     }
+
     return;
   }
 
   if (mode === "suggest") {
+    await postPublicInfo({
+      title: "⭐ Moment héroïque",
+      body: `<strong>${actor.name}</strong> vient d'obtenir un <strong>20 naturel</strong>. Le MJ peut accorder un point d'héroïsme.`,
+      speaker: message?.speaker
+    });
+
     await whisperNatural20Suggestion(actor, message, rollType);
   }
 }
@@ -147,6 +164,12 @@ async function evaluateBadLuckAward({ actor, actorStats, message, outcome }) {
 
   await markBadLuckSuggestion(actor.id);
 
+  await postPublicInfo({
+    title: "🌧️ Le destin grince",
+    body: `<strong>${actor.name}</strong> vient d'enchaîner <strong>${streak}</strong> échecs. Le MJ peut accorder un point d'héroïsme.`,
+    speaker: message?.speaker
+  });
+
   await ChatMessage.create({
     content: `
       <section class="hero-stats-report summary" data-hero-award="badLuck" data-actor-id="${actor.id}">
@@ -161,6 +184,22 @@ async function evaluateBadLuckAward({ actor, actorStats, message, outcome }) {
     `,
     speaker: message?.speaker ?? ChatMessage.getSpeaker(),
     whisper: ChatMessage.getWhisperRecipients("GM")
+  });
+}
+
+/* =========================
+   Messages publics
+========================= */
+
+async function postPublicInfo({ title, body, speaker }) {
+  await ChatMessage.create({
+    content: `
+      <section class="hero-stats-report summary">
+        <h3>${title}</h3>
+        <p>${body}</p>
+      </section>
+    `,
+    speaker: speaker ?? ChatMessage.getSpeaker()
   });
 }
 
@@ -252,8 +291,18 @@ function bindAwardButtons(html) {
       const given = await addHeroPoint(actor, 1, reason);
 
       if (given > 0) {
-        await markNatural20Award(actor.id);
+        if (reason === "20 naturel") {
+          await markNatural20Award(actor.id);
+        }
+
         await whisperAwardResult(actor, `${reason} : 1 point d'héroïsme accordé.`);
+
+        await postPublicInfo({
+          title: "⭐ Héroïsme accordé",
+          body: `<strong>${actor.name}</strong> reçoit <strong>1 point d'héroïsme</strong>.`,
+          speaker: ChatMessage.getSpeaker({ actor })
+        });
+
         button.disabled = true;
         button.textContent = "Accordé";
       } else {
