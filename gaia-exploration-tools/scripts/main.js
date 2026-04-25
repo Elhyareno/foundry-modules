@@ -11,6 +11,13 @@ Hooks.once("init", () => {
     type: Object,
     default: {}
   });
+  game.settings.register("gaia-exploration-tools", "customEntries", {
+  name: "Entrées personnalisées",
+  scope: "world",
+  config: false,
+  type: Object,
+  default: {}
+  });
 });
 
 Hooks.once("ready", () => {

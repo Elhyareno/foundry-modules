@@ -43,7 +43,6 @@ export class GaiaEntryDialog extends FormApplication {
     entry.value = score;
     }
 
-    console.log({ type, biome, entry });
-    ui.notifications.info(`Entrée préparée : ${entry.title}`);
+    await game.gaiaExploration.addCustomEntry(type, biome, entry);
   }
 }

@@ -178,4 +178,18 @@ export class GaiaExplorationService {
 
         ui.notifications.info("Entrée retirée de la table !");
         }
+
+    async addCustomEntry(type, biome, entry) {
+
+        const custom = game.settings.get("gaia-exploration-tools", "customEntries") ?? {};
+
+        if (!custom[type]) custom[type] = {};
+        if (!custom[type][biome]) custom[type][biome] = [];
+
+        custom[type][biome].push(entry);
+
+        await game.settings.set("gaia-exploration-tools", "customEntries", custom);
+
+        ui.notifications.info("Entrée ajoutée !");
+        }
   }
