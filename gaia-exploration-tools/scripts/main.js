@@ -20,17 +20,27 @@ Hooks.once("ready", () => {
       new GaiaExplorationDialog().render(true);
     },
 
-    async rollEvent(biome = "jungle") {
-        const biomeTrouve = trouverBiome(biome);
-        if (!biomeTrouve) {
-            await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
-            return null;
-            }
-        const event = generator.generateEvent(biomeTrouve);
-        const content = generator.formatEvent(event, biomeTrouve);
+    async rollFromGenerator(biome, generateFn, formatFn) {
+      const biomeTrouve = trouverBiome(biome);
+
+      if (!biomeTrouve) {
+        await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
+        return null;
+      }
+
+      const result = generateFn(biomeTrouve);
+      const content = formatFn(result, biomeTrouve);
 
       await envoyerMessageChat(content);
-      return event;
+      return result;
+    },
+
+    async rollEvent(biome = "jungle") {
+      return this.rollFromGenerator(
+        biome,
+        b => generator.generateEvent(b),
+        (result, b) => generator.formatEvent(result, b)
+      );
     },
 
     async rollCuriosity(biome = "jungle") {
