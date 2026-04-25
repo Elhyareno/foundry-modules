@@ -1,33 +1,41 @@
 import { MODULE_ID, JOURNAL_NAME, combatLogs } from "./state.js";
 import { buildPublicSummary, buildJournalContent, getGlobalStats } from "./summaries.js";
+import { getSetting } from "./settings.js";
 
 export async function finishCombatLog(combat) {
-  const log = combatLogs[combat.id];
-  if (!log) return;
+    const log = combatLogs[combat.id];
+    if (!log) return;
 
-  const { determineBattleResult } = await import("./summaries.js");
+    const { determineBattleResult } = await import("./summaries.js");
 
-  log.endedAt = new Date().toLocaleString();
-  log.rounds = combat.round ?? 0;
-  log.result = determineBattleResult(log);
+    log.endedAt = new Date().toLocaleString();
+    log.rounds = combat.round ?? 0;
+    log.result = determineBattleResult(log);
 
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker(),
-    content: buildPublicSummary(log)
-  });
+    if (getSetting("sendPublicSummary")) {
+    await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker(),
+        content: buildPublicSummary(log)
+    });
+    }
 
-  await sendPrivatePlayerReports(log);
-  await sendGmSavePrompt(log);
+    if (getSetting("sendPrivateReports")) {
+    await sendPrivatePlayerReports(log);
+    }
 
-  delete combatLogs[combat.id];
+    if (getSetting("sendGmArchivePrompt")) {
+    await sendGmSavePrompt(log);
+    }
+
+delete combatLogs[combat.id];
 }
 
 export async function createCombatJournalPage(log) {
-  let journal = game.journal.find(j => j.name === JOURNAL_NAME);
-
+const journalName = getSetting("journalName");
+let journal = game.journal.find(j => j.name === journalName);
   if (!journal) {
     journal = await JournalEntry.create({
-      name: JOURNAL_NAME
+      name: journalName
     });
   }
 

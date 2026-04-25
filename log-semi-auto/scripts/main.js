@@ -3,9 +3,12 @@ import { getHp } from "./utils.js";
 import { trackHpChange } from "./hp-tracker.js";
 import { trackNotableAttack } from "./attack-tracker.js";
 import { finishCombatLog, createCombatJournalPage } from "./journal.js";
+import { registerSettings, getSetting } from "./settings.js";
+
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | Initialisation`);
+  registerSettings();
 });
 
 Hooks.on("combatStart", (combat) => {
