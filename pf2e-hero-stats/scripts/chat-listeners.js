@@ -4,8 +4,7 @@ import { getSetting } from "./settings.js";
 const MODULE_ID = "pf2e-hero-stats";
 
 export function setupChatListeners() {
-  Hooks.on("updateActor", async (actor, changes, options, _userId) => {
-    if (options.heroStatsHandled) return;
+  Hooks.on("createChatMessage", async (message) => {
     await onChatMessage(message);
   });
 
@@ -14,7 +13,6 @@ export function setupChatListeners() {
 
 async function onChatMessage(message) {
   if (!message) return;
-
   if (!getSetting("trackDiceStats")) return;
 
   const rolls = message.rolls ?? [];
