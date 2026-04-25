@@ -14,7 +14,6 @@ export function getMessageActor(message) {
 export function isPlayerCharacter(actor) {
   if (!actor) return false;
 
-  // PF2e utilise généralement type === "character" pour les PJ.
   return actor.type === "character";
 }
 
@@ -60,15 +59,23 @@ export function hasD20(roll) {
 }
 
 /* =========================
-   PF2e context
+   PF2e / SF2e context
 ========================= */
 
-export function getPf2eContext(message) {
-  return message?.flags?.pf2e?.context ?? {};
+export function getSystemFlags(message) {
+  return message?.flags?.pf2e ?? message?.flags?.sf2e ?? {};
+}
+
+export function getSystemContext(message) {
+  return (
+    message?.flags?.pf2e?.context ??
+    message?.flags?.sf2e?.context ??
+    {}
+  );
 }
 
 export function getRollType(message) {
-  const context = getPf2eContext(message);
+  const context = getSystemContext(message);
 
   const type = context.type ?? context.rollType ?? "";
 
@@ -78,42 +85,93 @@ export function getRollType(message) {
   if (type === "perception-check") return "perception";
   if (type === "flat-check") return "flat";
 
-  // Certaines versions ou certains modules peuvent stocker différemment.
   const domains = context.domains ?? [];
 
   if (domains.includes("attack-roll")) return "attack";
+  if (domains.includes("attack")) return "attack";
+
   if (domains.includes("saving-throw")) return "save";
+  if (domains.includes("save")) return "save";
+
   if (domains.includes("skill-check")) return "skill";
+  if (domains.includes("skill")) return "skill";
+
+  if (domains.includes("perception-check")) return "perception";
   if (domains.includes("perception")) return "perception";
+
+  if (domains.includes("flat-check")) return "flat";
+  if (domains.includes("flat")) return "flat";
+
+  // SF2e semble parfois stocker le nom de compétence dans modifierName.
+  if (context.modifierName) {
+    return "skill";
+  }
 
   return "other";
 }
 
 export function getDegreeOfSuccess(message) {
-  const context = getPf2eContext(message);
+  const context = getSystemContext(message);
 
-  return context.outcome ?? null;
+  return (
+    context.outcome ??
+    context.degreeOfSuccess ??
+    context.degreeOfSuccessLabel ??
+    context.result?.degreeOfSuccess ??
+    context.result?.outcome ??
+    context.roll?.degreeOfSuccess ??
+    context.check?.degreeOfSuccess ??
+    null
+  );
 }
 
 export function normalizeOutcome(outcome) {
-  if (!outcome) return null;
+  if (outcome === null || outcome === undefined) return null;
+
+  // PF2e utilise souvent :
+  // 0 = échec critique
+  // 1 = échec
+  // 2 = réussite
+  // 3 = réussite critique
+  if (typeof outcome === "number") {
+    const numericMap = {
+      0: "criticalFailure",
+      1: "failure",
+      2: "success",
+      3: "criticalSuccess"
+    };
+
+    return numericMap[outcome] ?? null;
+  }
+
+  const normalized = String(outcome)
+    .trim()
+    .replaceAll("_", "-")
+    .toLowerCase();
 
   const map = {
-    criticalSuccess: "criticalSuccess",
+    criticalsuccess: "criticalSuccess",
     success: "success",
     failure: "failure",
-    criticalFailure: "criticalFailure",
+    criticalfailure: "criticalFailure",
 
     "critical-success": "criticalSuccess",
     "critical success": "criticalSuccess",
     "crit-success": "criticalSuccess",
+    "crit success": "criticalSuccess",
 
     "critical-failure": "criticalFailure",
     "critical failure": "criticalFailure",
-    "crit-failure": "criticalFailure"
+    "crit-failure": "criticalFailure",
+    "crit failure": "criticalFailure",
+
+    "degree-of-success-0": "criticalFailure",
+    "degree-of-success-1": "failure",
+    "degree-of-success-2": "success",
+    "degree-of-success-3": "criticalSuccess"
   };
 
-  return map[outcome] ?? null;
+  return map[normalized] ?? null;
 }
 
 /* =========================

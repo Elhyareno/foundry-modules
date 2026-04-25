@@ -15,6 +15,6 @@ Hooks.once("ready", () => {
   setupChatListeners();
   initHeroPoints();
   initDiceStats();
-  
+
   ui.notifications.info("PF2e Hero Stats loaded.");
 });
