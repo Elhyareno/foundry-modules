@@ -1,0 +1,113 @@
+.lsa-summary,
+.lsa-report,
+.lsa-journal,
+.lsa-xp {
+  padding: 8px;
+}
+
+.lsa-title {
+  margin: 0 0 8px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(160, 140, 100, 0.45);
+  font-size: 1.25em;
+}
+
+.lsa-subtitle {
+  margin: 10px 0 6px 0;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(160, 140, 100, 0.25);
+  font-size: 1.05em;
+}
+
+.lsa-muted {
+  opacity: 0.75;
+}
+
+.lsa-lead {
+  margin: 6px 0 10px 0;
+  line-height: 1.35;
+}
+
+.lsa-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.lsa-stat {
+  border: 1px solid rgba(120, 110, 90, 0.45);
+  border-radius: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.lsa-stat-label {
+  display: block;
+  font-size: 0.82em;
+  opacity: 0.78;
+}
+
+.lsa-stat-value {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.15em;
+  font-weight: bold;
+}
+
+.lsa-card {
+  border: 1px solid rgba(120, 110, 90, 0.55);
+  border-radius: 8px;
+  padding: 8px;
+  margin: 7px 0;
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.lsa-card-title {
+  margin: 0 0 6px 0;
+  font-size: 1.08em;
+}
+
+.lsa-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 3px 0;
+}
+
+.lsa-row strong {
+  opacity: 0.85;
+}
+
+.lsa-result {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(160, 140, 100, 0.6);
+  background: rgba(160, 140, 100, 0.12);
+  font-weight: bold;
+}
+
+.lsa-button {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.lsa-score-entry {
+  margin: 6px 0;
+  padding: 6px;
+  border-left: 3px solid rgba(160, 140, 100, 0.65);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.lsa-danger {
+  border-color: rgba(140, 50, 50, 0.65);
+}
+
+.lsa-success {
+  border-color: rgba(70, 130, 80, 0.65);
+}
+
+.lsa-warning {
+  border-color: rgba(160, 120, 40, 0.75);
+}

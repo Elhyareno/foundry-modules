@@ -135,35 +135,49 @@ async function sendXpMessage(xpResult) {
     : undefined;
 
   const awards = xpResult.awards.map(a => `
-    <p style="margin: 2px 0;">
-      <strong>${a.name}</strong> : +${a.gained} XP 
-      <span style="opacity: 0.8;">(${a.before} → ${a.after})</span>
-    </p>
-  `).join("");
+  <article class="lsa-score-entry lsa-success">
+    <strong>${a.name}</strong><br>
+    +${a.gained} XP <span class="lsa-muted">(${a.before} → ${a.after})</span>
+  </article>
+`).join("");
 
   const enemies = xpResult.enemies.map(e => `
-    <p style="margin: 2px 0;">
-      ${e.name} : ${e.xp} XP
-    </p>
-  `).join("");
+  <article class="lsa-score-entry">
+    <strong>${e.name}</strong><br>
+    ${e.xp} XP
+  </article>
+`).join("");
 
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker(),
     whisper,
     content: `
-      <h2>✨ XP de rencontre</h2>
+  <section class="lsa-xp">
+    <h2 class="lsa-title">✨ XP de rencontre</h2>
 
-      <p>
-        <strong>XP totale :</strong> ${xpResult.totalXp}<br>
-        <strong>XP par personnage :</strong> ${xpResult.xpPerCharacter}
-      </p>
+    <div class="lsa-stat-grid">
+      <div class="lsa-stat">
+        <span class="lsa-stat-label">XP totale</span>
+        <span class="lsa-stat-value">${xpResult.totalXp}</span>
+      </div>
 
-      <h3>Attribution</h3>
-      ${awards || "<p>Aucun personnage récompensé.</p>"}
+      <div class="lsa-stat">
+        <span class="lsa-stat-label">XP par personnage</span>
+        <span class="lsa-stat-value">${xpResult.xpPerCharacter}</span>
+      </div>
+    </div>
 
-      <h3>Sources</h3>
-      ${enemies || "<p>Aucun ennemi pris en compte.</p>"}
-    `
+    <h3 class="lsa-subtitle">Attribution</h3>
+    ${
+      awards || "<p class='lsa-muted'>Aucun personnage récompensé.</p>"
+    }
+
+    <h3 class="lsa-subtitle">Sources</h3>
+    ${
+      enemies || "<p class='lsa-muted'>Aucun ennemi pris en compte.</p>"
+    }
+  </section>
+`
   });
 }
 

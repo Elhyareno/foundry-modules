@@ -2,56 +2,82 @@ export function buildPublicSummary(log) {
   const stats = getGlobalStats(log);
 
   return `
-    <h2>⚔️ Fin de la rencontre</h2>
+    <section class="lsa-summary">
+      <h2 class="lsa-title">⚔️ Fin de la rencontre</h2>
 
-    <p>
-      La poussière retombe sur <strong>${log.sceneName}</strong>.
-      Le combat s'achève après <strong>${log.rounds}</strong> round(s).
-    </p>
+      <p class="lsa-lead">
+        La poussière retombe sur <strong>${log.sceneName}</strong>.
+        Le combat s'achève après <strong>${log.rounds}</strong> round(s).
+      </p>
 
-    <p>
-      <strong>Résultat :</strong> ${log.result}<br>
-      <strong>Dégâts infligés aux alliés :</strong> ${stats.damageToAllies}<br>
-      <strong>Dégâts infligés aux ennemis :</strong> ${stats.damageToEnemies}<br>
-      <strong>Combattants tombés :</strong> ${stats.totalDropped}
-    </p>
+      <p>
+        <strong>Résultat :</strong>
+        <span class="lsa-result">${log.result}</span>
+      </p>
+
+      <div class="lsa-stat-grid">
+        <div class="lsa-stat">
+          <span class="lsa-stat-label">Dégâts subis par les alliés</span>
+          <span class="lsa-stat-value">${stats.damageToAllies}</span>
+        </div>
+
+        <div class="lsa-stat">
+          <span class="lsa-stat-label">Dégâts subis par les ennemis</span>
+          <span class="lsa-stat-value">${stats.damageToEnemies}</span>
+        </div>
+
+        <div class="lsa-stat">
+          <span class="lsa-stat-label">Soins enregistrés</span>
+          <span class="lsa-stat-value">${stats.totalHealing}</span>
+        </div>
+
+        <div class="lsa-stat">
+          <span class="lsa-stat-label">Combattants tombés</span>
+          <span class="lsa-stat-value">${stats.totalDropped}</span>
+        </div>
+      </div>
+    </section>
   `;
 }
 
 export function buildPersonalReport(log, combatants) {
   const cards = combatants.map(c => `
-    <div style="
-      border: 1px solid #777;
-      border-radius: 8px;
-      padding: 8px;
-      margin: 6px 0;
-      background: rgba(0,0,0,0.08);
-    ">
-      <h3 style="margin: 0 0 4px 0;">${c.dropped ? "☠️ " : "🛡️ "}${c.name}</h3>
+    <article class="lsa-card ${c.dropped ? "lsa-danger" : "lsa-success"}">
+      <h3 class="lsa-card-title">${c.dropped ? "☠️" : "🛡️"} ${c.name}</h3>
 
-      <p style="margin: 2px 0;">
-        <strong>PV :</strong> ${c.startHp}/${c.maxHp} → ${c.endHp}/${c.maxHp}
-      </p>
+      <div class="lsa-row">
+        <strong>PV</strong>
+        <span>${c.startHp}/${c.maxHp} → ${c.endHp}/${c.maxHp}</span>
+      </div>
 
-      <p style="margin: 2px 0;">
-        <strong>Dégâts subis :</strong> ${c.damageTaken}
-      </p>
+      <div class="lsa-row">
+        <strong>Dégâts subis</strong>
+        <span>${c.damageTaken}</span>
+      </div>
 
-      <p style="margin: 2px 0;">
-        <strong>Soins reçus :</strong> ${c.healingReceived}
-      </p>
+      <div class="lsa-row">
+        <strong>Soins reçus</strong>
+        <span>${c.healingReceived}</span>
+      </div>
 
-      <p style="margin: 2px 0;">
-        <strong>État :</strong> ${c.dropped ? "Tombé au moins une fois" : "A terminé debout"}
-      </p>
-    </div>
+      <div class="lsa-row">
+        <strong>État</strong>
+        <span>${c.dropped ? "Tombé au moins une fois" : "A terminé debout"}</span>
+      </div>
+    </article>
   `).join("");
 
   return `
-    <h2>📜 Rapport personnel de combat</h2>
-    <p><strong>Lieu :</strong> ${log.sceneName}</p>
-    <p><strong>Durée :</strong> ${log.rounds} round(s)</p>
-    ${cards}
+    <section class="lsa-report">
+      <h2 class="lsa-title">📜 Rapport personnel de combat</h2>
+
+      <p class="lsa-lead">
+        <strong>Lieu :</strong> ${log.sceneName}<br>
+        <strong>Durée :</strong> ${log.rounds} round(s)
+      </p>
+
+      ${cards}
+    </section>
   `;
 }
 

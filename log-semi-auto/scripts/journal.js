@@ -89,20 +89,31 @@ async function sendGmSavePrompt(log) {
         combatLog: log
       }
     },
-    content: `
-      <h2>📚 Archiver la rencontre ?</h2>
+    content: `<section class="lsa-report">
+    <h2 class="lsa-title">📚 Archiver la rencontre ?</h2>
 
-      <p>
-        <strong>Lieu :</strong> ${log.sceneName}<br>
-        <strong>Résultat :</strong> ${log.result}<br>
-        <strong>Durée :</strong> ${log.rounds} round(s)<br>
-        <strong>Dégâts alliés subis :</strong> ${stats.damageToAllies}<br>
-        <strong>Dégâts ennemis subis :</strong> ${stats.damageToEnemies}
-      </p>
+    <p class="lsa-lead">
+      <strong>Lieu :</strong> ${log.sceneName}<br>
+      <strong>Résultat :</strong> <span class="lsa-result">${log.result}</span><br>
+      <strong>Durée :</strong> ${log.rounds} round(s)
+    </p>
 
-      <button type="button" data-action="lsa-save-combat">
-        📜 Ajouter au journal de combat
-      </button>
-    `
+    <div class="lsa-stat-grid">
+      <div class="lsa-stat">
+        <span class="lsa-stat-label">Dégâts alliés subis</span>
+        <span class="lsa-stat-value">${stats.damageToAllies}</span>
+      </div>
+
+      <div class="lsa-stat">
+        <span class="lsa-stat-label">Dégâts ennemis subis</span>
+        <span class="lsa-stat-value">${stats.damageToEnemies}</span>
+      </div>
+    </div>
+
+    <button type="button" class="lsa-button" data-action="lsa-save-combat">
+      📜 Ajouter au journal de combat
+    </button>
+  </section>
+`
   });
 }
