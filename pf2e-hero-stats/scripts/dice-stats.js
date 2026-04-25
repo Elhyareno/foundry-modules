@@ -1,5 +1,4 @@
 import {
-  MODULE_ID,
   createDefaultStatsData,
   getSetting,
   setSetting
@@ -17,6 +16,10 @@ import {
   nowIso,
   shouldIgnoreMessage
 } from "./utils.js";
+
+import {
+  evaluateHeroAwards
+} from "./hero-awards.js";
 
 /* =========================
    Initialisation
@@ -81,7 +84,6 @@ function getOrCreateActorStats(data, actor) {
     };
   }
 
-  // Si le nom de l'acteur change, on garde la stat vivante.
   data.actors[actor.id].name = actor.name;
 
   return data.actors[actor.id];
@@ -108,17 +110,17 @@ export async function recordDiceRoll(message, roll) {
   if (naturalD20 === null) return;
 
   const rawOutcome = getDegreeOfSuccess(message);
-    let outcome = normalizeOutcome(rawOutcome);
+  let outcome = normalizeOutcome(rawOutcome);
 
-    if (!outcome) {
+  if (!outcome) {
     const dc = getDCValue(message);
     outcome = computeOutcomeFromTotalAndDC(roll.total, dc, naturalD20);
-    }
+  }
+
   const data = duplicateData(getStatsData());
   const actorStats = getOrCreateActorStats(data, actor);
 
   applyRollStats(data, actorStats, {
-    actor,
     message,
     roll,
     rollType,
@@ -127,6 +129,16 @@ export async function recordDiceRoll(message, roll) {
   });
 
   await setStatsData(data);
+
+  await evaluateHeroAwards({
+    actor,
+    actorStats,
+    message,
+    roll,
+    rollType,
+    naturalD20,
+    outcome
+  });
 }
 
 /* =========================
@@ -227,6 +239,7 @@ export function getDiceStats() {
 
   const actors = Object.values(data.actors ?? {}).map(actorStats => {
     const total = actorStats.totalRolls || 0;
+
     const averageD20 = total > 0
       ? Number((actorStats.d20Total / total).toFixed(2))
       : 0;

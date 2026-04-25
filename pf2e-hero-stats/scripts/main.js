@@ -12,6 +12,12 @@ import {
 } from "./hero-points.js";
 
 import {
+  initHeroAwards,
+  setupAwardButtonListeners,
+  resetAwardData
+} from "./hero-awards.js";
+
+import {
   initDiceStats,
   getDiceStats,
   resetDiceStats
@@ -27,7 +33,9 @@ Hooks.once("ready", () => {
 
   setupChatListeners();
   initHeroPoints();
+  initHeroAwards();
   initDiceStats();
+  setupAwardButtonListeners();
 
   exposeApi();
 
@@ -50,6 +58,10 @@ function exposeApi() {
       return giveOneHeroPointToParty();
     },
 
+    resetPartyHeroPoints: async (value = 0) => {
+      return resetPartyHeroPoints(value);
+    },
+
     resetDiceStats: async () => {
       await resetDiceStats();
       ui.notifications.info("Statistiques de dés réinitialisées.");
@@ -60,14 +72,16 @@ function exposeApi() {
       ui.notifications.info("Journal des points d'héroïsme réinitialisé.");
     },
 
+    resetAwardData: async () => {
+      await resetAwardData();
+      ui.notifications.info("Mémoire des propositions d'héroïsme réinitialisée.");
+    },
+
     resetAll: async () => {
       await resetDiceStats();
       await resetHeroPointsLog();
+      await resetAwardData();
       ui.notifications.info("PF2e/SF2e Hero Stats : toutes les données ont été réinitialisées.");
-    },
-
-    resetPartyHeroPoints: async (value = 0) => {
-      return resetPartyHeroPoints(value);
     }
   };
 

@@ -30,13 +30,22 @@ export function createDefaultHeroLog() {
   };
 }
 
+export function createDefaultAwardData() {
+  return {
+    version: 1,
+    combat: {
+      encounterId: null,
+      awardedNatural20: {},
+      suggestedBadLuck: {}
+    }
+  };
+}
+
 /* =========================
    Enregistrement settings
 ========================= */
 
 export function registerSettings() {
-
-  // 🔴 DONNÉES PERSISTANTES
   game.settings.register(MODULE_ID, "statsData", {
     scope: "world",
     config: false,
@@ -51,7 +60,13 @@ export function registerSettings() {
     default: createDefaultHeroLog()
   });
 
-  // 🟢 OPTIONS UTILISATEUR
+  game.settings.register(MODULE_ID, "awardData", {
+    scope: "world",
+    config: false,
+    type: Object,
+    default: createDefaultAwardData()
+  });
+
   game.settings.register(MODULE_ID, "trackDiceStats", {
     name: "Suivre les statistiques de dés",
     hint: "Enregistre les jets d20 dans les statistiques.",
@@ -108,6 +123,65 @@ export function registerSettings() {
       minimal: "Minimal"
     },
     default: "detailed"
+  });
+
+  game.settings.register(MODULE_ID, "awardModeNatural20", {
+    name: "20 naturel",
+    hint: "Détermine comment le module réagit à un 20 naturel.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      off: "Désactivé",
+      suggest: "Proposer au MJ",
+      auto: "Ajouter automatiquement"
+    },
+    default: "suggest"
+  });
+
+  game.settings.register(MODULE_ID, "awardNatural20OncePerCombat", {
+    name: "Limiter le 20 naturel à 1 fois par combat",
+    hint: "Empêche un même personnage de recevoir plusieurs points automatiques pour 20 naturel dans le même combat.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, "awardIgnoreFlatChecks", {
+    name: "Ignorer les jets plats pour l'héroïsme",
+    hint: "Les jets plats ne déclenchent pas de proposition ou gain d'héroïsme.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, "suggestBadLuck", {
+    name: "Proposer sur série de malchance",
+    hint: "Propose au MJ d'accorder 1 point après plusieurs échecs consécutifs.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, "badLuckFailureStreak", {
+    name: "Seuil de malchance",
+    hint: "Nombre d'échecs consécutifs avant proposition.",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 3
+  });
+
+  game.settings.register(MODULE_ID, "badLuckOncePerCombat", {
+    name: "Limiter la malchance à 1 proposition par combat",
+    hint: "Évite de proposer plusieurs fois pour le même personnage dans le même combat.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
   });
 }
 
