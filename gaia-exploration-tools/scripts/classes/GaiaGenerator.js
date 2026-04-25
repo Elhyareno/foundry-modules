@@ -1,11 +1,13 @@
 import { RandomTable } from "./RandomTable.js";
 import { EVENTS_BY_BIOME } from "../data/events.js";
 import { CURIOSITIES_BY_BIOME } from "../data/curiosities.js";
+import { RESOURCES_BY_BIOME } from "../data/resources.js";
 
 export class GaiaGenerator {
-  constructor(eventsByBiome = EVENTS_BY_BIOME, curiositiesByBiome = CURIOSITIES_BY_BIOME) {
+  constructor(eventsByBiome = EVENTS_BY_BIOME, curiositiesByBiome = CURIOSITIES_BY_BIOME, resourcesByBiome = RESOURCES_BY_BIOME) {
     this.eventsByBiome = eventsByBiome;
     this.curiositiesByBiome = curiositiesByBiome;
+    this.resourcesByBiome = resourcesByBiome;
   }
 
   generateEvent(biome) {
@@ -66,4 +68,32 @@ export class GaiaGenerator {
     `;
   }
 
+  generateResources(biome){
+    const entries = this.resourcesByBiome[biome];
+
+    if (!entries){
+      return{
+        title: "Biome inconnu",
+        description: "Aucune table de ressources trouvé pour le biome",
+        value: 0,
+        tags: ["erreur"]
+      }
+    }
+
+    const table = new RandomTable(`Ressources : ${biome}`, entries);
+    return table.roll();
+  }
+
+  formatResources(resource, biome){
+    const tags = resource.tags.join(", ")
+
+    return `
+      <div class="gaia-card">
+        <h2>${resource.title}</h2>
+        <p><strong>Biome :</strong> ${biome}</p>
+        <p>${resource.description}</p>
+        <p><strong>Tags :</strong> ${tags}</p>
+      </div>
+    `;
+  }
 }
