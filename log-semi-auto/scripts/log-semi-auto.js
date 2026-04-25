@@ -133,15 +133,33 @@ async function finishCombatLog(combat) {
 }
 
 function buildPublicSummary(log) {
-  const rows = Object.values(log.combatants)
+  const cards = Object.values(log.combatants)
     .map(c => `
-      <tr>
-        <td><strong>${c.name}</strong></td>
-        <td>${c.damageTaken}</td>
-        <td>${c.healingReceived}</td>
-        <td>${c.endHp}/${c.maxHp}</td>
-        <td>${c.dropped ? "☠️ Tombé" : "—"}</td>
-      </tr>
+      <div style="
+        border: 1px solid #777;
+        border-radius: 8px;
+        padding: 8px;
+        margin: 6px 0;
+        background: rgba(0,0,0,0.08);
+      ">
+        <h3 style="margin: 0 0 4px 0;">${c.dropped ? "☠️ " : "🛡️ "}${c.name}</h3>
+
+        <p style="margin: 2px 0;">
+          <strong>PV finaux :</strong> ${c.endHp}/${c.maxHp}
+        </p>
+
+        <p style="margin: 2px 0;">
+          <strong>Dégâts subis :</strong> ${c.damageTaken}
+        </p>
+
+        <p style="margin: 2px 0;">
+          <strong>Soins reçus :</strong> ${c.healingReceived}
+        </p>
+
+        <p style="margin: 2px 0;">
+          <strong>État :</strong> ${c.dropped ? "Tombé au moins une fois" : "Debout à la fin du combat"}
+        </p>
+      </div>
     `).join("");
 
   return `
@@ -149,18 +167,9 @@ function buildPublicSummary(log) {
     <p><strong>Lieu :</strong> ${log.name}</p>
     <p><strong>Durée :</strong> ${log.rounds} round(s)</p>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Combattant</th>
-          <th>Dégâts subis</th>
-          <th>Soins reçus</th>
-          <th>PV finaux</th>
-          <th>État</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
+    <hr>
+
+    ${cards}
   `;
 }
 
