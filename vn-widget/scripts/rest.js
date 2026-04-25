@@ -1,83 +1,70 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { isVitalityActor } from "./actor.js";
 
-const DEBUG_REST_HOOKS = true;
+const REST_RECHARGE_DELAY_MS = 250;
 
-const HOOKS_TO_WATCH = [
-  "preUpdateActor",
-  "updateActor",
-  "preUpdateItem",
-  "updateItem",
-  "createChatMessage",
-  "renderDialog",
-  "closeDialog"
-];
+/**
+ * Detects an actual validated rest through the actor update caused by PF2e/SF2e.
+ *
+ * The old button listener was too early:
+ * clicking "rest" opens a confirmation dialog, and cancellation still triggered VN recharge.
+ *
+ * This handler runs only when the system actually updates the actor.
+ *
+ * @param {Actor} actor
+ * @param {object} changed
+ * @param {object} options
+ * @param {string} userId
+ */
+export async function handlePreUpdateActorForRest(actor, changed, options, userId) {
+  if (!game.user.isGM) return;
+  if (!isVitalityActor(actor)) return;
 
-export function registerRestHook() {
-  console.log("vn-widget | Rest diagnostic hooks registered.");
+  if (!looksLikeRestUpdate(changed, options)) return;
 
-  if (!DEBUG_REST_HOOKS) return;
+  setTimeout(() => {
+    rechargeVitalityOnRest(actor);
+  }, REST_RECHARGE_DELAY_MS);
+}
 
-  for (const hookName of HOOKS_TO_WATCH) {
-    Hooks.on(hookName, (...args) => {
-      logRestDiagnostic(hookName, args);
-    });
+/**
+ * Heuristic for SF2e/PF2e rest updates.
+ *
+ * Rest validation usually updates actor HP/resources and creates a system rest chat message.
+ * We avoid button-click listening entirely.
+ *
+ * @param {object} changed
+ * @param {object} options
+ * @returns {boolean}
+ */
+function looksLikeRestUpdate(changed, options) {
+  const text = safeStringify({ changed, options }).toLowerCase();
+
+  return (
+    text.includes("rest") ||
+    text.includes("restforthe-night") ||
+    text.includes("restforthenight") ||
+    text.includes("daily") ||
+    text.includes("stamina") ||
+    text.includes("resolve") ||
+    text.includes("attributes") ||
+    text.includes("resources")
+  );
+}
+
+function safeStringify(value) {
+  try {
+    return JSON.stringify(value) ?? "";
+  } catch {
+    return "";
   }
 }
 
-function logRestDiagnostic(hookName, args) {
-  const summary = summarizeArgs(args);
-
-  console.log(`VN REST DEBUG | ${hookName}`, summary);
-}
-
-function summarizeArgs(args) {
-  return args.map((arg) => {
-    if (!arg) return arg;
-
-    if (arg instanceof Actor) {
-      return {
-        type: "Actor",
-        name: arg.name,
-        actorType: arg.type,
-        id: arg.id
-      };
-    }
-
-    if (arg instanceof Item) {
-      return {
-        type: "Item",
-        name: arg.name,
-        itemType: arg.type,
-        id: arg.id,
-        parent: arg.parent?.name
-      };
-    }
-
-    if (arg instanceof ChatMessage) {
-      return {
-        type: "ChatMessage",
-        speaker: arg.speaker,
-        content: arg.content
-      };
-    }
-
-    if (arg instanceof Dialog) {
-      return {
-        type: "Dialog",
-        title: arg.title,
-        id: arg.id
-      };
-    }
-
-    if (typeof arg === "object") {
-      return foundry.utils.deepClone(arg);
-    }
-
-    return arg;
-  });
-}
-
+/**
+ * Recharge vitality to maximum when actor actually rests.
+ *
+ * @param {Actor} actor
+ */
 export async function rechargeVitalityOnRest(actor) {
   const max = getVitalityMax(actor);
   const current = getVitalityValue(actor, max);
