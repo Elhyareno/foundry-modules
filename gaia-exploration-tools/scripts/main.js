@@ -1,8 +1,22 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
-import { BIOMES } from "./data/biomes.js";
 import { creerListeBiomesHtml, trouverBiome, creerMessageBiomeInconnuHtml } from "./utils/biomes.js";
 import { envoyerMessageChat } from "./utils/chat.js";
+
+const rollTypes = {
+  event: {
+    generate: b => generator.generateEvent(b),
+    format: (result, b) => generator.formatEvent(result, b)
+  },
+  curiosity: {
+    generate: b => generator.generateCuriosity(b),
+    format: (result, b) => generator.formatCuriosity(result, b)
+  },
+  resource: {
+    generate: b => generator.generateResource(b),
+    format: (result, b) => generator.formatResource(result, b)
+  }
+};
 
 Hooks.once("ready", () => {
   ui.notifications.info("Gaïa Exploration Tools chargé.");
@@ -35,27 +49,18 @@ Hooks.once("ready", () => {
       return result;
     },
 
-    async rollEvent(biome = "jungle") {
-      return this.rollFromGenerator(
-        biome,
-        b => generator.generateEvent(b),
-        (result, b) => generator.formatEvent(result, b)
-      );
-    },
+    async rollByType(type, biome = "jungle") {
+      const config = rollTypes[type];
 
-    async rollCuriosity(biome = "jungle") {
-      return this.rollFromGenerator(
-        biome,
-        b => generator.generateCuriosity(b),
-        (result, b) => generator.formatCuriosity(result, b)
-      );
-    },
+      if (!config) {
+        ui.notifications.warn(`Type de tirage inconnu : ${type}`);
+        return null;
+      }
 
-    async rollResource(biome = "jungle"){
       return this.rollFromGenerator(
         biome,
-        b => generator.generateResource(b),
-        (result, b) => generator.formatResource(result, b)
+        config.generate,
+        config.format
       );
     }
   };
