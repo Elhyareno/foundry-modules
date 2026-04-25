@@ -1,6 +1,7 @@
 import { creerListeBiomesHtml, trouverBiome, creerMessageBiomeInconnuHtml } from "../utils/biomes.js";
 import { envoyerMessageChat } from "../utils/chat.js";
 import { createRollTypes } from "../config/rollTypes.js";
+import { getWorldTimeLabel } from "../utils/worldTime.js";
 
 export class GaiaExplorationService {
     constructor(generator){
