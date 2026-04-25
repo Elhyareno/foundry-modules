@@ -8,5 +8,5 @@
     "minimum": "14",
     "verified": "14"
   },
-  "esmodules": ["scripts/log-semi-auto.js"]
+  "esmodules": ["scripts/main.js"]
 }
