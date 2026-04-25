@@ -49,9 +49,22 @@ export class GaiaExplorationService {
         </button>
         `;
 
-      await envoyerMessageChat(content + rerollButton + journalButton, gmOnly);
+    const removeButton = `
+    <button
+        type="button"
+        class="gaia-remove-entry"
+        data-roll-type="${rollType}"
+        data-biome="${biomeTrouve}"
+        data-entry-id="${result.id}">
+        Retirer de la table
+    </button>
+    `;
+
+      await envoyerMessageChat(content + rerollButton + journalButton + removeButton, gmOnly);
       return result;
     }
+
+
 
     async rollByType(type, biome = "jungle", gmOnly = false) {
       const config = this.rollTypes[type];
