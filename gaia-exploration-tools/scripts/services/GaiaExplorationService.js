@@ -31,7 +31,7 @@ export class GaiaExplorationService {
       return result;
     }
 
-    async rollByType(type, biome = "jungle") {
+    async rollByType(type, biome = "jungle", gmOnly = false) {
       const config = this.rollTypes[type];
 
       if (!config) {
