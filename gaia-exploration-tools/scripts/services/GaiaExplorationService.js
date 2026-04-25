@@ -36,7 +36,6 @@ export class GaiaExplorationService {
         }
       const randomIndex = Math.floor(Math.random() * availableEntries.length);
       const result = availableEntries[randomIndex];
-      const result = generateFn(biomeTrouve);
       const content = formatFn(result, biomeTrouve);
 
       const rerollButton = `
