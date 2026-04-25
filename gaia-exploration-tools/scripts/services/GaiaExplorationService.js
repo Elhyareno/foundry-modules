@@ -103,12 +103,15 @@ export class GaiaExplorationService {
             });
         }
 
+        const dateLabel = getWorldTimeLabel();
+
         await JournalEntryPage.create({
-            name: entry.title,
+            name: `${dateLabel} - ${entry.title}`,
             type: "text",
             text: {
             content: `
                 <h2>${entry.title}</h2>
+                <p><em>Consigné ${dateLabel}, alors que les pas des explorateurs troublaient encore la poussière vivante de Gaïa.</em></p>
                 <p><strong>Type :</strong> ${type}</p>
                 <p><strong>Biome :</strong> ${biome}</p>
                 <p>${entry.description}</p>
