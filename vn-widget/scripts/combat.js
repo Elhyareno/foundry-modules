@@ -25,11 +25,10 @@ export async function handleCombatUpdate(combat, changed, options, userId) {
 async function regenerateVitality(actor) {
   const max = getVitalityMax(actor);
   const current = getVitalityValue(actor, max);
-  const regen = getVitalityRegen(actor);
+  const rank = getSpellcastingDCRank(actor);
+  const regen = getVitalityRegenFromRank(rank);
   const next = Math.min(current + regen, max);
   const gained = next - current;
-  const rank = getSpellcastingDCRank(actor);
-    const regen = getVitalityRegen(actor);
 
   if (gained <= 0) return;
 
@@ -45,7 +44,7 @@ async function regenerateVitality(actor) {
           <strong>${gained}</strong> point${gained > 1 ? "s" : ""} de Vitality Network.
         </p>
         <p>
-          Maîtrise du DD de sort : <strong>${getProficiencyLabel(getSpellcastingDCRank(actor))}</strong>
+          Maîtrise du DD de sort : <strong>${getProficiencyLabel(rank)}</strong>
           <small>(rang ${rank}, régénération +${regen})</small>
         </p>
         <p>
@@ -57,14 +56,12 @@ async function regenerateVitality(actor) {
 }
 
 /**
- * Get Vitality Network regeneration amount from spellcasting DC proficiency.
+ * Get Vitality Network regeneration amount from spellcasting DC proficiency rank.
  *
- * @param {Actor} actor - The actor
+ * @param {number} rank - Proficiency rank
  * @returns {number}
  */
-function getVitalityRegen(actor) {
-  const rank = getSpellcastingDCRank(actor);
-
+function getVitalityRegenFromRank(rank) {
   if (rank >= 4) return 8;
   if (rank >= 3) return 6;
 
