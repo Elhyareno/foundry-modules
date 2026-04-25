@@ -7,6 +7,7 @@ export function getHP(actor) {
   return actor.system.attributes.hp;
 }
 
+
 export function isVitalityActor(actor) {
   if (!actor) return false;
   if (actor.type !== "character") return false;
@@ -24,11 +25,9 @@ export function isVitalityActor(actor) {
   return classSlug === "mystic";
 }
 
+
 /**
  * Get the actor's spellcasting DC proficiency rank.
- *
- * PF2e/SF2e data structures may vary slightly depending on version/fork,
- * so this tries several common paths.
  *
  * Expected rank values:
  * 0 = untrained
@@ -43,17 +42,18 @@ export function isVitalityActor(actor) {
 export function getSpellcastingDCRank(actor) {
   const candidates = [
     actor.system?.proficiencies?.spellcasting?.rank,
-    actor.system?.proficiencies?.spellcasting?.value,
     actor.system?.attributes?.spellDC?.rank,
-    actor.system?.attributes?.spellDC?.value,
     actor.system?.attributes?.spellcasting?.rank,
-    actor.system?.attributes?.spellcasting?.value,
     actor.system?.spellcasting?.rank,
-    actor.system?.spellcasting?.value
+
+    actor.system?.proficiencies?.spellcasting,
+    actor.system?.attributes?.spellDC,
+    actor.system?.attributes?.spellcasting,
+    actor.system?.spellcasting
   ];
 
   for (const candidate of candidates) {
-    const rank = normalizeProficiencyRank(candidate);
+    const rank = extractProficiencyRank(candidate);
 
     if (rank !== null) {
       return rank;
@@ -63,13 +63,46 @@ export function getSpellcastingDCRank(actor) {
   return 1;
 }
 
+
+function extractProficiencyRank(value) {
+  if (value === null || value === undefined) return null;
+
+  if (typeof value === "object") {
+    const objectCandidates = [
+      value.rank,
+      value.proficiency?.rank,
+      value.proficient?.rank,
+      value.value
+    ];
+
+    for (const candidate of objectCandidates) {
+      const rank = normalizeProficiencyRank(candidate);
+
+      if (rank !== null) {
+        return rank;
+      }
+    }
+
+    return null;
+  }
+
+  return normalizeProficiencyRank(value);
+}
+
+
 function normalizeProficiencyRank(value) {
   if (value === null || value === undefined) return null;
 
   const numericValue = Number(value);
 
   if (Number.isFinite(numericValue)) {
-    return numericValue;
+    // Les rangs de maîtrise PF2e/SF2e vont normalement de 0 à 4.
+    // Une valeur supérieure ressemble plutôt à un DD total, pas à un rang.
+    if (numericValue >= 0 && numericValue <= 4) {
+      return numericValue;
+    }
+
+    return null;
   }
 
   const textValue = String(value)

@@ -1,6 +1,7 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { isVitalityActor, getSpellcastingDCRank } from "./actor.js";
 
+
 export async function handleCombatUpdate(combat, changed, options, userId) {
   if (!game.user.isGM) return;
 
@@ -18,8 +19,10 @@ export async function handleCombatUpdate(combat, changed, options, userId) {
   await regenerateVitality(actor);
 }
 
+
 /**
  * Regenerate Vitality Network for an actor.
+ *
  * @param {Actor} actor - The actor to regenerate
  */
 async function regenerateVitality(actor) {
@@ -55,6 +58,7 @@ async function regenerateVitality(actor) {
   });
 }
 
+
 /**
  * Get Vitality Network regeneration amount from spellcasting DC proficiency rank.
  *
@@ -67,6 +71,7 @@ function getVitalityRegenFromRank(rank) {
 
   return 4;
 }
+
 
 /**
  * Get a readable proficiency label.
