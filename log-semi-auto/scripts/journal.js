@@ -1,6 +1,7 @@
 import { MODULE_ID, JOURNAL_NAME, combatLogs } from "./state.js";
 import { buildPublicSummary, buildJournalContent, getGlobalStats } from "./summaries.js";
 import { getSetting } from "./settings.js";
+import {handleEncounterXp} from "./xp-tracker.js";
 
 export async function finishCombatLog(combat) {
     const log = combatLogs[combat.id];
@@ -11,6 +12,9 @@ export async function finishCombatLog(combat) {
     log.endedAt = new Date().toLocaleString();
     log.rounds = combat.round ?? 0;
     log.result = determineBattleResult(log);
+
+    // Handle XP awarding
+    await handleEncounterXp(log);
 
     if (getSetting("sendPublicSummary")) {
         await ChatMessage.create({

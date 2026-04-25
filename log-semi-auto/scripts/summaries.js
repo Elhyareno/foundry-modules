@@ -116,6 +116,24 @@ export function buildJournalContent(log) {
       ${enemyCrit ? `${enemyCrit.attacker} avec ${enemyCrit.damage} dégâts.` : "Aucun critique détecté."}
     </p>
 
+    <h2>XP</h2>
+
+    <p>
+      <strong>XP totale :</strong> ${log.xp?.totalXp ?? 0}<br>
+      <strong>XP par personnage :</strong> ${log.xp?.xpPerCharacter ?? 0}
+    </p>
+
+    ${
+      log.xp?.awards?.length
+        ? log.xp.awards.map(a => `
+          <p>
+            <strong>${a.name}</strong> : +${a.gained} XP 
+            (${a.before} → ${a.after})
+          </p>
+        `).join("")
+        : "<p>Aucune XP attribuée automatiquement.</p>"
+    }
+
     <h2>Scoreboard</h2>
     ${scoreboard}
   `;
