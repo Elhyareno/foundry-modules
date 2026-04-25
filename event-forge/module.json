@@ -1,0 +1,20 @@
+{
+  "id": "event-forge",
+  "title": "Event Forge",
+  "description": "Interface custom pour créer des événements avec test de compétence, fluff et log journal.",
+  "version": "1.0.0",
+  "authors": [{ "name": "Mat" }],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/event-forge.css"
+  ],
+  "templates": [
+    "templates/event-form.hbs"
+  ]
+}

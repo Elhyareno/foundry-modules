@@ -1,0 +1,27 @@
+.event-forge-card {
+  border: 1px solid #6f5b3e;
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(40, 32, 24, 0.08);
+}
+
+.event-forge-card h2 {
+  margin-top: 0;
+  font-size: 1.3em;
+}
+
+.event-forge-fluff {
+  font-style: italic;
+  margin: 8px 0 12px;
+}
+
+.event-forge-roll {
+  margin-top: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.event-forge-result {
+  border-left: 4px solid #7a5c35;
+  padding-left: 10px;
+}
