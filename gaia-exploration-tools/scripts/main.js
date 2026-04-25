@@ -23,7 +23,8 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 
     const rollType = button.dataset.rollType;
     const biome = button.dataset.biome;
+    const gmOnly = button.dataset.gmOnly === "true";
 
-    game.gaiaExploration.rollByType(rollType, biome);
+    game.gaiaExploration.rollByType(rollType, biome, gmOnly);
   });
 });
