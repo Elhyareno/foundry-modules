@@ -72,7 +72,7 @@ export async function rechargeVitalityOnRest(actor) {
 
   if (current >= max) return;
 
-  await rechargeVitality(actor);
+  await setVitality(actor, max);
 
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),
