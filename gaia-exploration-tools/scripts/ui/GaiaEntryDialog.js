@@ -29,12 +29,17 @@ export class GaiaEntryDialog extends FormApplication {
     .map(tag => tag.trim())
     .filter(tag => tag.length > 0);
     const entry = {
-        id: crypto.randomUUID(),
+        id: `${type}-${biome}-${Date.now()}`,
         title,
         description,
         tags
         };
 
+    const tags = (formData.tags ?? "")
+        .split(",")
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+        
     if (type === "event") {
     entry.danger = score;
     }
