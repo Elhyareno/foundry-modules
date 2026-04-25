@@ -64,6 +64,18 @@ Hooks.once("ready", () => {
         config.generate,
         config.format
       );
+    },
+
+    async rollEvent(biome = "jungle") {
+      return this.rollByType("event", biome);
+    },
+
+    async rollCuriosity(biome = "jungle") {
+      return this.rollByType("curiosity", biome);
+    },
+
+    async rollResource(biome = "jungle") {
+      return this.rollByType("resource", biome);
     }
   };
 });
