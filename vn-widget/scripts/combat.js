@@ -31,4 +31,8 @@ async function regenerateVitality(actor) {
   if (next === current) return;
 
   await setVitality(actor, next);
+  await chatMessage({
+    speaker: { actor },
+    content: `${actor.name} régénère 4 points de Vitality Network (total: ${next}/${max})`
+  });
 }
