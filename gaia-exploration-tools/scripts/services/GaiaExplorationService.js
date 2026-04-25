@@ -37,7 +37,18 @@ export class GaiaExplorationService {
         </button>
         `;
 
-      await envoyerMessageChat(content + rerollButton, gmOnly);
+    const journalButton = `
+        <button
+            type="button"
+            class="gaia-add-journal"
+            data-roll-type="${rollType}"
+            data-biome="${biomeTrouve}"
+            data-entry-id="${result.id}">
+            Ajouter au journal
+        </button>
+        `;
+
+      await envoyerMessageChat(content + rerollButton + journalButton, gmOnly);
       return result;
     }
 
@@ -69,4 +80,42 @@ export class GaiaExplorationService {
     async rollResource(biome = "jungle", gmOnly = false) {
       return this.rollByType("resource", biome, gmOnly);
     }
+
+    async addToJournal(type, biome, entryId) {
+        const config = this.rollTypes[type];
+
+        if (!config) return;
+
+        const entries = this.generator[`${type}sByBiome`]?.[biome];
+
+        const entry = entries?.find(e => e.id === entryId);
+
+        if (!entry) {
+            ui.notifications.warn("Entrée introuvable");
+            return;
+        }
+
+        let journal = game.journal.getName("Journal d'exploration");
+
+        if (!journal) {
+            journal = await JournalEntry.create({
+            name: "Journal d'exploration"
+            });
+        }
+
+        await JournalEntryPage.create({
+            name: entry.title,
+            type: "text",
+            text: {
+            content: `
+                <h2>${entry.title}</h2>
+                <p><strong>Type :</strong> ${type}</p>
+                <p><strong>Biome :</strong> ${biome}</p>
+                <p>${entry.description}</p>
+            `
+            }
+        }, { parent: journal });
+
+        ui.notifications.info("Ajouté au journal !");
+        }
   }

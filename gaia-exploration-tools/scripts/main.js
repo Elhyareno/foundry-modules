@@ -30,3 +30,18 @@ Hooks.on("renderChatMessage", (message, html, data) => {
     game.gaiaExploration.rollByType(rollType, biome, gmOnly);
   });
 });
+
+Hooks.on("renderChatMessage", (message, html) => {
+  html.find(".gaia-add-journal").click(async ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const button = ev.currentTarget;
+
+    const rollType = button.dataset.rollType;
+    const biome = button.dataset.biome;
+    const entryId = button.dataset.entryId;
+
+    await game.gaiaExploration.addToJournal(rollType, biome, entryId);
+  });
+});
