@@ -31,19 +31,33 @@ export class GaiaExplorationService {
         return null;
       }
 
+        const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? [];
 
-      const typeExclusions = this.excludedEntries[rollType]?.[biomeTrouve] ?? [];
-      const allEntries = this.generator[this.typeToProperty[rollType]]?.[biomeTrouve] ?? [];
-      const availableEntries = allEntries.filter(e => !typeExclusions.includes(e.id));
-      if (availableEntries.length === 0) {
-        await envoyerMessageChat("<p>Toutes les entrées ont été découvertes.</p>");
-        return null;
+        const allEntries = this.generator[this.typeToProperty[rollType]]?.[biomeTrouve] ?? [];
+
+        const custom = game.settings.get("gaia-exploration-tools", "customEntries") ?? {};
+
+        const customEntries = custom[rollType]?.[biomeTrouve] ?? [];
+
+        const uniqueEntries = new Map();
+
+        for (const entry of [...allEntries, ...customEntries]) {
+        uniqueEntries.set(entry.id, entry);
         }
-      const randomIndex = Math.floor(Math.random() * availableEntries.length);
-      const result = availableEntries[randomIndex];
-      const content = formatFn(result, biomeTrouve);
 
-      const rerollButton = `
+        const mergedEntries = Array.from(uniqueEntries.values());
+
+
+        const availableEntries = mergedEntries.filter(e => !typeExclusions.includes(e.id));
+
+        if (availableEntries.length === 0) {
+            await envoyerMessageChat("<p>Toutes les entrées ont été découvertes.</p>");
+            return null;
+        }
+        const randomIndex = Math.floor(Math.random() * availableEntries.length);
+        const result = availableEntries[randomIndex];
+        const content = formatFn(result, biomeTrouve);
+        const rerollButton = `
         <button 
             type="button"
             class="gaia-reroll"
