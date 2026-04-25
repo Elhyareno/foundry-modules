@@ -19,15 +19,9 @@ function onChatMessage(message) {
   // Track dice rolls
   if (getSetting("trackDiceStats") && message.rolls && message.rolls.length > 0) {
     for (const roll of message.rolls) {
-      recordDiceRoll(roll);
+        await recordDiceRoll(message, roll);
     }
-
-    // Record outcome if available
-    const context = flags.context;
-    if (context && context.outcome) {
-      recordRollOutcome(context.outcome);
     }
-  }
 
   // Track hero point usage
   if (getSetting("trackHeroPoints")) {

@@ -1,80 +1,129 @@
-const MODULE_ID = "pf2e-hero-stats";
+import { getSetting } from "./settings.js";
 
-/**
- * Format a number as a percentage with specified decimal places
- * @param {number} value - The value to format
- * @param {number} decimals - Number of decimal places (default: 2)
- * @returns {string} Formatted percentage string
- */
-export function formatPercentage(value, decimals = 2) {
-  return (value * 100).toFixed(decimals) + "%";
+/* =========================
+   Acteur / message
+========================= */
+
+export function getMessageActor(message) {
+  const actorId = message?.speaker?.actor;
+  if (!actorId) return null;
+
+  return game.actors.get(actorId) ?? null;
 }
 
-/**
- * Get the formatted date string
- * @param {Date} date - The date to format
- * @returns {string} Formatted date string
- */
-export function formatDate(date) {
-  return date.toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+export function isPlayerCharacter(actor) {
+  if (!actor) return false;
+
+  // PF2e utilise généralement type === "character" pour les PJ.
+  return actor.type === "character";
 }
 
-/**
- * Check if a user is a GM
- * @param {User} user - The user to check
- * @returns {boolean} True if user is a GM
- */
-export function isGM(user = game.user) {
-  return user?.isGM || false;
-}
+export function shouldIgnoreMessage(message, actor) {
+  if (!message || !actor) return true;
 
-/**
- * Send a message to chat
- * @param {string} content - The content to send
- * @param {boolean} gmOnly - Whether to send only to GMs
- */
-export async function sendChatMessage(content, gmOnly = false) {
-  const messageData = {
-    speaker: ChatMessage.getSpeaker(),
-    content
-  };
-
-  if (gmOnly) {
-    messageData.whisper = game.users
-      .filter(user => user.isGM)
-      .map(user => user.id);
+  if (getSetting("trackOnlyPlayerCharacters") && !isPlayerCharacter(actor)) {
+    return true;
   }
 
-  await ChatMessage.create(messageData);
+  if (getSetting("ignorePrivateRolls") && isPrivateMessage(message)) {
+    return true;
+  }
+
+  return false;
 }
 
-/**
- * Get all active combats
- * @returns {Combat[]} Array of active combats
- */
-export function getActiveCombats() {
-  return game.combats.filter(combat => !combat.isEnded);
+export function isPrivateMessage(message) {
+  const whisper = message.whisper ?? [];
+  const blind = message.blind ?? false;
+
+  return blind || whisper.length > 0;
 }
 
-/**
- * Get current combat if in combat
- * @returns {Combat|null} Current combat or null
- */
-export function getCurrentCombat() {
-  return game.combat && !game.combat.isEnded ? game.combat : null;
+/* =========================
+   Lecture des dés
+========================= */
+
+export function getNaturalD20FromRoll(roll) {
+  if (!roll) return null;
+
+  const d20 = roll.dice?.find(die => die.faces === 20);
+  if (!d20) return null;
+
+  const activeResult = d20.results?.find(result => result.active !== false);
+  if (!activeResult) return null;
+
+  return activeResult.result ?? null;
 }
 
-/**
- * Deep clone an object
- * @param {object} obj - Object to clone
- * @returns {object} Cloned object
- */
-export function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+export function hasD20(roll) {
+  return getNaturalD20FromRoll(roll) !== null;
+}
+
+/* =========================
+   PF2e context
+========================= */
+
+export function getPf2eContext(message) {
+  return message?.flags?.pf2e?.context ?? {};
+}
+
+export function getRollType(message) {
+  const context = getPf2eContext(message);
+
+  const type = context.type ?? context.rollType ?? "";
+
+  if (type === "attack-roll") return "attack";
+  if (type === "saving-throw") return "save";
+  if (type === "skill-check") return "skill";
+  if (type === "perception-check") return "perception";
+  if (type === "flat-check") return "flat";
+
+  // Certaines versions ou certains modules peuvent stocker différemment.
+  const domains = context.domains ?? [];
+
+  if (domains.includes("attack-roll")) return "attack";
+  if (domains.includes("saving-throw")) return "save";
+  if (domains.includes("skill-check")) return "skill";
+  if (domains.includes("perception")) return "perception";
+
+  return "other";
+}
+
+export function getDegreeOfSuccess(message) {
+  const context = getPf2eContext(message);
+
+  return context.outcome ?? null;
+}
+
+export function normalizeOutcome(outcome) {
+  if (!outcome) return null;
+
+  const map = {
+    criticalSuccess: "criticalSuccess",
+    success: "success",
+    failure: "failure",
+    criticalFailure: "criticalFailure",
+
+    "critical-success": "criticalSuccess",
+    "critical success": "criticalSuccess",
+    "crit-success": "criticalSuccess",
+
+    "critical-failure": "criticalFailure",
+    "critical failure": "criticalFailure",
+    "crit-failure": "criticalFailure"
+  };
+
+  return map[outcome] ?? null;
+}
+
+/* =========================
+   Divers
+========================= */
+
+export function duplicateData(data) {
+  return foundry.utils.deepClone(data);
+}
+
+export function nowIso() {
+  return new Date().toISOString();
 }
