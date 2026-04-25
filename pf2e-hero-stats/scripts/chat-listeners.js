@@ -4,7 +4,8 @@ import { getSetting } from "./settings.js";
 const MODULE_ID = "pf2e-hero-stats";
 
 export function setupChatListeners() {
-  Hooks.on("createChatMessage", async (message) => {
+  Hooks.on("updateActor", async (actor, changes, options, _userId) => {
+    if (options.heroStatsHandled) return;
     await onChatMessage(message);
   });
 
