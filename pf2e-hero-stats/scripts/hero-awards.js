@@ -57,7 +57,7 @@ async function resetCombatAwardData(encounterId = null) {
    Entrée principale
 ========================= */
 
-export async function evaluateHeroAwards({ actor, actorStats, message, roll, rollType, naturalD20, outcome }) {
+export async function evaluateHeroAwards({ actor, actorStats, message, rollType, naturalD20, outcome }) {
   if (!actor || actor.type !== "character") return;
   if (isPrivateMessage(message)) return;
 
@@ -84,6 +84,11 @@ async function evaluateNatural20Award({ actor, message, rollType, naturalD20 }) 
   }
 
   if (getHeroPoints(actor) >= getMaxHeroPoints(actor)) {
+    await postPublicInfo({
+      title: "⭐ Moment héroïque",
+      body: `<strong>${actor.name}</strong> obtient un <strong>20 naturel</strong>, mais possède déjà le maximum de points d'héroïsme.`,
+      speaker: message?.speaker
+    });
     return;
   }
 
@@ -92,10 +97,11 @@ async function evaluateNatural20Award({ actor, message, rollType, naturalD20 }) 
 
     if (given > 0) {
       await markNatural20Award(actor.id);
+      await resetBadLuckForActor(actor.id);
 
       await postPublicInfo({
         title: "⭐ Héroïsme",
-        body: `<strong>${actor.name}</strong> obtient un point d'héroïsme après un <strong>20 naturel</strong>.`,
+        body: `<strong>${actor.name}</strong> obtient un <strong>20 naturel</strong> et reçoit <strong>1 point d'héroïsme</strong>.`,
         speaker: message?.speaker
       });
 
@@ -243,16 +249,34 @@ async function markBadLuckSuggestion(actorId) {
   await setAwardData(data);
 }
 
+async function resetBadLuckForActor(actorId) {
+  const data = duplicateData(getAwardData());
+  const key = getCombatKey();
+
+  if (data.combat.suggestedBadLuck?.[key]?.[actorId]) {
+    delete data.combat.suggestedBadLuck[key][actorId];
+  }
+
+  await setAwardData(data);
+
+  // Reset de la série d'échecs dans les stats
+  const stats = game.settings.get("pf2e-hero-stats", "statsData");
+  const clone = foundry.utils.deepClone(stats);
+
+  if (clone.actors?.[actorId]?.streak) {
+    clone.actors[actorId].streak.failures = 0;
+    clone.actors[actorId].streak.criticalFailures = 0;
+  }
+
+  await game.settings.set("pf2e-hero-stats", "statsData", clone);
+}
+
 /* =========================
    Boutons chat
 ========================= */
 
 export function setupAwardButtonListeners() {
   Hooks.on("renderChatMessageHTML", (_message, html) => {
-    bindAwardButtons(html);
-  });
-
-  Hooks.on("renderChatMessage", (_message, html) => {
     bindAwardButtons(html);
   });
 }
@@ -265,6 +289,9 @@ function bindAwardButtons(html) {
   if (!buttons?.length) return;
 
   for (const button of buttons) {
+    if (button.dataset.heroAwardBound === "true") continue;
+    button.dataset.heroAwardBound = "true";
+
     button.addEventListener("click", async (event) => {
       event.preventDefault();
 
@@ -294,6 +321,8 @@ function bindAwardButtons(html) {
         if (reason === "20 naturel") {
           await markNatural20Award(actor.id);
         }
+
+        await resetBadLuckForActor(actor.id);
 
         await whisperAwardResult(actor, `${reason} : 1 point d'héroïsme accordé.`);
 

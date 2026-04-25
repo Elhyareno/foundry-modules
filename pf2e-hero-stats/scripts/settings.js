@@ -136,7 +136,7 @@ export function registerSettings() {
       suggest: "Proposer au MJ",
       auto: "Ajouter automatiquement"
     },
-    default: "suggest"
+    default: "auto"
   });
 
   game.settings.register(MODULE_ID, "awardNatural20OncePerCombat", {
@@ -145,7 +145,7 @@ export function registerSettings() {
     scope: "world",
     config: true,
     type: Boolean,
-    default: true
+    default: false
   });
 
   game.settings.register(MODULE_ID, "awardIgnoreFlatChecks", {
