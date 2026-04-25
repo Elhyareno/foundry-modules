@@ -1,6 +1,7 @@
 import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { GaiaExplorationService } from "./services/GaiaExplorationService.js";
+import { GaiaEntryDialog } from "./ui/GaiaEntryDialog.js";
 
 Hooks.once("init", () => {
   game.settings.register("gaia-exploration-tools", "excludedEntries", {
@@ -20,7 +21,11 @@ Hooks.once("ready", () => {
   service.openDialog = function () {
     new GaiaExplorationDialog().render(true);
   };
-  
+
+  service.openEntryDialog = function () {
+    new GaiaEntryDialog().render(true);
+  };
+
   game.gaiaExploration = service;
 
   ui.notifications.info("Gaïa Exploration Tools chargé.");

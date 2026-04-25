@@ -19,6 +19,7 @@
     "styles/gaia-exploration.css"
   ],
   "templates": [
-    "templates/gaia-exploration-dialog.hbs"
+    "templates/gaia-exploration-dialog.hbs",
+    "templates/gaia-entry-dialog.hbs"
   ]
 }
