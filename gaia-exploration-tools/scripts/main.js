@@ -7,7 +7,6 @@ Hooks.once("ready", () => {
   
   const generator = new GaiaGenerator();
   const service = new GaiaExplorationService(generator);
-  const rollTypes = createRollTypes(generator);
 
   service.openDialog = function () {
     new GaiaExplorationDialog().render(true);

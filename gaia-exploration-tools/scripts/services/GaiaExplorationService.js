@@ -57,4 +57,4 @@ export class GaiaExplorationService {
     async rollResource(biome = "jungle") {
       return this.rollByType("resource", biome);
     }
-  };
+  }
