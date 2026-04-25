@@ -16,18 +16,18 @@ export class GaiaExplorationService {
     new DialogClass().render(true);
     }
 
-    async rollFromGenerator(biome, generateFn, formatFn) {
+    async rollFromGenerator(biome, generateFn, formatFn, gmOnly = false) {
       const biomeTrouve = trouverBiome(biome);
 
       if (!biomeTrouve) {
-        await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
+        await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome), gmOnly);
         return null;
       }
 
       const result = generateFn(biomeTrouve);
       const content = formatFn(result, biomeTrouve);
 
-      await envoyerMessageChat(content);
+      await envoyerMessageChat(content, gmOnly);
       return result;
     }
 
@@ -42,19 +42,20 @@ export class GaiaExplorationService {
       return this.rollFromGenerator(
         biome,
         config.generate,
-        config.format
+        config.format,
+        gmOnly
       );
     }
 
-    async rollEvent(biome = "jungle") {
-      return this.rollByType("event", biome);
+    async rollEvent(biome = "jungle", gmOnly = false) {
+      return this.rollByType("event", biome, gmOnly);
     }
 
-    async rollCuriosity(biome = "jungle") {
-      return this.rollByType("curiosity", biome);
+    async rollCuriosity(biome = "jungle", gmOnly = false) {
+      return this.rollByType("curiosity", biome, gmOnly);
     }
 
-    async rollResource(biome = "jungle") {
-      return this.rollByType("resource", biome);
+    async rollResource(biome = "jungle", gmOnly = false) {
+      return this.rollByType("resource", biome, gmOnly);
     }
   }
