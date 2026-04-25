@@ -33,6 +33,17 @@ async function regenerateVitality(actor) {
   await setVitality(actor, next);
   await chatMessage.create({
     speaker: chatMessage.getSpeaker({ actor }),
-    content: `${actor.name} régénère 4 points de Vitality Network (total: ${next}/${max})`
+    content:  `
+      <div class="vn-chat">
+        <div class="vn-chat-title">⚡ Vitality Network</div>
+        <p>
+          <strong>${actor.name}</strong> récupère 
+          <strong>${gained}</strong> point${gained > 1 ? "s" : ""} de Vitality Network.
+        </p>
+        <p>
+          Réserve actuelle : <strong>${next}/${max}</strong>
+        </p>
+      </div>
+    `
   });
 }
