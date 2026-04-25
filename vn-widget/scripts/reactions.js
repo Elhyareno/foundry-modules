@@ -72,14 +72,48 @@ function areActorsAdjacent(actorA, actorB) {
   if (!tokenA || !tokenB) return false;
   if (tokenA.scene?.id !== tokenB.scene?.id) return false;
 
-  const distance = canvas.grid.measurePath([
-    tokenA.center,
-    tokenB.center
-  ]).distance;
+  return areTokensAdjacent(tokenA, tokenB);
+}
 
-  const gridDistance = canvas.scene?.grid?.distance ?? 5;
+function areTokensAdjacent(tokenA, tokenB) {
+  const gridSize = canvas.grid.size;
+  const maxGap = canvas.scene?.grid?.distance ?? 5;
 
-  return distance <= gridDistance;
+  const boundsA = getTokenGridBounds(tokenA);
+  const boundsB = getTokenGridBounds(tokenB);
+
+  const gapX = Math.max(
+    boundsB.left - boundsA.right,
+    boundsA.left - boundsB.right,
+    0
+  );
+
+  const gapY = Math.max(
+    boundsB.top - boundsA.bottom,
+    boundsA.top - boundsB.bottom,
+    0
+  );
+
+  const gapInSquares = Math.max(gapX, gapY) / gridSize;
+  const gapInDistance = gapInSquares * maxGap;
+
+  return gapInDistance <= maxGap;
+}
+
+function getTokenGridBounds(token) {
+  const document = token.document;
+
+  const width = Number(document.width ?? 1);
+  const height = Number(document.height ?? 1);
+
+  const gridSize = canvas.grid.size;
+
+  return {
+    left: token.x,
+    right: token.x + (width * gridSize),
+    top: token.y,
+    bottom: token.y + (height * gridSize)
+  };
 }
 
 function getActiveToken(actor) {
