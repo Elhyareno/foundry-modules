@@ -1,19 +1,20 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { isVitalityActor } from "./actor.js";
 
-export async function handleCombatRound(combat, data) {
+export async function handleCombatTurn(combat, data) {
   if (!game.user.isGM) return;
 
-  for (const combatant of combat.combatants) {
-    const actor = combatant.actor;
-    if (!isVitalityActor(actor)) continue;
+  const combatant = combat.combatant;
+  if (!combatant) return;
 
-    const max = getVitalityMax(actor);
-    const current = getVitalityValue(actor, max);
-    const next = Math.min(current + 4, max);
+  const actor = combatant.actor;
+  if (!isVitalityActor(actor)) return;
 
-    if (next === current) continue;
+  const max = getVitalityMax(actor);
+  const current = getVitalityValue(actor, max);
+  const next = Math.min(current + 4, max);
 
-    await setVitality(actor, next);
-  }
+  if (next === current) return;
+
+  await setVitality(actor, next);
 }
