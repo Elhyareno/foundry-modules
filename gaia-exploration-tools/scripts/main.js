@@ -44,29 +44,19 @@ Hooks.once("ready", () => {
     },
 
     async rollCuriosity(biome = "jungle") {
-        const biomeTrouve = trouverBiome(biome);
-        if (!biomeTrouve) {
-            await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
-            return null;
-            }
-        const curiosity = generator.generateCuriosity(biomeTrouve);
-        const content = generator.formatCuriosity(curiosity, biomeTrouve);
-
-      await envoyerMessageChat(content);
-      return curiosity;
+      return this.rollFromGenerator(
+        biome,
+        b => generator.generateCuriosity(b),
+        (result, b) => generator.formatCuriosity(result, b)
+      );
     },
 
     async rollResource(biome = "jungle"){
-      const biomeTrouve = trouverBiome(biome);
-      if (!biomeTrouve){
-        await envoyerMessageChat(creerMessageBiomeInconnuHtml(biome));
-        return null;
-      }
-      const resource = generator.generateResource(biomeTrouve);
-      const content = generator.formatResource(resource, biomeTrouve);
-
-      await envoyerMessageChat(content);
-      return resource;
+      return this.rollFromGenerator(
+        biome,
+        b => generator.generateResource(b),
+        (result, b) => generator.formatResource(result, b)
+      );
     }
   };
 });
