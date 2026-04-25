@@ -19,6 +19,13 @@ Hooks.on("renderChatMessage", (message, html) => {
     const title = button.dataset.title;
     const eventId = button.dataset.eventId;
 
-    await handleEventRoll({ skill, dc, title, eventId });
+    await handleEventRoll({
+      skill: button.dataset.skill,
+      dc: Number(button.dataset.dc),
+      title: button.dataset.title,
+      eventId: button.dataset.eventId,
+      successText: button.dataset.success,
+      failureText: button.dataset.failure
+    });
   });
 });

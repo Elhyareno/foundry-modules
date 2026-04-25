@@ -53,13 +53,15 @@ export class EventForgeForm extends FormApplication {
 
         <p><strong>Test demandé :</strong> ${skillLabel} DD ${dc}</p>
 
-        <button 
+        <button
           class="event-forge-roll"
           data-event-id="${eventId}"
-          data-title="${title}"
+          data-title="${foundry.utils.escapeHTML(title)}"
           data-skill="${skill}"
-          data-dc="${dc}">
-          Faire le test
+          data-dc="${dc}"
+          data-success="${foundry.utils.escapeHTML(success)}"
+          data-failure="${foundry.utils.escapeHTML(failure)}">
+          Lancer le test
         </button>
       </div>
     `;
