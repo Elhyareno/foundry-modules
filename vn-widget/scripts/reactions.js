@@ -44,11 +44,9 @@ function getPartyMysticsWithSpotHealing() {
 function isPartyMember(actor) {
   if (!actor) return false;
 
-  // SF2e/PF2e party actors usually contain member references.
   const parties = game.actors.filter((a) => a.type === "party");
 
   if (parties.length === 0) {
-    // Fallback simple : tous les personnages joueurs sont considérés comme party.
     return actor.hasPlayerOwner;
   }
 
@@ -92,7 +90,9 @@ function getActiveToken(actor) {
 
 async function createSpotHealingPrompt(mystic, damagedActor, damageTaken) {
   const users = getActorOwners(mystic);
-  const whisper = users.length > 0 ? users.map((u) => u.id) : ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+  const whisper = users.length > 0
+    ? users.map((u) => u.id)
+    : ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
 
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: mystic }),
@@ -112,6 +112,7 @@ async function createSpotHealingPrompt(mystic, damagedActor, damageTaken) {
           data-action="${SPOT_HEALING_ACTION}"
           data-mystic-id="${mystic.id}"
           data-target-id="${damagedActor.id}"
+          data-damage-taken="${damageTaken}"
         >
           Utiliser Transfer Vitality
         </button>
@@ -132,7 +133,6 @@ export function registerSpotHealingChatListener() {
     bindSpotHealingButtons(html);
   });
 
-  // Compatibilité v13/v14 si renderChatMessageHTML ne passe pas selon certains contextes.
   Hooks.on("renderChatMessage", (message, html) => {
     const element = html instanceof HTMLElement ? html : html[0];
     bindSpotHealingButtons(element);
@@ -151,13 +151,18 @@ function bindSpotHealingButtons(html) {
     button.addEventListener("click", async () => {
       const mystic = game.actors.get(button.dataset.mysticId);
       const target = game.actors.get(button.dataset.targetId);
+      const damageTaken = Number(button.dataset.damageTaken ?? 0);
 
       if (!mystic || !target) {
         ui.notifications.warn("Spot Healing : acteur introuvable.");
         return;
       }
 
-      const result = await transferVitalityToActor(mystic, target);
+      const amount = await askSpotHealingAmount(mystic, target, damageTaken);
+
+      if (amount === null) return;
+
+      const result = await transferVitalityToActor(mystic, target, amount);
 
       if (!result) {
         ui.notifications.warn("Spot Healing : transfert impossible.");
@@ -188,4 +193,90 @@ function bindSpotHealingButtons(html) {
       });
     });
   }
+}
+
+async function askSpotHealingAmount(mystic, target, damageTaken) {
+  const vitality = getVitalityValue(mystic);
+  const hp = target.system?.attributes?.hp;
+
+  if (!hp) {
+    ui.notifications.warn("Spot Healing : les PV de la cible sont introuvables.");
+    return null;
+  }
+
+  const missing = Math.max(0, Number(hp.max ?? 0) - Number(hp.value ?? 0));
+  const maxAmount = Math.min(vitality, missing);
+  const suggestedAmount = Math.max(0, Math.min(damageTaken, maxAmount));
+
+  if (maxAmount <= 0) {
+    ui.notifications.warn("Spot Healing : aucun soin possible.");
+    return null;
+  }
+
+  return new Promise((resolve) => {
+    new Dialog({
+      title: "Spot Healing",
+      content: `
+        <form class="vn-spot-healing-dialog">
+          <p>
+            <strong>${target.name}</strong> peut recevoir jusqu'à
+            <strong>${maxAmount}</strong> point${maxAmount > 1 ? "s" : ""} de soin.
+          </p>
+          <p>
+            Dégâts subis : <strong>${damageTaken}</strong><br/>
+            Vitality disponible : <strong>${vitality}</strong><br/>
+            PV manquants : <strong>${missing}</strong>
+          </p>
+          <div class="form-group">
+            <label>Montant à transférer</label>
+            <input
+              type="number"
+              name="amount"
+              value="${suggestedAmount}"
+              min="1"
+              max="${maxAmount}"
+              step="1"
+            />
+          </div>
+        </form>
+      `,
+      buttons: {
+        confirm: {
+          icon: '<i class="fas fa-bolt"></i>',
+          label: "Transférer",
+          callback: (html) => {
+            const root = html instanceof HTMLElement ? html : html[0];
+            const input = root.querySelector('input[name="amount"]');
+            const rawAmount = Number(input?.value ?? 0);
+
+            if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+              resolve(null);
+              return;
+            }
+
+            const amount = Math.max(1, Math.min(Math.floor(rawAmount), maxAmount));
+            resolve(amount);
+          }
+        },
+        max: {
+          icon: '<i class="fas fa-heart"></i>',
+          label: "Maximum",
+          callback: () => {
+            resolve(maxAmount);
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "Annuler",
+          callback: () => {
+            resolve(null);
+          }
+        }
+      },
+      default: "confirm",
+      close: () => {
+        resolve(null);
+      }
+    }).render(true);
+  });
 }
