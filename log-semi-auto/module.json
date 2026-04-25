@@ -1,0 +1,12 @@
+{
+  "id": "log-semi-auto",
+  "title": "Log Semi Auto",
+  "description": "Résumé semi-automatique des combats avec ajout au journal.",
+  "version": "1.0.0",
+  "authors": [{ "name": "Mat" }],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": ["scripts/log-semi-auto.js"]
+}
