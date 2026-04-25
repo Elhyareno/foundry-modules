@@ -35,6 +35,13 @@ export async function handleEventRoll({ skill, dc, title, eventId, successText, 
     criticalFailure: "Échec critique"
   }[degree];
 
+  const outcomes = {
+    criticalSuccess: criticalSuccessText,
+    success: successText,
+    failure: failureText,
+    criticalFailure: criticalFailureText
+  };
+
   const outcomeText = outcomes[degree] ?? "";
 
   await roll.toMessage({
