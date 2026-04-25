@@ -24,7 +24,7 @@ export class GaiaEntryDialog extends FormApplication {
     const title = formData.title;
     const description = formData.description;
     const score = Number(formData.score);
-    const tags = formData.tags
+    const tags = (formData.tags ?? "")
     .split(",")
     .map(tag => tag.trim())
     .filter(tag => tag.length > 0);
@@ -35,11 +35,6 @@ export class GaiaEntryDialog extends FormApplication {
         tags
         };
 
-    const tags = (formData.tags ?? "")
-        .split(",")
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
-        
     if (type === "event") {
     entry.danger = score;
     }
