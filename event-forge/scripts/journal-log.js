@@ -16,7 +16,7 @@ export async function getOrCreateJournal() {
   return journal;
 }
 
-export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, success, failure }) {
+export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, success, failure, criticalSuccess, criticalFailure }) {
   const journal = await getOrCreateJournal();
 
   await JournalEntryPage.create({
@@ -32,11 +32,17 @@ export async function logEventCreation({ eventId, title, skillLabel, dc, fluff, 
         <h2>Ambiance</h2>
         <p>${fluff}</p>
 
+        <h2>Réussite critique</h2>
+        <p>${foundry.utils.escapeHTML(criticalSuccess)}</p>
+
         <h2>Réussite</h2>
-        <p>${success}</p>
+        <p>${foundry.utils.escapeHTML(success)}</p>
 
         <h2>Échec</h2>
-        <p>${failure}</p>
+        <p>${foundry.utils.escapeHTML(failure)}</p>
+
+        <h2>Échec critique</h2>
+        <p>${foundry.utils.escapeHTML(criticalFailure)}</p>
 
         <h2>Résultats</h2>
         <ul id="event-results-${eventId}">

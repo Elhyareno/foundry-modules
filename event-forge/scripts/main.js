@@ -25,7 +25,9 @@ Hooks.on("renderChatMessage", (message, html) => {
       title: button.dataset.title,
       eventId: button.dataset.eventId,
       successText: button.dataset.success,
-      failureText: button.dataset.failure
+      failureText: button.dataset.failure,
+      criticalSuccessText: button.dataset.criticalSuccess,
+      criticalFailureText: button.dataset.criticalFailure
     });
   });
 });

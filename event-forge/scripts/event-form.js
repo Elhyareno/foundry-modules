@@ -67,8 +67,10 @@ export class EventForgeForm extends FormApplication {
     const skillLabel = skills.find(s => s.key === skill)?.label ?? skill;
     const dc = Number(formData.dc);
     const fluff = formData.fluff;
-    const success = formData.success;
-    const failure = formData.failure;
+    const criticalSuccess = formData.criticalSuccess?.trim() || "";
+    const success = formData.success?.trim() || "";
+    const failure = formData.failure?.trim() || "";
+    const criticalFailure = formData.criticalFailure?.trim() || "";
 
     const content = `
       <div class="event-forge-card" data-event-id="${eventId}">
@@ -83,8 +85,10 @@ export class EventForgeForm extends FormApplication {
           data-title="${foundry.utils.escapeHTML(title)}"
           data-skill="${skill}"
           data-dc="${dc}"
+          data-critical-success="${foundry.utils.escapeHTML(criticalSuccess)}"
           data-success="${foundry.utils.escapeHTML(success)}"
-          data-failure="${foundry.utils.escapeHTML(failure)}">
+          data-failure="${foundry.utils.escapeHTML(failure)}"
+          data-critical-failure="${foundry.utils.escapeHTML(criticalFailure)}">
           Lancer le test
         </button>
       </div>
@@ -101,8 +105,10 @@ export class EventForgeForm extends FormApplication {
           skillLabel,
           dc,
           fluff,
+          criticalSuccess,
           success,
           failure,
+          criticalFailure,
           results: []
         }
       }
@@ -115,7 +121,9 @@ export class EventForgeForm extends FormApplication {
       dc,
       fluff,
       success,
-      failure
+      failure,
+      criticalSuccess,
+      criticalFailure
     });
   }
 }

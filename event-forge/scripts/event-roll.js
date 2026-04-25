@@ -1,6 +1,6 @@
 import { logEventResult } from "./journal-log.js";
 
-export async function handleEventRoll({ skill, dc, title, eventId, successText, failureText }) {
+export async function handleEventRoll({ skill, dc, title, eventId, successText, failureText, criticalSuccessText, criticalFailureText }) {
   const token = canvas.tokens.controlled[0];
 
   if (!token?.actor) {
@@ -35,9 +35,7 @@ export async function handleEventRoll({ skill, dc, title, eventId, successText, 
     criticalFailure: "Échec critique"
   }[degree];
 
-  const outcomeText = ["criticalSuccess", "success"].includes(degree)
-    ? successText
-    : failureText;
+  const outcomeText = outcomes[degree] ?? "";
 
   await roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
