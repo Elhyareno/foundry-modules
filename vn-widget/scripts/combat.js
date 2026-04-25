@@ -1,7 +1,6 @@
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { isVitalityActor } from "./actor.js";
 
-
 export async function handleCombatUpdate(combat, changed, options, userId) {
   if (!game.user.isGM) return;
 
@@ -26,14 +25,17 @@ export async function handleCombatUpdate(combat, changed, options, userId) {
 async function regenerateVitality(actor) {
   const max = getVitalityMax(actor);
   const current = getVitalityValue(actor, max);
-  const next = Math.min(current + 4, max);
+  const regen = 4;
+  const next = Math.min(current + regen, max);
+  const gained = next - current;
 
-  if (next === current) return;
+  if (gained <= 0) return;
 
   await setVitality(actor, next);
-  await chatMessage.create({
-    speaker: chatMessage.getSpeaker({ actor }),
-    content:  `
+
+  await ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: `
       <div class="vn-chat">
         <div class="vn-chat-title">⚡ Vitality Network</div>
         <p>
