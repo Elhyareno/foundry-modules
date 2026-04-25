@@ -101,13 +101,10 @@ function areTokensAdjacent(tokenA, tokenB) {
   const gapSquares = Math.max(gapX, gapY) / gridSize;
   const gapDistance = gapSquares * gridDistance;
 
-  // Adjacent = bords au contact ou séparés d'une case.
-  // Petite marge pour les arrondis de grille.
   return gapDistance <= gridDistance + 0.01;
 }
 
 function getTokenPixelBounds(token, gridSize) {
-  // Foundry placeable Token
   if (token.bounds) {
     return {
       left: token.bounds.x,
@@ -117,7 +114,6 @@ function getTokenPixelBounds(token, gridSize) {
     };
   }
 
-  // TokenDocument ou fallback depuis document
   const document = token.document ?? token;
 
   const x = Number(token.x ?? document.x ?? 0);
@@ -131,47 +127,6 @@ function getTokenPixelBounds(token, gridSize) {
     right: x + (width * gridSize),
     top: y,
     bottom: y + (height * gridSize)
-  };
-}
-
-function areTokensAdjacent(tokenA, tokenB) {
-  const gridSize = canvas.grid.size;
-  const maxGap = canvas.scene?.grid?.distance ?? 5;
-
-  const boundsA = getTokenGridBounds(tokenA);
-  const boundsB = getTokenGridBounds(tokenB);
-
-  const gapX = Math.max(
-    boundsB.left - boundsA.right,
-    boundsA.left - boundsB.right,
-    0
-  );
-
-  const gapY = Math.max(
-    boundsB.top - boundsA.bottom,
-    boundsA.top - boundsB.bottom,
-    0
-  );
-
-  const gapInSquares = Math.max(gapX, gapY) / gridSize;
-  const gapInDistance = gapInSquares * maxGap;
-
-  return gapInDistance <= maxGap;
-}
-
-function getTokenGridBounds(token) {
-  const document = token.document;
-
-  const width = Number(document.width ?? 1);
-  const height = Number(document.height ?? 1);
-
-  const gridSize = canvas.grid.size;
-
-  return {
-    left: token.x,
-    right: token.x + (width * gridSize),
-    top: token.y,
-    bottom: token.y + (height * gridSize)
   };
 }
 
