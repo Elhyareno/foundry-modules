@@ -19,7 +19,31 @@ export class GaiaEntryDialog extends FormApplication {
   }
 
   async _updateObject(event, formData) {
-    console.log(formData);
-    ui.notifications.info("Formulaire reçu.");
+    const type = formData.type;
+    const biome = formData.biome;
+    const title = formData.title;
+    const description = formData.description;
+    const score = Number(formData.score);
+    const tags = formData.tags
+    .split(",")
+    .map(tag => tag.trim())
+    .filter(tag => tag.length > 0);
+    const entry = {
+        id: crypto.randomUUID(),
+        title,
+        description,
+        tags
+        };
+
+    if (type === "event") {
+    entry.danger = score;
+    }
+
+    if (type === "resource") {
+    entry.value = score;
+    }
+
+    console.log({ type, biome, entry });
+    ui.notifications.info(`Entrée préparée : ${entry.title}`);
   }
 }
