@@ -2,6 +2,8 @@ import { MODULE_ID } from "../constants.js";
 import { hasTransfusion, assertSanguimancerFeat } from "../feats.js";
 import { postToChat } from "../chat.js";
 
+const TRANSFUSION_SLUG = "sanguimancer-transfusion";
+
 export function getTransfusionValue(spent) {
   const amount = Number(spent);
   if (!Number.isFinite(amount) || amount < 5) return 0;
@@ -43,7 +45,7 @@ export async function useTransfusion(actor, target, spent) {
     actor,
     `
       Transfusion accordée à <strong>${selectedTarget.name}</strong>.<br>
-      Fast Healing ${fastHealing} pendant 5 rounds.
+      Régénération ${fastHealing} pendant 5 rounds.
     `
   );
 
@@ -51,26 +53,49 @@ export async function useTransfusion(actor, target, spent) {
 }
 
 export async function createTransfusionEffect(target, value, sourceActor = null) {
-  const fastHealing = Number(value);
-
-  if (!target || !Number.isFinite(fastHealing) || fastHealing <= 0) {
-    ui.notifications.warn("Impossible de créer l'effet Transfusion.");
+  if (!target) {
+    ui.notifications.warn("Aucune cible pour Transfusion.");
     return [];
   }
 
-  return target.createEmbeddedDocuments("Item", [{
+  const fastHealing = Number(value);
+
+  if (!Number.isFinite(fastHealing) || fastHealing <= 0) {
+    ui.notifications.warn("Valeur de Transfusion invalide.");
+    return [];
+  }
+
+  const effectData = {
     name: `Transfusion (${fastHealing})`,
     type: "effect",
     img: "icons/magic/life/heart-cross-strong-red.webp",
     system: {
-      slug: "transfusion",
-      tokenIcon: {
-        show: true,
+      slug: TRANSFUSION_SLUG,
+      description: {
+        value: `<p>Régénération ${fastHealing} accordée par Transfusion.</p>`,
       },
       duration: {
         value: 5,
         unit: "rounds",
         expiry: "turn-start",
+        sustained: false,
+      },
+      tokenIcon: {
+        show: true,
+      },
+      unidentified: false,
+      start: {
+        value: 0,
+        initiative: null,
+      },
+      badge: {
+        type: "counter",
+        value: fastHealing,
+      },
+      traits: {
+        value: [],
+        rarity: "common",
+        otherTags: [],
       },
       rules: [],
     },
@@ -79,24 +104,35 @@ export async function createTransfusionEffect(target, value, sourceActor = null)
         type: "transfusion",
         transfusion: true,
         fastHealing,
-        sourceActorUuid: sourceActor?.uuid ?? null,
         sourceActorId: sourceActor?.id ?? null,
+        sourceActorUuid: sourceActor?.uuid ?? null,
         lastAppliedRound: null,
         lastAppliedTurn: null,
       },
     },
-  }]);
+  };
+
+  const created = await target.createEmbeddedDocuments("Item", [effectData]);
+
+  console.log(`${MODULE_ID} | Transfusion effect created`, {
+    target: target.name,
+    fastHealing,
+    created,
+    flags: created[0]?.flags,
+    system: created[0]?.system,
+  });
+
+  return created;
 }
 
 export function getTransfusionEffects(actor) {
   const effects = actor?.itemTypes?.effect ?? [];
 
-  return effects.filter((effect) => {
-    const moduleFlag = effect.flags?.[MODULE_ID] ?? {};
-
+  const found = effects.filter((effect) => {
+    const moduleFlags = effect.flags?.[MODULE_ID] ?? {};
     const flagType = effect.getFlag?.(MODULE_ID, "type");
     const flagTransfusion = effect.getFlag?.(MODULE_ID, "transfusion");
-    const flagFastHealing = Number(effect.getFlag?.(MODULE_ID, "fastHealing") ?? 0);
+    const flagFastHealing = Number(effect.getFlag?.(MODULE_ID, "fastHealing") ?? moduleFlags.fastHealing ?? 0);
 
     const name = String(effect.name ?? "").toLowerCase();
     const slug = String(effect.slug ?? effect.system?.slug ?? "").toLowerCase();
@@ -104,13 +140,29 @@ export function getTransfusionEffects(actor) {
     return (
       flagType === "transfusion"
       || flagTransfusion === true
-      || moduleFlag.type === "transfusion"
-      || moduleFlag.transfusion === true
+      || moduleFlags.type === "transfusion"
+      || moduleFlags.transfusion === true
       || flagFastHealing > 0
-      || slug === "transfusion"
-      || name.includes("transfusion")
+      || slug === TRANSFUSION_SLUG
+      || name.startsWith("transfusion")
     );
   });
+
+  console.log(`${MODULE_ID} | getTransfusionEffects`, {
+    actor: actor?.name,
+    allEffects: effects.map((effect) => ({
+      name: effect.name,
+      slug: effect.slug ?? effect.system?.slug,
+      flags: effect.flags?.[MODULE_ID],
+    })),
+    found: found.map((effect) => ({
+      name: effect.name,
+      slug: effect.slug ?? effect.system?.slug,
+      flags: effect.flags?.[MODULE_ID],
+    })),
+  });
+
+  return found;
 }
 
 export async function applyTransfusionHealing(actor, combat = game.combat) {
@@ -119,7 +171,7 @@ export async function applyTransfusionHealing(actor, combat = game.combat) {
   const effects = getTransfusionEffects(actor);
 
   if (!effects.length) {
-    console.debug(`${MODULE_ID} | Aucun effet Transfusion trouvé sur ${actor.name}.`);
+    console.warn(`${MODULE_ID} | Aucun effet Transfusion trouvé sur ${actor.name}.`);
     return;
   }
 
@@ -137,10 +189,8 @@ export async function applyTransfusionHealing(actor, combat = game.combat) {
       continue;
     }
 
-    const moduleFlag = effect.flags?.[MODULE_ID] ?? {};
-    const flagFastHealing = Number(effect.getFlag?.(MODULE_ID, "fastHealing") ?? moduleFlag.fastHealing ?? 0);
-
-    let fastHealing = flagFastHealing;
+    const moduleFlags = effect.flags?.[MODULE_ID] ?? {};
+    let fastHealing = Number(effect.getFlag?.(MODULE_ID, "fastHealing") ?? moduleFlags.fastHealing ?? 0);
 
     if (!Number.isFinite(fastHealing) || fastHealing <= 0) {
       const match = String(effect.name ?? "").match(/\((\d+)\)/);
@@ -165,11 +215,27 @@ export async function applyTransfusionHealing(actor, combat = game.combat) {
     await effect.setFlag(MODULE_ID, "lastAppliedTurn", turn);
   }
 
-  if (heal > 0) {
-    await actor.update({
-      "system.attributes.hp.value": current + heal,
+  if (heal <= 0) {
+    console.log(`${MODULE_ID} | Transfusion : aucune guérison nécessaire`, {
+      actor: actor.name,
+      current,
+      max,
+      total,
     });
-
-    postToChat(actor, `Transfusion +${heal} PV`);
+    return;
   }
+
+  await actor.update({
+    "system.attributes.hp.value": current + heal,
+  });
+
+  postToChat(actor, `Transfusion +${heal} PV`);
+
+  console.log(`${MODULE_ID} | Transfusion healing applied`, {
+    actor: actor.name,
+    before: current,
+    after: current + heal,
+    heal,
+    total,
+  });
 }
