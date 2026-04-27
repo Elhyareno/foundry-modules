@@ -25,6 +25,10 @@ import {
   createBloodShieldEffect,
   removeBloodShieldEffect,
   useBloodShield,
+  createBloodShieldItem,
+  removeBloodShieldItems,
+  removeBloodShield,
+  consumeBloodShield,
 } from "./abilities/blood-shield.js";
 
 import {
@@ -94,6 +98,10 @@ export function initSanguimancerAPI() {
     createBloodShieldEffect,
     removeBloodShieldEffect,
     useBloodShield,
+    createBloodShieldItem,
+    removeBloodShieldItems,
+    removeBloodShield,
+    consumeBloodShield,
 
     createTransfusionEffect,
     getTransfusionEffects,
