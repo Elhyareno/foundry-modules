@@ -1,4 +1,4 @@
-const MODULE_ID = "sanguimancer-resource";
+import { MODULE_ID } from "./constants.js";
 
 export function registerHooks() {
   const thpCache = new Map();

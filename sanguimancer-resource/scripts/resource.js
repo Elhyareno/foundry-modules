@@ -1,4 +1,16 @@
-const MODULE_ID = "sanguimancer-resource";
+import { MODULE_ID, getLevel, getMax, clamp, getTHP, getBestDC } from "./constants.js";
+import {
+  hasDedication,
+  hasFeat,
+  hasBloodShield,
+  hasExsanguinate,
+  hasTransfusion,
+  hasVenipuncture,
+  assertSanguimancerFeat
+} from "./feats.js";
+import { postToChat } from "./chat.js";
+import { createBloodShieldEffect, removeBloodShieldEffect } from "./abilities/blood-shield.js";
+import { createTransfusionEffect, getTransfusionEffects, applyTransfusionHealing } from "./abilities/transfusion.js";
 
 // =========================
 // INIT API
@@ -34,64 +46,6 @@ export function initSanguimancerAPI() {
     cleanupExpiredTemporaryResources,
     getTemporaryResourceData,
   };
-}
-
-// =========================
-// UTILS
-// =========================
-
-function getLevel(actor) {
-  return actor.level ?? actor.system?.details?.level?.value ?? 0;
-}
-
-function getMax(actor) {
-  return getLevel(actor) * 2;
-}
-
-function clamp(v, min, max) {
-  return Math.max(min, Math.min(max, v));
-}
-
-function getTHP(actor) {
-  return actor.system?.attributes?.hp?.temp ?? 0;
-}
-
-// =========================
-// FEATS
-// =========================
-
-function hasDedication(actor) {
-  return actor.itemTypes?.feat?.some(f => {
-    const slug = (f.slug ?? f.system?.slug ?? "").toLowerCase();
-    const name = (f.name ?? "").toLowerCase();
-    return slug.includes("sanguimancer") || name.includes("sanguimancien");
-  });
-}
-
-function hasFeat(actor, terms = []) {
-  return actor.itemTypes?.feat?.some(f => {
-    const slug = (f.slug ?? f.system?.slug ?? "").toLowerCase();
-    const name = (f.name ?? "").toLowerCase();
-    return terms.some(t => slug.includes(t) || name.includes(t));
-  });
-}
-
-const hasBloodShield = a => hasFeat(a, ["blood shield"]);
-const hasExsanguinate = a => hasFeat(a, ["exsanguinate"]);
-const hasTransfusion = a => hasFeat(a, ["transfusion"]);
-const hasVenipuncture = a => hasFeat(a, ["venipuncture"]);
-
-function assertSanguimancerFeat(actor, check, error) {
-  if (!actor) return false;
-  if (!hasDedication(actor)) {
-    ui.notifications.warn("Pas sanguimancien");
-    return false;
-  }
-  if (check && !check(actor)) {
-    ui.notifications.warn(error);
-    return false;
-  }
-  return true;
 }
 
 // =========================
@@ -193,82 +147,6 @@ async function onFullRest(actor) {
 // DC
 // =========================
 
-function getBestDC(actor) {
-  return Math.max(
-    actor.system?.attributes?.classDC?.value ?? 0,
-    actor.system?.attributes?.spellDC?.value ?? 0
-  );
-}
-
-// =========================
-// BLOOD SHIELD
-// =========================
-
-async function createBloodShieldEffect(actor, spent) {
-  const bonus = spent >= 10 ? 2 : 1;
-  const hardness = spent * 4;
-
-  return actor.createEmbeddedDocuments("Item", [{
-    name: "Blood Shield",
-    type: "effect",
-    system: {
-      duration: { value: 1, unit: "rounds", expiry: "turn-start" },
-      rules: [{
-        key: "FlatModifier",
-        selector: "ac",
-        type: "circumstance",
-        value: bonus
-      }]
-    },
-    flags: {
-      [MODULE_ID]: { bloodShield: true, hardness }
-    }
-  }]);
-}
-
-async function removeBloodShieldEffect(actor) {
-  const effects = actor.itemTypes.effect.filter(e => e.getFlag(MODULE_ID, "bloodShield"));
-  if (effects.length) {
-    await actor.deleteEmbeddedDocuments("Item", effects.map(e => e.id));
-  }
-}
-
-// =========================
-// TRANSFUSION
-// =========================
-
-async function createTransfusionEffect(target, value) {
-  return target.createEmbeddedDocuments("Item", [{
-    name: `Transfusion (${value})`,
-    type: "effect",
-    system: {
-      duration: { value: 5, unit: "rounds", expiry: "turn-end" }
-    },
-    flags: {
-      [MODULE_ID]: { transfusion: true, fastHealing: value }
-    }
-  }]);
-}
-
-function getTransfusionEffects(actor) {
-  return actor.itemTypes.effect.filter(e => e.getFlag(MODULE_ID, "transfusion"));
-}
-
-async function applyTransfusionHealing(actor) {
-  const total = getTransfusionEffects(actor)
-    .reduce((s, e) => s + (e.getFlag(MODULE_ID, "fastHealing") || 0), 0);
-
-  if (!total) return;
-
-  const hp = actor.system.attributes.hp;
-  const heal = Math.min(total, hp.max - hp.value);
-
-  if (heal > 0) {
-    await actor.update({ "system.attributes.hp.value": hp.value + heal });
-    postToChat(actor, `Transfusion +${heal} PV`);
-  }
-}
-
 // =========================
 // TEMP RESOURCES
 // =========================
@@ -308,15 +186,4 @@ async function cleanupExpiredTemporaryResources(actor) {
 
 function getTemporaryResourceData(actor) {
   return actor.getFlag(MODULE_ID, "data")?.temporaryResources ?? [];
-}
-
-// =========================
-// CHAT
-// =========================
-
-function postToChat(actor, msg) {
-  ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor }),
-    content: `<strong>Sanguimancie</strong><br>${msg}`
-  });
 }
