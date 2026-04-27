@@ -72,6 +72,14 @@ export function registerSettings() {
     },
     default: "levelBased"
   });
+
+  game.settings.register(MODULE_ID, "persistedCombatLogs", {
+    name: "Logs de combat temporaires",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {}
+  });
 }
 
 export function getSetting(key) {

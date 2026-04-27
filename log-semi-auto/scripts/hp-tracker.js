@@ -1,4 +1,4 @@
-import { combatLogs } from "./state.js";
+import { combatLogs, saveCombatLogs } from "./state.js";
 
 export function trackHpChange(actor, changes) {
   const combat = game.combat;
@@ -20,6 +20,10 @@ export function trackHpChange(actor, changes) {
   if (delta < 0) entry.damageTaken += Math.abs(delta);
   if (delta > 0) entry.healingReceived += delta;
   if (oldHp > 0 && newHp <= 0) entry.dropped = true;
+
+  saveCombatLogs().catch(err => {
+    console.error("log-semi-auto | Impossible de sauvegarder les PV du combat", err);
+  });
 }
 
 function getHp(actor) {

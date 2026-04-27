@@ -1,4 +1,4 @@
-import { MODULE_ID, JOURNAL_NAME, combatLogs } from "./state.js";
+import { MODULE_ID, JOURNAL_NAME, combatLogs, deleteCombatLog } from "./state.js";
 import { buildPublicSummary, buildJournalContent, getGlobalStats } from "./summaries.js";
 import { getSetting } from "./settings.js";
 import {handleEncounterXp} from "./xp-tracker.js";
@@ -31,7 +31,7 @@ export async function finishCombatLog(combat) {
         await sendGmSavePrompt(log);
     }
 
-    delete combatLogs[combat.id];
+    await deleteCombatLog(combat.id);
 }
 
 export async function createCombatJournalPage(log) {

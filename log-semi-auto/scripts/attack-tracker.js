@@ -1,4 +1,4 @@
-import { combatLogs } from "./state.js";
+import { combatLogs, saveCombatLogs } from "./state.js";
 
 export function trackNotableAttack(message) {
   const combat = game.combat;
@@ -38,6 +38,10 @@ export function trackNotableAttack(message) {
 
   if (!current || damage > current.damage) {
     log.notableAttacks[side] = attack;
+
+    saveCombatLogs().catch(err => {
+      console.error("log-semi-auto | Impossible de sauvegarder l’attaque notable", err);
+    });
   }
 }
 

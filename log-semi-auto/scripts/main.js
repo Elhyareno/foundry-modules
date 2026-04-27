@@ -1,9 +1,10 @@
-import { MODULE_ID, combatLogs } from "./state.js";
+import { MODULE_ID, combatLogs, loadCombatLogs } from "./state.js";
 import { getHp } from "./utils.js";
 import { trackHpChange } from "./hp-tracker.js";
 import { trackNotableAttack } from "./attack-tracker.js";
 import { finishCombatLog, createCombatJournalPage } from "./journal.js";
 import { registerSettings, getSetting } from "./settings.js";
+import { setCombatLog } from "./state.js";
 
 
 Hooks.once("init", () => {
@@ -11,8 +12,13 @@ Hooks.once("init", () => {
   registerSettings();
 });
 
-Hooks.on("combatStart", (combat) => {
-  startCombatLog(combat);
+Hooks.once("ready", async () => {
+  await loadCombatLogs();
+  console.log(`${MODULE_ID} | Logs de combat restaurés`);
+});
+
+Hooks.on("combatStart", async (combat) => {
+  await startCombatLog(combat);
 });
 
 Hooks.on("preUpdateActor", (actor, changes) => {
@@ -46,7 +52,7 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
   });
 });
 
-function startCombatLog(combat) {
+async function startCombatLog(combat) {
   const combatants = {};
 
   for (const combatant of combat.combatants) {
@@ -56,20 +62,20 @@ function startCombatLog(combat) {
     const hp = getHp(actor);
     const disposition = combatant.token?.disposition ?? combatant.token?.object?.document?.disposition ?? 0;
 
-    combatants[actor.id] = {
-      actorId: actor.id,
-      tokenId: combatant.tokenId,
-      name: actor.name,
-      img: actor.img,
-      type: actor.type,
-      alliance: disposition === 1 ? "ally" : disposition === -1 ? "enemy" : "neutral",
-      startHp: hp.value,
-      maxHp: hp.max,
-      endHp: hp.value,
-      damageTaken: 0,
-      healingReceived: 0,
-      dropped: false
+    const log = {
+      id: combat.id,
+      sceneName: combat.scene?.name ?? "Lieu inconnu",
+      startedAt: new Date().toLocaleString(),
+      endedAt: null,
+      rounds: 0,
+      combatants,
+      notableAttacks: {
+        playerCrit: null,
+        enemyCrit: null
+      }
     };
+
+    setCombatLog(combat.id, log);
   }
 
   combatLogs[combat.id] = {
