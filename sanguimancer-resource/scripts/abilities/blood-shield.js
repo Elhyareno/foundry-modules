@@ -127,7 +127,7 @@ export async function createBloodShieldEffect(actor, spent, shield = null) {
   return actor.createEmbeddedDocuments("Item", [{
     name: "Blood Shield Aura",
     type: "effect",
-    img: "icons/magic/defensive/shield-barrier-glowing-red.webp",
+    img: "systems/pf2e/icons/equipment/shields/steel-shield.webp",
     system: {
       duration: {
         value: 1,
