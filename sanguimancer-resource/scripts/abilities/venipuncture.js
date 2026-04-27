@@ -7,7 +7,7 @@ export function getVenipunctureDamage(spent) {
 }
 
 async function createDamageMessage(actor, damage, dc) {
-  const formula = `${damage}[piercing]`;
+  const formula = `${damage}`;
 
   const DamageRollClass = CONFIG?.Dice?.DamageRoll;
   const RollClass = DamageRollClass ?? Roll;
@@ -58,7 +58,7 @@ export async function useVenipuncture(actor) {
   postToChat(
     actor,
     `
-      Venipuncture consume ${spent} PV sanguimanciens.<br>
+      Venipuncture consomme ${spent} PV sanguimanciens.<br>
       Réflexes basique DD ${dc}.<br>
       Dégâts : ${damage} perforants, cap 80.
     `
