@@ -99,9 +99,8 @@ export async function createBloodShieldItem(actor, spent) {
       hardness,
       hp: {
         value: hp,
-        max: hp,
-        brokenThreshold: Math.floor(hp / 2)
-      },
+        max: hp
+        },
       bulk: {
         heldOrStowed: 0,
         value: 0,
