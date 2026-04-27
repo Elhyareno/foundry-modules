@@ -1,4 +1,4 @@
-import { MODULE_ID, JOURNAL_NAME, combatLogs, deleteCombatLog } from "./state.js";
+import { MODULE_ID, combatLogs, deleteCombatLog } from "./state.js";
 import { buildPublicSummary, buildJournalContent, getGlobalStats } from "./summaries.js";
 import { getSetting } from "./settings.js";
 import {handleEncounterXp} from "./xp-tracker.js";
