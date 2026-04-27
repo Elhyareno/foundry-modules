@@ -80,7 +80,7 @@ export async function createBloodShieldItem(actor, spent) {
   return actor.createEmbeddedDocuments("Item", [{
     name: "Blood Shield",
     type: "shield",
-    img: "icons/magic/defensive/shield-barrier-glowing-red.webp",
+    img: "systems/pf2e/icons/equipment/shields/steel-shield.webp",
     system: {
       baseItem: "steel-shield",
       traits: {
@@ -107,11 +107,6 @@ export async function createBloodShieldItem(actor, spent) {
         value: 0,
         per: 1
       },
-      usage: {
-        value: "held-in-one-hand",
-        type: "held",
-        hands: 1
-      },
       rules: []
     },
     flags: {
@@ -125,7 +120,6 @@ export async function createBloodShieldItem(actor, spent) {
     }
   }]);
 }
-
 export async function createBloodShieldEffect(actor, spent, shield = null) {
   const bonus = getBloodShieldACBonus(spent);
   const hardness = getBloodShieldHardness(spent);
