@@ -19,8 +19,8 @@ export async function setExsanguinateOpportunity(actor, data = {}) {
 
   const gain = getExsanguinateGain(actor);
   const button = makeButton("Utiliser Exsanguinate", "exsanguinate", {
-    actorId: actor.id,
-  });
+    actorUuid: actor.uuid,
+    });
 
   await postPrivateToActor(
     actor,

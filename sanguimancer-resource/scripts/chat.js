@@ -5,12 +5,20 @@ export function postToChat(actor, message, options = {}) {
     title = "Sanguimancie",
     whisper = null,
     blind = false,
+    dataset = {},
   } = options;
 
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),
     whisper,
     blind,
+    flags: {
+      [MODULE_ID]: {
+        actorUuid: actor?.uuid ?? null,
+        tokenUuid: actor?.token?.object?.document?.uuid ?? null,
+        ...dataset,
+      },
+    },
     content: `
       <div class="sanguimancer-message">
         <strong>${title}</strong><br>
@@ -27,15 +35,73 @@ export function postPrivateToActor(actor, message, options = {}) {
   });
 }
 
+function htmlEscape(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 export function makeButton(label, action, dataset = {}) {
   const data = Object.entries({
     action,
     ...dataset,
   })
-    .map(([key, value]) => `data-${key}="${String(value)}"`)
+    .filter(([, value]) => value !== undefined && value !== null)
+    .map(([key, value]) => `data-${key}="${htmlEscape(value)}"`)
     .join(" ");
 
   return `<button type="button" class="sanguimancer-action" ${data}>${label}</button>`;
+}
+
+async function resolveActorFromButton(button, message) {
+  const actorUuid =
+    button.dataset.actorUuid
+    ?? message.getFlag?.(MODULE_ID, "actorUuid")
+    ?? null;
+
+  const tokenUuid =
+    button.dataset.tokenUuid
+    ?? message.getFlag?.(MODULE_ID, "tokenUuid")
+    ?? null;
+
+  const actorId = button.dataset.actorId ?? null;
+
+  if (actorUuid) {
+    const actor = await fromUuid(actorUuid);
+    if (actor) return actor;
+  }
+
+  if (tokenUuid) {
+    const tokenDocument = await fromUuid(tokenUuid);
+    if (tokenDocument?.actor) return tokenDocument.actor;
+  }
+
+  if (actorId) {
+    const actor = game.actors.get(actorId);
+    if (actor) return actor;
+  }
+
+  return null;
+}
+
+async function resolveTargetFromButton(button) {
+  const targetUuid = button.dataset.targetUuid ?? null;
+  const targetId = button.dataset.targetId ?? null;
+
+  if (targetUuid) {
+    const target = await fromUuid(targetUuid);
+    if (target?.actor) return target.actor;
+    if (target) return target;
+  }
+
+  if (targetId) {
+    const target = game.actors.get(targetId);
+    if (target) return target;
+  }
+
+  return null;
 }
 
 export function registerChatListeners() {
@@ -45,12 +111,10 @@ export function registerChatListeners() {
         event.preventDefault();
 
         const action = button.dataset.action;
-        const actorId = button.dataset.actorId;
-        const targetId = button.dataset.targetId;
         const amount = Number(button.dataset.amount ?? 0);
 
-        const actor = game.actors.get(actorId);
-        const target = targetId ? game.actors.get(targetId) : null;
+        const actor = await resolveActorFromButton(button, message);
+        const target = await resolveTargetFromButton(button);
 
         if (!actor) {
           ui.notifications.warn("Acteur sanguimancien introuvable.");
