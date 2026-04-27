@@ -68,7 +68,7 @@ export async function createTransfusionEffect(target, value, sourceActor = null)
   const effectData = {
     name: `Transfusion (${fastHealing})`,
     type: "effect",
-    img: "icons/magic/life/heart-cross-strong-red.webp",
+    img: "icons/magic/life/heart-area-circle-red-green.webp",
     system: {
       slug: TRANSFUSION_SLUG,
       description: {
