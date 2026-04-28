@@ -200,3 +200,59 @@
   color: #cbd5e1;
   background: rgba(15, 23, 42, 0.95);
 }
+
+.matcore-tab-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+  padding: 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.75));
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.matcore-tab-card {
+  position: relative;
+  min-height: 92px;
+  padding: 14px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(241, 245, 249, 0.92);
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.matcore-tab-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.34);
+}
+
+.matcore-tab-card.active {
+  border-color: #38bdf8;
+  outline: 2px solid rgba(56, 189, 248, 0.55);
+}
+
+.matcore-tab-card strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.matcore-tab-card small {
+  display: block;
+  color: #475569;
+  font-size: 12px;
+}
+
+.matcore-tab-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  color: #94a3b8;
+  font-weight: 700;
+  pointer-events: none;
+}

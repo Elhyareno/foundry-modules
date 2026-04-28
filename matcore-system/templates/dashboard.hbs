@@ -10,14 +10,43 @@
     </button>
   </header>
 
-  <nav class="matcore-tabs">
-    <button class="{{#if (eq activeTab 'home')}}active{{/if}}" data-tab="home">Accueil</button>
-    <button class="{{#if (eq activeTab 'hero')}}active{{/if}}" data-tab="hero">Hero Stats</button>
-    <button class="{{#if (eq activeTab 'vitality')}}active{{/if}}" data-tab="vitality">Vitality Network</button>
-    <button class="{{#if (eq activeTab 'combat')}}active{{/if}}" data-tab="combat">Combat Log</button>
-    <button class="{{#if (eq activeTab 'events')}}active{{/if}}" data-tab="events">Event Forge</button>
-    <button class="{{#if (eq activeTab 'gaia')}}active{{/if}}" data-tab="gaia">Gaïa</button>
-  </nav>
+    <nav class="matcore-tab-overview">
+    <button class="matcore-tab-card {{#if (eq activeTab 'home')}}active{{/if}}" data-tab="home">
+        <span class="matcore-tab-close">×</span>
+        <strong>Accueil</strong>
+        <small>État général</small>
+    </button>
+
+    <button class="matcore-tab-card {{#if (eq activeTab 'hero')}}active{{/if}}" data-tab="hero">
+        <span class="matcore-tab-close">×</span>
+        <strong>Hero Stats</strong>
+        <small>Dés & héroïsme</small>
+    </button>
+
+    <button class="matcore-tab-card {{#if (eq activeTab 'vitality')}}active{{/if}}" data-tab="vitality">
+        <span class="matcore-tab-close">×</span>
+        <strong>Vitality Network</strong>
+        <small>Ressources mystiques</small>
+    </button>
+
+    <button class="matcore-tab-card {{#if (eq activeTab 'combat')}}active{{/if}}" data-tab="combat">
+        <span class="matcore-tab-close">×</span>
+        <strong>Combat Log</strong>
+        <small>Archives de combat</small>
+    </button>
+
+    <button class="matcore-tab-card {{#if (eq activeTab 'events')}}active{{/if}}" data-tab="events">
+        <span class="matcore-tab-close">×</span>
+        <strong>Event Forge</strong>
+        <small>Événements</small>
+    </button>
+
+    <button class="matcore-tab-card {{#if (eq activeTab 'gaia')}}active{{/if}}" data-tab="gaia">
+        <span class="matcore-tab-close">×</span>
+        <strong>Gaïa</strong>
+        <small>Exploration</small>
+    </button>
+    </nav>
 
   {{#if (eq activeTab 'home')}}
     <section class="matcore-panel">
