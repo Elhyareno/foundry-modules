@@ -1,0 +1,12 @@
+{
+  "id": "lib-foundry-core",
+  "title": "Lib Foundry Core",
+  "description": "Librairie utilitaire agnostique système pour mutualiser les interactions communes avec Foundry VTT.",
+  "version": "0.1.0",
+  "authors": [{ "name": "Mat" }],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": ["scripts/index.js"]
+}
