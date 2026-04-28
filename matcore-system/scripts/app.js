@@ -194,7 +194,7 @@ async function askVitalityTransferAmount(source, target) {
 
             <div class="form-group">
               <label>Montant</label>
-              <input type="number" name="amount" min="1" max="${maxAmount}" value="${maxAmount}" />
+              <input type="number" name="amount" min="1" max="${maxAmount}" value="${maxAmount}" style="color: #f4f7ff; -webkit-text-fill-color: #f4f7ff; background-color: #0b1220; border: 1px solid #6f7d99; caret-color: #ffffff;" />
             </div>
           </form>
         `,
