@@ -42,14 +42,29 @@ function getResponsibleGM() {
   return game.users.find(user => user.active && user.isGM);
 }
 
-async function resolveActorFromUuid(uuid) {
-  const doc = await fromUuid(uuid);
+async function resolveActorFromUuid(uuidOrId) {
+  if (!uuidOrId) return null;
+
+  const directActor = game.actors.get(uuidOrId);
+  if (directActor) return directActor;
+
+  const doc = await fromUuid(uuidOrId);
   if (!doc) return null;
 
+  // TokenDocument ou token-like : l’acteur est porté par le token.
   if (doc.actor) return doc.actor;
+
+  // Actor classique.
   if (doc.documentName === "Actor") return doc;
 
   return null;
+}
+
+function hasVitalityNetwork(actor) {
+  if (!actor || actor.type !== "character") return false;
+
+  const max = Number(getVitalityMax(actor) ?? 0);
+  return Number.isFinite(max) && max > 0;
 }
 
 function registerSocket() {
@@ -72,7 +87,7 @@ function registerSocket() {
       return;
     }
 
-    if (!isVitalityActor(source)) return;
+    if (!hasVitalityNetwork(source)) return;
 
     await transferVitalityToActor(source, target, data.amount);
   });
@@ -82,13 +97,17 @@ function exposeApi() {
   game.vnWidget = {
     isVitalityActor,
 
+    hasVitalityNetwork,
+
     getVitalityActors: () => {
-      return game.actors.filter(actor => isVitalityActor(actor));
+      return game.actors.filter(actor => hasVitalityNetwork(actor));
     },
 
     getVitalityData: actor => {
-      const max = getVitalityMax(actor);
-      const value = getVitalityValue(actor, max);
+      if (!actor) return null;
+
+      const max = Number(getVitalityMax(actor) ?? 0);
+      const value = Number(getVitalityValue(actor, max) ?? 0);
       const percent = max > 0 ? Math.round((value / max) * 100) : 0;
 
       return {
@@ -103,22 +122,18 @@ function exposeApi() {
     },
 
     recharge: async actorUuidOrId => {
-      const actor =
-        game.actors.get(actorUuidOrId) ??
-        await resolveActorFromUuid(actorUuidOrId);
+      const actor = await resolveActorFromUuid(actorUuidOrId);
 
-      if (!actor || !isVitalityActor(actor)) return null;
+      if (!actor || !hasVitalityNetwork(actor)) return null;
 
       await rechargeVitality(actor);
       return game.vnWidget.getVitalityData(actor);
     },
 
     empty: async actorUuidOrId => {
-      const actor =
-        game.actors.get(actorUuidOrId) ??
-        await resolveActorFromUuid(actorUuidOrId);
+      const actor = await resolveActorFromUuid(actorUuidOrId);
 
-      if (!actor || !isVitalityActor(actor)) return null;
+      if (!actor || !hasVitalityNetwork(actor)) return null;
 
       await setVitality(actor, 0);
       return game.vnWidget.getVitalityData(actor);
@@ -129,7 +144,7 @@ function exposeApi() {
       const target = await resolveActorFromUuid(targetUuid);
 
       if (!source || !target) return null;
-      if (!isVitalityActor(source)) return null;
+      if (!hasVitalityNetwork(source)) return null;
 
       if (!game.user.isGM) {
         game.socket.emit(SOCKET_NAME, {
