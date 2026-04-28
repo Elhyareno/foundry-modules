@@ -26,8 +26,7 @@ export async function transferVitalityToTarget(source, panel) {
 
   const healed = Math.min(amount, missing);
 
-  await target.update({ "system.attributes.hp.value": hp.value + healed });
-  await setVitality(source, max - amount);
+  await game.vnWidget.transferVitalityToTarget(source.id, target.id, amount);
 }
 
 /**
@@ -44,8 +43,7 @@ export async function transferMaxVitalityToTarget(source) {
   const vn = getVitalityValue(source);
   const heal = Math.min(vn, missing);
 
-  await target.update({ "system.attributes.hp.value": hp.value + heal });
-  await setVitality(source, vn - heal);
+  await game.vnWidget.transferVitalityToTarget(source.id, target.id, amount);
 }
 export async function transferVitalityToActor(source, target, requestedAmount = null) {
   if (!source || !target) return null;
