@@ -27,6 +27,12 @@
         "id": "lib-pf2e-tools",
         "type": "module"
       }
+    ],
+    "optional": [
+      {
+        "id": "matcore-system",
+        "type": "module"
+      }
     ]
   }
 }

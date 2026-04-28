@@ -213,8 +213,41 @@
 
   {{#if (eq activeTab 'events')}}
     <section class="matcore-panel">
-      <h2>Event Forge</h2>
-      <p>Vue prête pour les derniers événements et raccourcis de création.</p>
+      <div class="matcore-panel-header">
+        <div>
+          <h2>Event Forge</h2>
+          <p class="matcore-lead">
+            Création d’événements avec test de compétence, fluff et journalisation.
+          </p>
+        </div>
+      </div>
+
+      {{#if eventForge.available}}
+        <div class="matcore-stats">
+          <div>
+            <span>Interface</span>
+            <strong>Active</strong>
+          </div>
+
+          <div>
+            <span>Création</span>
+            <strong>{{#if eventForge.canCreateEvent}}MJ{{else}}Verrouillée{{/if}}</strong>
+          </div>
+        </div>
+
+        {{#if isGM}}
+          <div class="matcore-actions">
+            <button
+              type="button"
+              data-module="event-forge"
+              data-action="openEventForge">
+              Créer un événement
+            </button>
+          </div>
+        {{/if}}
+      {{else}}
+        <p>Event Forge n’est pas actif ou n’expose pas encore son API.</p>
+      {{/if}}
     </section>
   {{/if}}
 

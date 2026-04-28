@@ -1,5 +1,6 @@
 import { EventForgeForm } from "./event-form.js";
 import { handleEventRoll } from "./event-roll.js";
+import { registerEventForgeInMatCore } from "./integrations/matcore.js";
 
 Hooks.once("init", () => {
   console.log("Event Forge | Initialisation");
@@ -9,15 +10,28 @@ Hooks.once("init", () => {
   };
 });
 
+Hooks.once("ready", () => {
+  const tryRegisterMatCore = () => {
+    if (game.matcore?.registerModule) {
+      registerEventForgeInMatCore();
+      return true;
+    }
+
+    return false;
+  };
+
+  Hooks.once("matcoreReady", tryRegisterMatCore);
+
+  if (!tryRegisterMatCore()) {
+    setTimeout(tryRegisterMatCore, 250);
+  }
+});
+
 Hooks.on("renderChatMessage", (message, html) => {
   html.find(".event-forge-roll").on("click", async event => {
     event.preventDefault();
 
     const button = event.currentTarget;
-    const skill = button.dataset.skill;
-    const dc = Number(button.dataset.dc);
-    const title = button.dataset.title;
-    const eventId = button.dataset.eventId;
 
     await handleEventRoll({
       skill: button.dataset.skill,
