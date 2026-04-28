@@ -22,8 +22,9 @@ export class MatCoreDashboard extends Application {
     this.activeTab = "home";
   }
 
-    async getData() {
+  async getData() {
     const registeredModules = await game.matcore.registry.collectAll();
+
     const gaiaModule = registeredModules.find(module => module.id === "gaia-exploration-tools");
     const eventForgeModule = registeredModules.find(module => module.id === "event-forge");
 
@@ -31,25 +32,24 @@ export class MatCoreDashboard extends Application {
     const activeCount = modules.filter(module => module.active).length;
 
     return {
-        isGM: game.user.isGM,
-        activeTab: this.activeTab,
-        modules,
-        registeredModules,
-        activeCount,
-        totalCount: modules.length,
-        heroStats: collectHeroStats(),
-        vitalityActors: collectVitalityActors(),
-        gaia: gaiaModule?.data ?? { available: false },
-        eventForge: eventForgeModule?.data ?? { available: false }
+      isGM: game.user.isGM,
+      activeTab: this.activeTab,
+      modules,
+      registeredModules,
+      activeCount,
+      totalCount: modules.length,
+      heroStats: collectHeroStats(),
+      vitalityActors: collectVitalityActors(),
+      gaia: gaiaModule?.data ?? { available: false },
+      eventForge: eventForgeModule?.data ?? { available: false }
     };
-    }
+  }
 
   activateListeners(html) {
     super.activateListeners(html);
 
     html.find("[data-tab]").on("click", event => {
       event.preventDefault();
-
       this.activeTab = event.currentTarget.dataset.tab;
       this.render();
     });
@@ -86,58 +86,78 @@ export class MatCoreDashboard extends Application {
       await game.heroStats.resetAll();
       this.render();
     });
-    html.find("button[data-module]").click(async ev => {
-        const moduleId = ev.currentTarget.dataset.module;
-        const actionId = ev.currentTarget.dataset.action;
 
-        await game.matcore.runAction(moduleId, actionId);
+    html.find("button[data-module]").click(async event => {
+      event.preventDefault();
+
+      const moduleId = event.currentTarget.dataset.module;
+      const actionId = event.currentTarget.dataset.action;
+
+      await game.matcore.runAction(moduleId, actionId);
     });
 
     html.find("[data-action='vn-recharge']").on("click", async event => {
-    event.preventDefault();
-    if (!game.user.isGM) return;
+      event.preventDefault();
 
-    const actorId = event.currentTarget.dataset.actorId;
-    await game.vnWidget?.recharge?.(actorId);
+      if (!game.user.isGM) return;
 
-    this.render();
+      const actorId = event.currentTarget.dataset.actorId;
+      await game.vnWidget?.recharge?.(actorId);
+
+      this.render();
     });
 
     html.find("[data-action='vn-empty']").on("click", async event => {
-    event.preventDefault();
-    if (!game.user.isGM) return;
+      event.preventDefault();
 
-    const actorId = event.currentTarget.dataset.actorId;
-    await game.vnWidget?.empty?.(actorId);
+      if (!game.user.isGM) return;
 
-    this.render();
+      const actorId = event.currentTarget.dataset.actorId;
+      await game.vnWidget?.empty?.(actorId);
+
+      this.render();
     });
 
     html.find("[data-action='vn-transfer']").on("click", async event => {
-    event.preventDefault();
+      event.preventDefault();
 
-    const sourceActorId = event.currentTarget.dataset.actorId;
-    const source = game.actors.get(sourceActorId);
+      if (!game.vnWidget?.transferVitalityToTarget) {
+        ui.notifications.warn("VN Widget n'est pas disponible.");
+        return;
+      }
 
-    if (!source?.testUserPermission(game.user, "OWNER")) {
+      const sourceActorId = event.currentTarget.dataset.actorId;
+      const source = game.actors.get(sourceActorId);
+
+      if (!source) {
+        ui.notifications.warn("Mystic introuvable.");
+        return;
+      }
+
+      if (!source.testUserPermission(game.user, "OWNER")) {
         ui.notifications.warn("Tu ne contrôles pas ce Mystic.");
         return;
-    }
+      }
 
-    const target = Array.from(game.user.targets)[0]?.actor;
+      const target = Array.from(game.user.targets)[0]?.actor;
 
-    if (!target) {
+      if (!target) {
         ui.notifications.warn("Cible un token à soigner.");
         return;
-    }
+      }
 
-    const amount = await askVitalityTransferAmount(source, target);
+      const amount = await askVitalityTransferAmount(source, target);
+      if (!amount || amount <= 0) return;
 
-    if (!amount) return;
+      console.log("MatCoreDashboard | Transfert VN demandé", {
+        source: source.name,
+        target: target.name,
+        amount
+      });
 
-    await game.vnWidget?.transferVitalityToTarget?.(source.id, target.id, amount);
+      await game.vnWidget.transferVitalityToTarget(source.id, target.id, amount);
 
-    this.render();
+      this.render();
     });
   }
 }
@@ -164,47 +184,19 @@ async function askVitalityTransferAmount(source, target) {
       {
         title: "Transfer Vitality",
         content: `
-          <section class="matcore-dialog-body">
-            <header class="matcore-dialog-header">
-              <h2>Transfer Vitality</h2>
-              <p>Canalisation du réseau vital.</p>
-            </header>
-
-            <div class="matcore-dialog-card">
-              <p>
-                <strong>${source.name}</strong> peut transférer jusqu’à
-                <strong>${maxAmount}</strong> point${maxAmount > 1 ? "s" : ""}.
-              </p>
-
-              <div class="matcore-dialog-stats">
-                <div>
-                  <span>Cible</span>
-                  <strong>${target.name}</strong>
-                </div>
-
-                <div>
-                  <span>PV manquants</span>
-                  <strong>${missing}</strong>
-                </div>
-
-                <div>
-                  <span>Vitality disponible</span>
-                  <strong>${sourceData.value}</strong>
-                </div>
-              </div>
-
-              <div class="form-group matcore-dialog-field">
-                <label>Montant</label>
-                <input
-                  type="number"
-                  name="amount"
-                  min="1"
-                  max="${maxAmount}"
-                  value="${maxAmount}"
-                />
-              </div>
+          <form>
+            <div class="form-group">
+              <p><strong>${source.name}</strong> peut transférer jusqu’à <strong>${maxAmount}</strong> point${maxAmount > 1 ? "s" : ""}.</p>
+              <p>Cible : <strong>${target.name}</strong></p>
+              <p>PV manquants : <strong>${missing}</strong></p>
+              <p>Vitality disponible : <strong>${sourceData.value}</strong></p>
             </div>
-          </section>
+
+            <div class="form-group">
+              <label>Montant</label>
+              <input type="number" name="amount" min="1" max="${maxAmount}" value="${maxAmount}" />
+            </div>
+          </form>
         `,
         buttons: {
           confirm: {
