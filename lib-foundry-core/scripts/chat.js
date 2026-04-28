@@ -9,7 +9,7 @@ export class FCoreChat {
       : ChatMessage.getSpeaker();
   }
 
-  static async send(content, { gmOnly = false, actor = null, whisper = null } = {}) {
+  static async send(content, { gmOnly = false, actor = null, whisper = null, flags = null } = {}) {
     const messageData = {
       speaker: this.getSpeaker(actor),
       content
