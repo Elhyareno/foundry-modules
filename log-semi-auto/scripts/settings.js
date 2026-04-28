@@ -1,7 +1,8 @@
+import { FCoreSettings } from "../../lib-foundry-core/scripts/index.js";
 import { MODULE_ID } from "./state.js";
 
 export function registerSettings() {
-  game.settings.register(MODULE_ID, "journalName", {
+  FCoreSettings.register(MODULE_ID, "journalName", {
     name: "Nom du journal de combat",
     hint: "Nom du journal dans lequel les rencontres archivées seront enregistrées.",
     scope: "world",
@@ -10,7 +11,7 @@ export function registerSettings() {
     default: "Journal de combat"
   });
 
-  game.settings.register(MODULE_ID, "sendPublicSummary", {
+  FCoreSettings.register(MODULE_ID, "sendPublicSummary", {
     name: "Envoyer le résumé public",
     hint: "Publie un résumé synthétique dans le chat à la fin du combat.",
     scope: "world",
@@ -19,7 +20,7 @@ export function registerSettings() {
     default: true
   });
 
-  game.settings.register(MODULE_ID, "sendPrivateReports", {
+  FCoreSettings.register(MODULE_ID, "sendPrivateReports", {
     name: "Envoyer les rapports privés",
     hint: "Envoie à chaque joueur son rapport détaillé, avec copie au MJ.",
     scope: "world",
@@ -28,7 +29,7 @@ export function registerSettings() {
     default: true
   });
 
-  game.settings.register(MODULE_ID, "sendGmArchivePrompt", {
+  FCoreSettings.register(MODULE_ID, "sendGmArchivePrompt", {
     name: "Demander l’archivage au MJ",
     hint: "Envoie au MJ un message privé avec bouton pour ajouter la rencontre au journal.",
     scope: "world",
@@ -37,7 +38,7 @@ export function registerSettings() {
     default: true
   });
 
-  game.settings.register(MODULE_ID, "autoAwardXp", {
+  FCoreSettings.register(MODULE_ID, "autoAwardXp", {
     name: "Attribuer automatiquement l'XP",
     hint: "Ajoute automatiquement l'XP de la rencontre aux personnages joueurs alliés à la fin du combat.",
     scope: "world",
@@ -46,7 +47,7 @@ export function registerSettings() {
     default: true
   });
 
-  game.settings.register(MODULE_ID, "xpMessageVisibility", {
+  FCoreSettings.register(MODULE_ID, "xpMessageVisibility", {
     name: "Visibilité du message d'XP",
     hint: "Détermine qui voit le message d'attribution d'XP.",
     scope: "world",
@@ -60,7 +61,7 @@ export function registerSettings() {
     default: "public"
   });
 
-  game.settings.register(MODULE_ID, "xpFallbackMode", {
+  FCoreSettings.register(MODULE_ID, "xpFallbackMode", {
     name: "Calcul XP si aucune valeur trouvée",
     hint: "Méthode utilisée si l'ennemi n'a pas de valeur d'XP explicite.",
     scope: "world",
@@ -73,7 +74,7 @@ export function registerSettings() {
     default: "levelBased"
   });
 
-  game.settings.register(MODULE_ID, "persistedCombatLogs", {
+  FCoreSettings.register(MODULE_ID, "persistedCombatLogs", {
     name: "Logs de combat temporaires",
     scope: "world",
     config: false,
@@ -83,5 +84,5 @@ export function registerSettings() {
 }
 
 export function getSetting(key) {
-  return game.settings.get(MODULE_ID, key);
+  return FCoreSettings.get(MODULE_ID, key);
 }

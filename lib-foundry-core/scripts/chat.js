@@ -15,6 +15,10 @@ export class FCoreChat {
       content
     };
 
+    if(flags){
+      messageData.flags = flags;
+    }
+
     if (gmOnly) {
       messageData.whisper = this.getGMIds();
     }

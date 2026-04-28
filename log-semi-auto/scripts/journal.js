@@ -1,62 +1,51 @@
+import { FCoreChat, FCoreJournal } from "../../lib-foundry-core/scripts/index.js";
 import { MODULE_ID, combatLogs, deleteCombatLog } from "./state.js";
 import { buildPublicSummary, buildJournalContent, getGlobalStats } from "./summaries.js";
 import { getSetting } from "./settings.js";
-import {handleEncounterXp} from "./xp-tracker.js";
+import { handleEncounterXp } from "./xp-tracker.js";
 
 export async function finishCombatLog(combat) {
-    const log = combatLogs[combat.id];
-    if (!log) return;
+  const log = combatLogs[combat.id];
+  if (!log) return;
 
-    const { determineBattleResult } = await import("./summaries.js");
+  const { determineBattleResult } = await import("./summaries.js");
 
-    log.endedAt = new Date().toLocaleString();
-    log.rounds = combat.round ?? 0;
-    log.result = determineBattleResult(log);
+  log.endedAt = new Date().toLocaleString();
+  log.rounds = combat.round ?? 0;
+  log.result = determineBattleResult(log);
 
-    // Handle XP awarding
-    await handleEncounterXp(log);
+  await handleEncounterXp(log);
 
-    if (getSetting("sendPublicSummary")) {
-        await ChatMessage.create({
-            speaker: ChatMessage.getSpeaker(),
-            content: buildPublicSummary(log)
-        });
-    }
+  if (getSetting("sendPublicSummary")) {
+    await FCoreChat.send(buildPublicSummary(log));
+  }
 
-    if (getSetting("sendPrivateReports")) {
-        await sendPrivatePlayerReports(log);
-    }
+  if (getSetting("sendPrivateReports")) {
+    await sendPrivatePlayerReports(log);
+  }
 
-    if (getSetting("sendGmArchivePrompt")) {
-        await sendGmSavePrompt(log);
-    }
+  if (getSetting("sendGmArchivePrompt")) {
+    await sendGmSavePrompt(log);
+  }
 
-    await deleteCombatLog(combat.id);
+  await deleteCombatLog(combat.id);
 }
 
 export async function createCombatJournalPage(log) {
   const journalName = getSetting("journalName");
-  let journal = game.journal.find(j => j.name === journalName);
-  if (!journal) {
-    journal = await JournalEntry.create({
-      name: journalName
-    });
-  }
+  const journal = await FCoreJournal.getOrCreate(journalName);
 
   const date = new Date().toLocaleDateString();
   const pageTitle = `${date} - ${log.sceneName} - ${log.result}`;
 
-  await JournalEntryPage.create({
+  await FCoreJournal.addTextPage(journal, {
     name: pageTitle,
-    type: "text",
-    text: {
-      content: buildJournalContent(log)
-    }
-  }, { parent: journal });
+    content: buildJournalContent(log)
+  });
 }
 
 async function sendPrivatePlayerReports(log) {
-  const gmIds = game.users.filter(u => u.isGM).map(u => u.id);
+  const gmIds = FCoreChat.getGMIds();
   const { buildPersonalReport } = await import("./summaries.js");
 
   for (const user of game.users.filter(u => !u.isGM && u.active)) {
@@ -69,27 +58,17 @@ async function sendPrivatePlayerReports(log) {
 
     const content = buildPersonalReport(log, ownedCombatants);
 
-    await ChatMessage.create({
-      speaker: ChatMessage.getSpeaker(),
-      whisper: [user.id, ...gmIds],
-      content
+    await FCoreChat.send(content, {
+      whisper: [user.id, ...gmIds]
     });
   }
 }
 
 async function sendGmSavePrompt(log) {
-  const gmIds = game.users.filter(u => u.isGM).map(u => u.id);
+  const gmIds = FCoreChat.getGMIds();
   const stats = getGlobalStats(log);
 
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker(),
-    whisper: gmIds,
-    flags: {
-      [MODULE_ID]: {
-        combatLog: log
-      }
-    },
-    content: `<section class="lsa-report">
+  const content = `<section class="lsa-report">
     <h2 class="lsa-title">📚 Archiver la rencontre ?</h2>
 
     <p class="lsa-lead">
@@ -113,7 +92,14 @@ async function sendGmSavePrompt(log) {
     <button type="button" class="lsa-button" data-action="lsa-save-combat">
       📜 Ajouter au journal de combat
     </button>
-  </section>
-`
+  </section>`;
+
+  await FCoreChat.send(content, {
+    whisper: gmIds,
+    flags: {
+      [MODULE_ID]: {
+        combatLog: log
+      }
+    }
   });
 }
