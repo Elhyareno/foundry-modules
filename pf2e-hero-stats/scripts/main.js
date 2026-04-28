@@ -88,3 +88,21 @@ function exposeApi() {
 
   console.log(`${MODULE_ID} | API exposed on game.heroStats`);
 }
+
+Hooks.once("ready", () => {
+  game.heroStats = {
+    getStats: () => {
+      return game.heroStatsData ?? {};
+    },
+
+    getHeroSummary: () => {
+      return game.heroHeroPoints ?? {};
+    },
+
+    open: () => {
+      ui.notifications.info("Hero Stats panel à venir");
+    }
+  };
+
+  console.log("pf2e-hero-stats | API exposée sur game.heroStats");
+});
