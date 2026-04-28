@@ -1,362 +1,85 @@
-import {
-  createDefaultAwardData,
-  getSetting,
-  setSetting
-} from "./settings.js";
+import { FCoreChat, FCoreUI } from "../../lib-foundry-core/scripts/index.js";
+import { getSetting, setSetting } from "./settings.js";
+import { addHeroPoint } from "./hero-points.js";
 
-import {
-  addHeroPoint,
-  getHeroPoints,
-  getMaxHeroPoints
-} from "./hero-points.js";
-
-import {
-  duplicateData,
-  isPrivateMessage
-} from "./utils.js";
-
-/* =========================
-   Initialisation
-========================= */
+const MODULE_ID = "pf2e-hero-stats";
 
 export function initHeroAwards() {
-  const data = getAwardData();
-
-  if (!data || !data.combat) {
-    setAwardData(createDefaultAwardData());
-  }
-
-  Hooks.on("combatStart", async (combat) => {
-    await resetCombatAwardData(combat?.id ?? null);
-  });
-
-  Hooks.on("deleteCombat", async () => {
-    await resetCombatAwardData(null);
-  });
+  Hooks.on("createChatMessage", handleChatMessage);
 }
-
-/* =========================
-   Données
-========================= */
-
-export function getAwardData() {
-  return getSetting("awardData") ?? createDefaultAwardData();
-}
-
-export async function setAwardData(data) {
-  return setSetting("awardData", data);
-}
-
-async function resetCombatAwardData(encounterId = null) {
-  const data = createDefaultAwardData();
-  data.combat.encounterId = encounterId;
-  await setAwardData(data);
-}
-
-/* =========================
-   Entrée principale
-========================= */
-
-export async function evaluateHeroAwards({ actor, actorStats, message, rollType, naturalD20, outcome }) {
-  if (!actor || actor.type !== "character") return;
-  if (isPrivateMessage(message)) return;
-
-  if (getSetting("awardIgnoreFlatChecks") && rollType === "flat") {
-    return;
-  }
-
-  await evaluateNatural20Award({ actor, message, rollType, naturalD20 });
-  await evaluateBadLuckAward({ actor, actorStats, message, outcome });
-}
-
-/* =========================
-   20 naturel
-========================= */
-
-async function evaluateNatural20Award({ actor, message, rollType, naturalD20 }) {
-  if (naturalD20 !== 20) return;
-
-  const mode = getSetting("awardModeNatural20");
-  if (mode === "off") return;
-
-  if (getSetting("awardNatural20OncePerCombat") && hasNatural20AwardThisCombat(actor.id)) {
-    return;
-  }
-
-  if (getHeroPoints(actor) >= getMaxHeroPoints(actor)) {
-    await postPublicInfo({
-      title: "⭐ Moment héroïque",
-      body: `<strong>${actor.name}</strong> obtient un <strong>20 naturel</strong>, mais possède déjà le maximum de points d'héroïsme.`,
-      speaker: message?.speaker
-    });
-    return;
-  }
-
-  if (mode === "auto") {
-    const given = await addHeroPoint(actor, 1, "20 naturel");
-
-    if (given > 0) {
-      await markNatural20Award(actor.id);
-      await resetBadLuckForActor(actor.id);
-
-      await postPublicInfo({
-        title: "⭐ Héroïsme",
-        body: `<strong>${actor.name}</strong> obtient un <strong>20 naturel</strong> et reçoit <strong>1 point d'héroïsme</strong>.`,
-        speaker: message?.speaker
-      });
-
-      await whisperAwardResult(
-        actor,
-        `20 naturel sur un jet de type <strong>${rollType}</strong>. Point ajouté automatiquement.`
-      );
-    }
-
-    return;
-  }
-
-  if (mode === "suggest") {
-    await postPublicInfo({
-      title: "⭐ Moment héroïque",
-      body: `<strong>${actor.name}</strong> vient d'obtenir un <strong>20 naturel</strong>. Le MJ peut accorder un point d'héroïsme.`,
-      speaker: message?.speaker
-    });
-
-    await whisperNatural20Suggestion(actor, message, rollType);
-  }
-}
-
-async function whisperNatural20Suggestion(actor, message, rollType) {
-  await ChatMessage.create({
-    content: `
-      <section class="hero-stats-report summary" data-hero-award="natural20" data-actor-id="${actor.id}">
-        <h3>⭐ Proposition d'héroïsme</h3>
-        <p><strong>${actor.name}</strong> vient d'obtenir un <strong>20 naturel</strong>.</p>
-        <p>Type de jet : <strong>${rollType}</strong></p>
-        <p>Accorder 1 point d'héroïsme ?</p>
-        <p>
-          <button type="button" data-hero-award-action="grant" data-actor-id="${actor.id}" data-reason="20 naturel">Accorder</button>
-          <button type="button" data-hero-award-action="ignore">Ignorer</button>
-        </p>
-      </section>
-    `,
-    speaker: message?.speaker ?? ChatMessage.getSpeaker(),
-    whisper: ChatMessage.getWhisperRecipients("GM")
-  });
-}
-
-/* =========================
-   Malchance
-========================= */
-
-async function evaluateBadLuckAward({ actor, actorStats, message, outcome }) {
-  if (!getSetting("suggestBadLuck")) return;
-  if (!outcome) return;
-
-  const isFailure = outcome === "failure" || outcome === "criticalFailure";
-  if (!isFailure) return;
-
-  const threshold = Number(getSetting("badLuckFailureStreak") ?? 3);
-  const streak = actorStats?.streak?.failures ?? 0;
-
-  if (streak < threshold) return;
-
-  if (getSetting("badLuckOncePerCombat") && hasBadLuckSuggestionThisCombat(actor.id)) {
-    return;
-  }
-
-  if (getHeroPoints(actor) >= getMaxHeroPoints(actor)) {
-    return;
-  }
-
-  await markBadLuckSuggestion(actor.id);
-
-  await postPublicInfo({
-    title: "🌧️ Le destin grince",
-    body: `<strong>${actor.name}</strong> vient d'enchaîner <strong>${streak}</strong> échecs. Le MJ peut accorder un point d'héroïsme.`,
-    speaker: message?.speaker
-  });
-
-  await ChatMessage.create({
-    content: `
-      <section class="hero-stats-report summary" data-hero-award="badLuck" data-actor-id="${actor.id}">
-        <h3>🌧️ Proposition d'héroïsme</h3>
-        <p><strong>${actor.name}</strong> vient d'enchaîner <strong>${streak}</strong> échecs.</p>
-        <p>Accorder 1 point d'héroïsme pour compenser la morsure du destin ?</p>
-        <p>
-          <button type="button" data-hero-award-action="grant" data-actor-id="${actor.id}" data-reason="Série de malchance">Accorder</button>
-          <button type="button" data-hero-award-action="ignore">Ignorer</button>
-        </p>
-      </section>
-    `,
-    speaker: message?.speaker ?? ChatMessage.getSpeaker(),
-    whisper: ChatMessage.getWhisperRecipients("GM")
-  });
-}
-
-/* =========================
-   Messages publics
-========================= */
-
-async function postPublicInfo({ title, body, speaker }) {
-  await ChatMessage.create({
-    content: `
-      <section class="hero-stats-report summary">
-        <h3>${title}</h3>
-        <p>${body}</p>
-      </section>
-    `,
-    speaker: speaker ?? ChatMessage.getSpeaker()
-  });
-}
-
-/* =========================
-   Mémoire combat
-========================= */
-
-function getCombatKey() {
-  return game.combat?.id ?? "no-combat";
-}
-
-function hasNatural20AwardThisCombat(actorId) {
-  const data = getAwardData();
-  const key = getCombatKey();
-  return Boolean(data.combat.awardedNatural20?.[key]?.[actorId]);
-}
-
-async function markNatural20Award(actorId) {
-  const data = duplicateData(getAwardData());
-  const key = getCombatKey();
-
-  data.combat.awardedNatural20[key] ??= {};
-  data.combat.awardedNatural20[key][actorId] = true;
-
-  await setAwardData(data);
-}
-
-function hasBadLuckSuggestionThisCombat(actorId) {
-  const data = getAwardData();
-  const key = getCombatKey();
-  return Boolean(data.combat.suggestedBadLuck?.[key]?.[actorId]);
-}
-
-async function markBadLuckSuggestion(actorId) {
-  const data = duplicateData(getAwardData());
-  const key = getCombatKey();
-
-  data.combat.suggestedBadLuck[key] ??= {};
-  data.combat.suggestedBadLuck[key][actorId] = true;
-
-  await setAwardData(data);
-}
-
-async function resetBadLuckForActor(actorId) {
-  const data = duplicateData(getAwardData());
-  const key = getCombatKey();
-
-  if (data.combat.suggestedBadLuck?.[key]?.[actorId]) {
-    delete data.combat.suggestedBadLuck[key][actorId];
-  }
-
-  await setAwardData(data);
-
-  // Reset de la série d'échecs dans les stats
-  const stats = game.settings.get("pf2e-hero-stats", "statsData");
-  const clone = foundry.utils.deepClone(stats);
-
-  if (clone.actors?.[actorId]?.streak) {
-    clone.actors[actorId].streak.failures = 0;
-    clone.actors[actorId].streak.criticalFailures = 0;
-  }
-
-  await game.settings.set("pf2e-hero-stats", "statsData", clone);
-}
-
-/* =========================
-   Boutons chat
-========================= */
 
 export function setupAwardButtonListeners() {
-  Hooks.on("renderChatMessageHTML", (_message, html) => {
-    bindAwardButtons(html);
+  Hooks.on("renderChatMessageHTML", (message, html) => {
+    html.querySelectorAll("[data-action='award-hero-point']").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const actorId = btn.dataset.actorId;
+        const actor = game.actors.get(actorId);
+
+        if (!actor) {
+          FCoreUI.warn("Acteur introuvable.");
+          return;
+        }
+
+        await addHeroPoint(actor, 1, "Décision du MJ");
+
+        FCoreUI.info(`${actor.name} reçoit un point d'héroïsme.`);
+        btn.disabled = true;
+      });
+    });
   });
 }
 
-function bindAwardButtons(html) {
-  const root = html instanceof HTMLElement ? html : html?.[0];
-  if (!root) return;
+async function handleChatMessage(message) {
+  if (!game.user.isGM) return;
 
-  const buttons = root.querySelectorAll?.("[data-hero-award-action]");
-  if (!buttons?.length) return;
+  const roll = message.rolls?.[0];
+  if (!roll) return;
 
-  for (const button of buttons) {
-    if (button.dataset.heroAwardBound === "true") continue;
-    button.dataset.heroAwardBound = "true";
+  const die = roll.dice?.[0];
+  if (!die) return;
 
-    button.addEventListener("click", async (event) => {
-      event.preventDefault();
+  const result = die.results?.[0]?.result;
+  if (!result) return;
 
-      const action = button.dataset.heroAwardAction;
+  const actor = game.actors.get(message.speaker.actor);
+  if (!actor) return;
 
-      if (action === "ignore") {
-        const section = button.closest("[data-hero-award]");
-        if (section) section.innerHTML += `<p><em>Proposition ignorée.</em></p>`;
-        button.disabled = true;
-        return;
-      }
+  // 🎯 20 naturel
+  if (result === 20 && getSetting("awardModeNatural20") !== "off") {
+    if (getSetting("awardModeNatural20") === "auto") {
+      await addHeroPoint(actor, 1, "20 naturel");
 
-      if (action !== "grant") return;
+      await FCoreChat.send(`
+        <div class="hero-stats-report">
+          <h3>✨ Coup du destin</h3>
+          <p><strong>${actor.name}</strong> obtient un point d'héroïsme (20 naturel).</p>
+        </div>
+      `);
+    }
 
-      const actorId = button.dataset.actorId;
-      const reason = button.dataset.reason ?? "Gain accordé par le MJ";
-      const actor = game.actors.get(actorId);
-
-      if (!actor) {
-        ui.notifications.error("Acteur introuvable pour l'attribution du point d'héroïsme.");
-        return;
-      }
-
-      const given = await addHeroPoint(actor, 1, reason);
-
-      if (given > 0) {
-        if (reason === "20 naturel") {
-          await markNatural20Award(actor.id);
-        }
-
-        await resetBadLuckForActor(actor.id);
-
-        await whisperAwardResult(actor, `${reason} : 1 point d'héroïsme accordé.`);
-
-        await postPublicInfo({
-          title: "⭐ Héroïsme accordé",
-          body: `<strong>${actor.name}</strong> reçoit <strong>1 point d'héroïsme</strong>.`,
-          speaker: ChatMessage.getSpeaker({ actor })
-        });
-
-        button.disabled = true;
-        button.textContent = "Accordé";
-      } else {
-        ui.notifications.warn(`${actor.name} est déjà au maximum de points d'héroïsme.`);
-      }
-    });
+    if (getSetting("awardModeNatural20") === "suggest") {
+      await FCoreChat.send(`
+        <div class="hero-stats-report">
+          <h3>✨ 20 naturel détecté</h3>
+          <p><strong>${actor.name}</strong> a fait un 20 naturel.</p>
+          <button data-action="award-hero-point" data-actor-id="${actor.id}">
+            Donner 1 point d'héroïsme
+          </button>
+        </div>
+      `, {
+        whisper: FCoreChat.getGMIds()
+      });
+    }
   }
 }
 
-async function whisperAwardResult(actor, text) {
-  await ChatMessage.create({
-    content: `
-      <section class="hero-stats-report summary">
-        <h3>⭐ Héroïsme accordé</h3>
-        <p><strong>${actor.name}</strong> : ${text}</p>
-      </section>
-    `,
-    whisper: ChatMessage.getWhisperRecipients("GM")
-  });
-}
-
-/* =========================
-   Reset public API
-========================= */
-
 export async function resetAwardData() {
-  await setAwardData(createDefaultAwardData());
+  await setSetting("awardData", {
+    version: 1,
+    combat: {
+      encounterId: null,
+      awardedNatural20: {},
+      suggestedBadLuck: {}
+    }
+  });
 }

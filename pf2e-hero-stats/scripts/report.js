@@ -1,100 +1,47 @@
-import { getDiceStats } from "./dice-stats.js";
-import { getTotalHeroPointsUsed, getHeroPointsLog } from "./hero-points.js";
+import { FCoreChat } from "../../lib-foundry-core/scripts/index.js";
 import { getSetting } from "./settings.js";
 
-const MODULE_ID = "pf2e-hero-stats";
-
-export function generateCombatReport() {
+export function buildStatsReport(stats) {
   const format = getSetting("reportFormat");
-  
-  switch (format) {
-    case "summary":
-      return generateSummaryReport();
-    case "minimal":
-      return generateMinimalReport();
-    case "detailed":
-    default:
-      return generateDetailedReport();
+
+  if (format === "minimal") {
+    return `
+      <div class="hero-stats-report minimal">
+        🎲 ${stats.totals.rolls} jets |
+        20 : ${stats.totals.natural20} |
+        1 : ${stats.totals.natural1}
+      </div>
+    `;
   }
-}
 
-function generateDetailedReport() {
-  const diceStats = getDiceStats();
-  const heroPointsUsed = getTotalHeroPointsUsed();
-  const heroPointsLog = getHeroPointsLog();
+  if (format === "summary") {
+    return `
+      <div class="hero-stats-report summary">
+        <h3>🎲 Résumé des dés</h3>
+        <p>Total : ${stats.totals.rolls}</p>
+        <p>20 : ${stats.totals.natural20} | 1 : ${stats.totals.natural1}</p>
+      </div>
+    `;
+  }
 
-  const diceStatsHtml = `
-    <div class="hero-stats-dice">
-      <h3>📊 Dice Statistics</h3>
-      <p>Total Rolls: <strong>${diceStats.total}</strong></p>
-      <p>Critical Successes: <strong>${diceStats.criticalSuccesses}</strong></p>
-      <p>Successes: <strong>${diceStats.successes}</strong></p>
-      <p>Failures: <strong>${diceStats.failures}</strong></p>
-      <p>Critical Failures: <strong>${diceStats.criticalFailures}</strong></p>
-      <p>Success Rate: <strong>${diceStats.successRate}%</strong></p>
-    </div>
-  `;
+  return `
+    <section class="hero-stats-report detailed">
+      <h3>🎲 Rapport des dés</h3>
 
-  const heroPointsHtml = `
-    <div class="hero-stats-points">
-      <h3>⭐ Hero Points Used</h3>
-      <p>Total: <strong>${heroPointsUsed}</strong></p>
       <ul>
-        ${heroPointsLog.map(entry => `
-          <li>${entry.actor}: ${entry.amount} point(s) - ${entry.reason}</li>
-        `).join("")}
+        <li>Total de jets : <strong>${stats.totals.rolls}</strong></li>
+        <li>20 naturels : <strong>${stats.totals.natural20}</strong></li>
+        <li>1 naturels : <strong>${stats.totals.natural1}</strong></li>
+        <li>Succès critiques : <strong>${stats.totals.criticalSuccesses}</strong></li>
+        <li>Succès : <strong>${stats.totals.successes}</strong></li>
+        <li>Échecs : <strong>${stats.totals.failures}</strong></li>
+        <li>Échecs critiques : <strong>${stats.totals.criticalFailures}</strong></li>
       </ul>
-    </div>
-  `;
-
-  return `
-    <section class="hero-stats-report">
-      ${diceStatsHtml}
-      ${heroPointsHtml}
     </section>
   `;
 }
 
-function generateSummaryReport() {
-  const diceStats = getDiceStats();
-  const heroPointsUsed = getTotalHeroPointsUsed();
-
-  return `
-    <section class="hero-stats-report summary">
-      <h3>⚔️ Combat Summary</h3>
-      <p>Total Rolls: <strong>${diceStats.total}</strong> | Success Rate: <strong>${diceStats.successRate}%</strong></p>
-      <p>Hero Points Used: <strong>${heroPointsUsed}</strong></p>
-    </section>
-  `;
-}
-
-function generateMinimalReport() {
-  const diceStats = getDiceStats();
-  const heroPointsUsed = getTotalHeroPointsUsed();
-
-  return `
-    <section class="hero-stats-report minimal">
-      <p>Rolls: ${diceStats.total} | Success: ${diceStats.successRate}% | Hero Points: ${heroPointsUsed}</p>
-    </section>
-  `;
-}
-
-export async function saveReportToJournal(reportContent) {
-  const journalName = "Hero Stats Reports";
-  let journal = game.journal.getName(journalName);
-
-  if (!journal) {
-    journal = await JournalEntry.create({
-      name: journalName
-    });
-  }
-
-  const date = new Date().toLocaleString();
-  await JournalEntryPage.create({
-    name: `Report - ${date}`,
-    type: "text",
-    text: {
-      content: reportContent
-    }
-  }, { parent: journal });
+export async function sendStatsReport(stats) {
+  const content = buildStatsReport(stats);
+  await FCoreChat.send(content);
 }
