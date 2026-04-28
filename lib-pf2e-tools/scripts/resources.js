@@ -9,12 +9,19 @@ export class PF2eResources {
     });
   }
 
-  // Vitality Network (ton cas spécifique)
-  static getVitality(actor) {
-    return this.get(actor, "system.resources.vitalityNetwork");
+  static getFlagResource(actor, scope, key, fallback = {}) {
+    return actor?.getFlag(scope, key) ?? fallback;
   }
 
-  static async setVitality(actor, value) {
-    return this.set(actor, "system.resources.vitalityNetwork.value", value);
+  static async setFlagResource(actor, scope, key, value) {
+    return actor.setFlag(scope, key, value);
+  }
+
+  static clamp(value, min, max) {
+    const numericValue = Number(value);
+
+    if (!Number.isFinite(numericValue)) return min;
+
+    return Math.max(min, Math.min(numericValue, max));
   }
 }

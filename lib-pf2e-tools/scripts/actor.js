@@ -1,23 +1,25 @@
 export class PF2eActor {
   static getLevel(actor) {
-    return actor.system.details?.level?.value ?? 0;
+    return Number(actor?.system?.details?.level?.value ?? 1);
   }
 
   static getHP(actor) {
-    return actor.system.attributes.hp;
+    return actor?.system?.attributes?.hp ?? null;
   }
 
   static getMaxHP(actor) {
-    return this.getHP(actor).max;
+    return this.getHP(actor)?.max ?? 0;
   }
 
   static getCurrentHP(actor) {
-    return this.getHP(actor).value;
+    return this.getHP(actor)?.value ?? 0;
   }
 
   static async applyDamage(actor, amount) {
     const hp = this.getHP(actor);
-    const newValue = Math.max(hp.value - amount, 0);
+    if (!hp) return null;
+
+    const newValue = Math.max(Number(hp.value ?? 0) - Number(amount ?? 0), 0);
 
     return actor.update({
       "system.attributes.hp.value": newValue
@@ -26,10 +28,119 @@ export class PF2eActor {
 
   static async applyHealing(actor, amount) {
     const hp = this.getHP(actor);
-    const newValue = Math.min(hp.value + amount, hp.max);
+    if (!hp) return null;
+
+    const newValue = Math.min(
+      Number(hp.value ?? 0) + Number(amount ?? 0),
+      Number(hp.max ?? 0)
+    );
 
     return actor.update({
       "system.attributes.hp.value": newValue
     });
+  }
+
+  static getClassSlug(actor) {
+    const classItem = actor?.items?.find(item => item.type === "class");
+
+    return String(
+      actor?.class?.slug
+        ?? classItem?.slug
+        ?? classItem?.system?.slug
+        ?? classItem?.name
+        ?? ""
+    ).toLowerCase();
+  }
+
+  static hasClass(actor, classSlug) {
+    return this.getClassSlug(actor) === String(classSlug).toLowerCase();
+  }
+
+  static getSpellcastingDCRank(actor) {
+    const candidates = [
+      actor?.system?.proficiencies?.spellcasting?.rank,
+      actor?.system?.attributes?.spellDC?.rank,
+      actor?.system?.attributes?.spellcasting?.rank,
+      actor?.system?.spellcasting?.rank,
+
+      actor?.system?.proficiencies?.spellcasting,
+      actor?.system?.attributes?.spellDC,
+      actor?.system?.attributes?.spellcasting,
+      actor?.system?.spellcasting
+    ];
+
+    for (const candidate of candidates) {
+      const rank = this.extractProficiencyRank(candidate);
+
+      if (rank !== null) {
+        return rank;
+      }
+    }
+
+    return 1;
+  }
+
+  static extractProficiencyRank(value) {
+    if (value === null || value === undefined) return null;
+
+    if (typeof value === "object") {
+      const objectCandidates = [
+        value.rank,
+        value.proficiency?.rank,
+        value.proficient?.rank,
+        value.value
+      ];
+
+      for (const candidate of objectCandidates) {
+        const rank = this.normalizeProficiencyRank(candidate);
+
+        if (rank !== null) {
+          return rank;
+        }
+      }
+
+      return null;
+    }
+
+    return this.normalizeProficiencyRank(value);
+  }
+
+  static normalizeProficiencyRank(value) {
+    if (value === null || value === undefined) return null;
+
+    const numericValue = Number(value);
+
+    if (Number.isFinite(numericValue)) {
+      if (numericValue >= 0 && numericValue <= 4) {
+        return numericValue;
+      }
+
+      return null;
+    }
+
+    const textValue = String(value)
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    const ranks = {
+      untrained: 0,
+      nonqualifie: 0,
+      "non-qualifie": 0,
+
+      trained: 1,
+      qualifie: 1,
+
+      expert: 2,
+
+      master: 3,
+      maitre: 3,
+
+      legendary: 4,
+      legendaire: 4
+    };
+
+    return ranks[textValue] ?? null;
   }
 }
