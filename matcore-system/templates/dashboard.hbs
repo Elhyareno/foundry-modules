@@ -44,28 +44,86 @@
     </section>
   {{/if}}
 
-  {{#if (eq activeTab 'hero')}}
+    {{#if (eq activeTab 'hero')}}
     <section class="matcore-panel">
-      <h2>Hero Stats</h2>
-
-      {{#if heroStats.available}}
-        <div class="matcore-stats">
-          <div><span>Jets</span><strong>{{heroStats.totalRolls}}</strong></div>
-          <div><span>20 naturels</span><strong>{{heroStats.natural20}}</strong></div>
-          <div><span>1 naturels</span><strong>{{heroStats.natural1}}</strong></div>
-          <div><span>Héroïsme gagné</span><strong>{{heroStats.heroGained}}</strong></div>
-          <div><span>Héroïsme dépensé</span><strong>{{heroStats.heroUsed}}</strong></div>
+        <div class="matcore-panel-header">
+        <div>
+            <h2>Hero Stats</h2>
+            <p class="matcore-lead">Observatoire des jets, de la chance et des braises héroïques.</p>
         </div>
+        </div>
+
+        {{#if heroStats.available}}
+        <div class="matcore-stats">
+            <div><span>Jets</span><strong>{{heroStats.totalRolls}}</strong></div>
+            <div><span>Taux de réussite</span><strong>{{heroStats.successRate}}%</strong></div>
+            <div><span>20 naturels</span><strong>{{heroStats.natural20}}</strong></div>
+            <div><span>1 naturels</span><strong>{{heroStats.natural1}}</strong></div>
+            <div><span>Critiques</span><strong>{{heroStats.criticalSuccesses}}</strong></div>
+            <div><span>Échecs critiques</span><strong>{{heroStats.criticalFailures}}</strong></div>
+            <div><span>Héroïsme gagné</span><strong>{{heroStats.heroGained}}</strong></div>
+            <div><span>Héroïsme dépensé</span><strong>{{heroStats.heroUsed}}</strong></div>
+        </div>
+
+        <div class="matcore-two-columns">
+            <article class="matcore-card">
+            <h3>Astres favorables</h3>
+            {{#if heroStats.bestActor}}
+                <p><strong>{{heroStats.bestActor.name}}</strong></p>
+                <p>D20 moyen : <strong>{{heroStats.bestActor.averageD20}}</strong></p>
+            {{else}}
+                <p>Aucun jet enregistré.</p>
+            {{/if}}
+            </article>
+
+            <article class="matcore-card">
+            <h3>Nuages persistants</h3>
+            {{#if heroStats.worstActor}}
+                <p><strong>{{heroStats.worstActor.name}}</strong></p>
+                <p>D20 moyen : <strong>{{heroStats.worstActor.averageD20}}</strong></p>
+            {{else}}
+                <p>Aucun jet enregistré.</p>
+            {{/if}}
+            </article>
+        </div>
+
+        <h3 class="matcore-section-title">Personnages</h3>
+
+        {{#if heroStats.actors.length}}
+            <div class="matcore-table">
+            <div class="matcore-table-row header">
+                <span>Personnage</span>
+                <span>Jets</span>
+                <span>Moy.</span>
+                <span>Réussite</span>
+                <span>20</span>
+                <span>1</span>
+            </div>
+
+            {{#each heroStats.actors}}
+                <div class="matcore-table-row">
+                <span>{{name}}</span>
+                <span>{{totalRolls}}</span>
+                <span>{{averageD20}}</span>
+                <span>{{successRate}}%</span>
+                <span>{{natural20}}</span>
+                <span>{{natural1}}</span>
+                </div>
+            {{/each}}
+            </div>
+        {{else}}
+            <p>Aucun personnage enregistré dans les statistiques.</p>
+        {{/if}}
 
         <div class="matcore-actions">
-          <button type="button" data-action="give-hero-point-party">Donner 1 point au groupe</button>
-          <button type="button" data-action="reset-hero-stats">Reset Hero Stats</button>
+            <button type="button" data-action="give-hero-point-party">Donner 1 point au groupe</button>
+            <button type="button" data-action="reset-hero-stats">Reset Hero Stats</button>
         </div>
-      {{else}}
+        {{else}}
         <p>Hero Stats n’est pas actif ou n’expose pas encore son API.</p>
-      {{/if}}
+        {{/if}}
     </section>
-  {{/if}}
+    {{/if}}
 
   {{#if (eq activeTab 'vitality')}}
     <section class="matcore-panel">

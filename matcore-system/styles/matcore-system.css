@@ -159,3 +159,44 @@
   gap: 8px;
   margin-top: 14px;
 }
+
+.matcore-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.matcore-two-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.matcore-section-title {
+  margin: 18px 0 8px;
+}
+
+.matcore-table {
+  display: grid;
+  gap: 6px;
+}
+
+.matcore-table-row {
+  display: grid;
+  grid-template-columns: 2fr repeat(5, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 9px 11px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.58);
+}
+
+.matcore-table-row.header {
+  font-weight: 700;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.95);
+}
