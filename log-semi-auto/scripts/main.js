@@ -5,16 +5,45 @@ import { trackNotableAttack } from "./attack-tracker.js";
 import { finishCombatLog, createCombatJournalPage } from "./journal.js";
 import { registerSettings, getSetting } from "./settings.js";
 import { setCombatLog } from "./state.js";
+import { registerLogSemiAutoInMatCore } from "./integrations/matcore.js";
 
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | Initialisation`);
   registerSettings();
+
+  globalThis.LogSemiAuto = {
+    openCombatJournal: () => {
+      const journalName = game.settings.get(MODULE_ID, "journalName");
+      const journal = game.journal.find(j => j.name === journalName);
+
+      if (!journal) {
+        ui.notifications.warn(`Journal introuvable : ${journalName}`);
+        return;
+      }
+
+      journal.sheet.render(true);
+    }
+  };  
 });
 
 Hooks.once("ready", async () => {
   await loadCombatLogs();
   console.log(`${MODULE_ID} | Logs de combat restaurés`);
+  const tryRegisterMatCore = () => {
+    if (game.matcore?.registerModule) {
+      registerLogSemiAutoInMatCore();
+      return true;
+    }
+
+    return false;
+  };
+
+  Hooks.once("matcoreReady", tryRegisterMatCore);
+
+  if (!tryRegisterMatCore()) {
+    setTimeout(tryRegisterMatCore, 250);
+  }
 });
 
 Hooks.on("combatStart", async (combat) => {
