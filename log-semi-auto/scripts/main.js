@@ -30,6 +30,7 @@ Hooks.once("init", () => {
 Hooks.once("ready", async () => {
   await loadCombatLogs();
   console.log(`${MODULE_ID} | Logs de combat restaurés`);
+
   const tryRegisterMatCore = () => {
     if (game.matcore?.registerModule) {
       registerLogSemiAutoInMatCore();
@@ -39,9 +40,8 @@ Hooks.once("ready", async () => {
     return false;
   };
 
-  Hooks.once("matcoreReady", tryRegisterMatCore);
-
   if (!tryRegisterMatCore()) {
+    Hooks.once("matcoreReady", tryRegisterMatCore);
     setTimeout(tryRegisterMatCore, 250);
   }
 });

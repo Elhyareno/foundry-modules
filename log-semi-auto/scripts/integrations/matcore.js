@@ -1,10 +1,14 @@
-const MODULE_ID = "log-semi-auto";
+let registered = false;
 
 export function registerLogSemiAutoInMatCore() {
+  if (registered) return;
+
   if (!game.matcore?.registerModule) {
     console.warn(`${MODULE_ID} | MatCore non disponible, intégration ignorée.`);
     return;
   }
+
+  registered = true;
 
   game.matcore.registerModule(MODULE_ID, {
     label: "Combat Log",
