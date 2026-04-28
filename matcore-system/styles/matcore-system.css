@@ -391,3 +391,53 @@
   background: rgba(59, 130, 246, 0.35);
   border-color: rgba(96, 165, 250, 0.8);
 }
+
+.matcore-dialog-window .window-content {
+  padding: 12px;
+}
+
+.matcore-dialog-window form.matcore-vn-transfer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.matcore-dialog-window .matcore-vn-transfer-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.matcore-dialog-window .matcore-vn-transfer-summary p {
+  display: block;
+  margin: 0;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.matcore-dialog-window .form-group {
+  display: block;
+  margin: 0;
+}
+
+.matcore-dialog-window label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.matcore-dialog-window input[type="number"] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.matcore-dialog-window .dialog-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matcore-dialog-window .dialog-button {
+  width: 100%;
+}

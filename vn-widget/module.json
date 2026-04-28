@@ -17,19 +17,6 @@
     "scripts/main.js"
   ],
   "styles": [
-    "styles/vn.css"
-  ],
-
-  "relationships": {
-    "requires": [
-      {
-        "id": "lib-foundry-core",
-        "type": "module"
-      },
-      {
-        "id": "lib-pf2e-tools",
-        "type": "module"
-      }
-    ]
-  }
+    "styles/VN.css"
+  ]
 }

@@ -51,12 +51,12 @@ export class MatCoreDashboard extends Application {
     html.find("[data-tab]").on("click", event => {
       event.preventDefault();
       this.activeTab = event.currentTarget.dataset.tab;
-      this.render();
+      this.render(false);
     });
 
     html.find("[data-action='refresh']").on("click", event => {
       event.preventDefault();
-      this.render();
+      this.render(false);
     });
 
     html.find("[data-action='give-hero-point-party']").on("click", async event => {
@@ -70,7 +70,7 @@ export class MatCoreDashboard extends Application {
       }
 
       await game.heroStats.giveOneHeroPointToParty();
-      this.render();
+      this.render(false);
     });
 
     html.find("[data-action='reset-hero-stats']").on("click", async event => {
@@ -84,10 +84,10 @@ export class MatCoreDashboard extends Application {
       }
 
       await game.heroStats.resetAll();
-      this.render();
+      this.render(false);
     });
 
-    html.find("button[data-module]").click(async event => {
+    html.find("button[data-module]").on("click", async event => {
       event.preventDefault();
 
       const moduleId = event.currentTarget.dataset.module;
@@ -104,7 +104,7 @@ export class MatCoreDashboard extends Application {
       const actorId = event.currentTarget.dataset.actorId;
       await game.vnWidget?.recharge?.(actorId);
 
-      this.render();
+      this.render(false);
     });
 
     html.find("[data-action='vn-empty']").on("click", async event => {
@@ -115,7 +115,7 @@ export class MatCoreDashboard extends Application {
       const actorId = event.currentTarget.dataset.actorId;
       await game.vnWidget?.empty?.(actorId);
 
-      this.render();
+      this.render(false);
     });
 
     html.find("[data-action='vn-transfer']").on("click", async event => {
@@ -142,7 +142,7 @@ export class MatCoreDashboard extends Application {
       const targetToken = Array.from(game.user.targets)[0];
       const target = targetToken?.actor;
 
-      if (!target) {
+      if (!targetToken || !target) {
         ui.notifications.warn("Cible un token à soigner.");
         return;
       }
@@ -150,17 +150,14 @@ export class MatCoreDashboard extends Application {
       const amount = await askVitalityTransferAmount(source, target);
       if (!amount || amount <= 0) return;
 
-      console.log("MatCoreDashboard | Transfert VN demandé", {
-        source: source.name,
-        target: target.name,
+      await game.vnWidget.transferVitalityToTarget(
+        source.uuid,
+        targetToken.document.uuid,
         amount
-      });
+      );
 
-      await game.vnWidget.transferVitalityToTarget(source.uuid, targetToken.document.uuid, amount);
-
-      setTimeout(() => {
-        this.render(false);
-      }, 100);
+      ui.notifications.info(`Transfert de ${amount} point${amount > 1 ? "s" : ""} de Vitality Network effectué.`);
+      this.render(false);
     });
   }
 }
@@ -187,12 +184,12 @@ async function askVitalityTransferAmount(source, target) {
       {
         title: "Transfer Vitality",
         content: `
-          <form>
-            <div class="form-group">
+          <form class="matcore-vn-transfer-form">
+            <div class="matcore-vn-transfer-summary">
               <p><strong>${source.name}</strong> peut transférer jusqu’à <strong>${maxAmount}</strong> point${maxAmount > 1 ? "s" : ""}.</p>
-              <p>Cible : <strong>${target.name}</strong></p>
-              <p>PV manquants : <strong>${missing}</strong></p>
-              <p>Vitality disponible : <strong>${sourceData.value}</strong></p>
+              <p><strong>Cible :</strong> ${target.name}</p>
+              <p><strong>PV manquants :</strong> ${missing}</p>
+              <p><strong>Vitality disponible :</strong> ${sourceData.value}</p>
             </div>
 
             <div class="form-group">

@@ -42,13 +42,18 @@ function getResponsibleGM() {
   return game.users.find(user => user.active && user.isGM);
 }
 
+async function resolveActorFromUuid(uuid) {
+  const doc = await fromUuid(uuid);
+  if (!doc) return null;
+
+  if (doc.actor) return doc.actor;
+  if (doc.documentName === "Actor") return doc;
+
+  return null;
+}
+
 function registerSocket() {
   game.socket.on(SOCKET_NAME, async data => {
-    console.log(`${MODULE_ID} | Socket reçu`, {
-      isGM: game.user.isGM,
-      data
-    });
-
     if (!game.user.isGM) return;
 
     const responsibleGM = getResponsibleGM();
@@ -57,15 +62,8 @@ function registerSocket() {
     if (data?.type !== "TRANSFER_VITALITY") return;
 
     const user = game.users.get(data.userId);
-    const source = await fromUuid(data.sourceUuid);
+    const source = await resolveActorFromUuid(data.sourceUuid);
     const target = await resolveActorFromUuid(data.targetUuid);
-
-    console.log(`${MODULE_ID} | Socket transfert reçu côté MJ`, {
-      user: user?.name,
-      source: source?.name,
-      target: target?.name,
-      amount: data.amount
-    });
 
     if (!user || !source || !target) return;
 
@@ -76,9 +74,7 @@ function registerSocket() {
 
     if (!isVitalityActor(source)) return;
 
-    const result = await transferVitalityToActor(source, target, data.amount);
-
-    console.log(`${MODULE_ID} | Résultat transfert socket MJ`, result);
+    await transferVitalityToActor(source, target, data.amount);
   });
 }
 
@@ -98,6 +94,7 @@ function exposeApi() {
       return {
         actor,
         id: actor.id,
+        uuid: actor.uuid,
         name: actor.name,
         value,
         max,
@@ -105,16 +102,22 @@ function exposeApi() {
       };
     },
 
-    recharge: async actorId => {
-      const actor = game.actors.get(actorId);
+    recharge: async actorUuidOrId => {
+      const actor =
+        game.actors.get(actorUuidOrId) ??
+        await resolveActorFromUuid(actorUuidOrId);
+
       if (!actor || !isVitalityActor(actor)) return null;
 
       await rechargeVitality(actor);
       return game.vnWidget.getVitalityData(actor);
     },
 
-    empty: async actorId => {
-      const actor = game.actors.get(actorId);
+    empty: async actorUuidOrId => {
+      const actor =
+        game.actors.get(actorUuidOrId) ??
+        await resolveActorFromUuid(actorUuidOrId);
+
       if (!actor || !isVitalityActor(actor)) return null;
 
       await setVitality(actor, 0);
@@ -122,24 +125,13 @@ function exposeApi() {
     },
 
     transferVitalityToTarget: async (sourceUuid, targetUuid, amount = null) => {
-      const source = await fromUuid(sourceUuid);
-      const target = await fromUuid(targetUuid);
-
-      console.log(`${MODULE_ID} | API transfert demandé`, {
-        sourceUuid,
-        targetUuid,
-        source: source?.name,
-        target: target?.name,
-        amount,
-        isGM: game.user.isGM
-      });
+      const source = await resolveActorFromUuid(sourceUuid);
+      const target = await resolveActorFromUuid(targetUuid);
 
       if (!source || !target) return null;
       if (!isVitalityActor(source)) return null;
 
       if (!game.user.isGM) {
-        console.log(`${MODULE_ID} | Envoi socket transfert vers MJ`);
-
         game.socket.emit(SOCKET_NAME, {
           type: "TRANSFER_VITALITY",
           userId: game.user.id,
@@ -151,27 +143,9 @@ function exposeApi() {
         return true;
       }
 
-      const result = await transferVitalityToActor(source, target, amount);
-
-      console.log(`${MODULE_ID} | Résultat transfert direct MJ`, result);
-
-      return result;
+      return transferVitalityToActor(source, target, amount);
     }
   };
 
   console.log(`${MODULE_ID} | API exposée sur game.vnWidget`);
-}
-
-async function resolveActorFromUuid(uuid) {
-  const doc = await fromUuid(uuid);
-
-  if (!doc) return null;
-
-  // TokenDocument ciblé
-  if (doc.actor) return doc.actor;
-
-  // Actor classique
-  if (doc.documentName === "Actor") return doc;
-
-  return null;
 }
