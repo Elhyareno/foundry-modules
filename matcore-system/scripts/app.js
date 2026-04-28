@@ -29,6 +29,7 @@ export class MatCoreDashboard extends Application {
     const activeCount = modules.filter(module => module.active).length;
 
     return {
+        isGM: game.user.isGM,
         activeTab: this.activeTab,
         modules,
         registeredModules,
@@ -57,6 +58,8 @@ export class MatCoreDashboard extends Application {
     html.find("[data-action='give-hero-point-party']").on("click", async event => {
       event.preventDefault();
 
+      if (!game.user.isGM) return;
+
       if (!game.heroStats?.giveOneHeroPointToParty) {
         ui.notifications.warn("Hero Stats n'est pas disponible.");
         return;
@@ -68,6 +71,8 @@ export class MatCoreDashboard extends Application {
 
     html.find("[data-action='reset-hero-stats']").on("click", async event => {
       event.preventDefault();
+
+      if (!game.user.isGM) return;
 
       if (!game.heroStats?.resetAll) {
         ui.notifications.warn("Hero Stats n'est pas disponible.");

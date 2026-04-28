@@ -144,10 +144,12 @@
             <p>Aucun personnage enregistré dans les statistiques.</p>
         {{/if}}
 
+        {{#if isGM}}
         <div class="matcore-actions">
             <button type="button" data-action="give-hero-point-party">Donner 1 point au groupe</button>
             <button type="button" data-action="reset-hero-stats">Reset Hero Stats</button>
         </div>
+        {{/if}}
         {{else}}
         <p>Hero Stats n’est pas actif ou n’expose pas encore son API.</p>
         {{/if}}
