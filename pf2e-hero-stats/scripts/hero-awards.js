@@ -10,7 +10,7 @@ export function initHeroAwards() {
 
 export function setupAwardButtonListeners() {
   Hooks.on("renderChatMessageHTML", (message, html) => {
-    html.querySelectorAll("[data-action='award-hero-point']").forEach(btn => {
+    html.querySelectorAll("[data-action='award-hero-award']").forEach(btn => {
       btn.addEventListener("click", async () => {
         const actorId = btn.dataset.actorId;
         const actor = game.actors.get(actorId);
@@ -81,5 +81,126 @@ export async function resetAwardData() {
       awardedNatural20: {},
       suggestedBadLuck: {}
     }
+  });
+}
+
+export async function evaluateHeroAwards({
+  actor,
+  actorStats,
+  message,
+  roll,
+  rollType,
+  naturalD20,
+  outcome
+}) {
+  if (!game.user.isGM) return;
+  if (!actor || actor.type !== "character") return;
+
+  if (getSetting("awardIgnoreFlatChecks") && rollType === "flat") {
+    return;
+  }
+
+  if (naturalD20 === 20) {
+    await handleNatural20Award(actor, message);
+  }
+
+  if (getSetting("suggestBadLuck")) {
+    await handleBadLuckSuggestion(actor, actorStats);
+  }
+}
+
+async function handleNatural20Award(actor, message) {
+  const mode = getSetting("awardModeNatural20");
+
+  if (mode === "off") return;
+
+  const data = getSetting("awardData");
+
+  const encounterId = game.combat?.id ?? null;
+  const actorId = actor.id;
+
+  if (getSetting("awardNatural20OncePerCombat") && encounterId) {
+    const alreadyAwarded = data.combat?.awardedNatural20?.[actorId];
+
+    if (alreadyAwarded === encounterId) {
+      return;
+    }
+  }
+
+  if (mode === "auto") {
+    await addHeroPoint(actor, 1, "20 naturel");
+
+    data.combat.awardedNatural20[actorId] = encounterId;
+    await setSetting("awardData", data);
+
+    await FCoreChat.send(`
+      <section class="hero-stats-report summary">
+        <h3>⭐ 20 naturel</h3>
+        <p><strong>${actor.name}</strong> gagne 1 point d'héroïsme.</p>
+      </section>
+    `);
+
+    return;
+  }
+
+  if (mode === "suggest") {
+    await FCoreChat.send(`
+      <section class="hero-stats-report summary">
+        <h3>⭐ 20 naturel détecté</h3>
+        <p><strong>${actor.name}</strong> a obtenu un 20 naturel.</p>
+        <button
+          type="button"
+          data-action="hero-stats-award"
+          data-actor-id="${actor.id}"
+          data-reason="20 naturel"
+        >
+          Donner 1 point d'héroïsme
+        </button>
+      </section>
+    `, {
+      whisper: FCoreChat.getGMIds()
+    });
+  }
+}
+
+async function handleBadLuckSuggestion(actor, actorStats) {
+  const threshold = Number(getSetting("badLuckFailureStreak") ?? 3);
+  const streak = Number(actorStats?.streak?.failures ?? 0);
+
+  if (streak < threshold) return;
+
+  const data = getSetting("awardData");
+  const encounterId = game.combat?.id ?? null;
+  const actorId = actor.id;
+
+  if (getSetting("badLuckOncePerCombat") && encounterId) {
+    const alreadySuggested = data.combat?.suggestedBadLuck?.[actorId];
+
+    if (alreadySuggested === encounterId) {
+      return;
+    }
+  }
+
+  data.combat.suggestedBadLuck[actorId] = encounterId;
+  await setSetting("awardData", data);
+
+  await FCoreChat.send(`
+    <section class="hero-stats-report summary">
+      <h3>🌧️ Série de malchance</h3>
+      <p>
+        <strong>${actor.name}</strong> enchaîne ${streak} échecs.
+        Le destin tousse dans sa manche.
+      </p>
+      <button
+        type="button"
+        data-action="hero-stats-award"
+        data-actor-id="${actor.id}"
+        data-reason="Série de malchance"
+      >
+        Donner 1 point d'héroïsme
+      </button>
+    </section>
+  `, {
+    whisper: FCoreChat.getGMIds()
   });
 }
