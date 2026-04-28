@@ -256,3 +256,40 @@
   font-weight: 700;
   pointer-events: none;
 }
+
+.matcore-vn-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.matcore-vn-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(30, 41, 59, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.matcore-vn-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.matcore-vn-bar {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.95);
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.matcore-vn-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #22c55e);
+}
+
+.matcore-admin-actions {
+  opacity: 0.75;
+}

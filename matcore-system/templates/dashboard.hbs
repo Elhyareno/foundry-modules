@@ -158,22 +158,51 @@
 
   {{#if (eq activeTab 'vitality')}}
     <section class="matcore-panel">
-      <h2>Vitality Network</h2>
+        <h2>Vitality Network</h2>
+        <p class="matcore-lead">Flux vital des Mystics connectés au réseau.</p>
 
-      {{#if vitalityActors.length}}
-        <div class="matcore-list">
-          {{#each vitalityActors}}
-            <article class="matcore-line">
-              <strong>{{name}}</strong>
-              <span>{{value}} / {{max}}</span>
+        {{#if vitalityActors.length}}
+        <div class="matcore-vn-grid">
+            {{#each vitalityActors}}
+            <article class="matcore-vn-card">
+                <div class="matcore-vn-head">
+                <strong>{{name}}</strong>
+                <span>{{value}} / {{max}}</span>
+                </div>
+
+                <div class="matcore-vn-bar">
+                <div class="matcore-vn-fill" style="width: {{percent}}%;"></div>
+                </div>
+
+                <small>{{percent}}% de réserve</small>
+
+                {{#if canUseAbilities}}
+                <div class="matcore-actions">
+                    <button type="button" data-action="vn-transfer" data-actor-id="{{id}}">
+                    Transfer Vitality
+                    </button>
+                </div>
+                {{/if}}
+
+                {{#if canAdmin}}
+                <div class="matcore-actions matcore-admin-actions">
+                    <button type="button" data-action="vn-recharge" data-actor-id="{{id}}">
+                    Recharger
+                    </button>
+
+                    <button type="button" data-action="vn-empty" data-actor-id="{{id}}">
+                    Vider
+                    </button>
+                </div>
+                {{/if}}
             </article>
-          {{/each}}
+            {{/each}}
         </div>
-      {{else}}
+        {{else}}
         <p>Aucun Mystic avec Vitality Network détecté.</p>
-      {{/if}}
+        {{/if}}
     </section>
-  {{/if}}
+    {{/if}}
 
   {{#if (eq activeTab 'combat')}}
     <section class="matcore-panel">

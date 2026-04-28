@@ -87,6 +87,119 @@ export class MatCoreDashboard extends Application {
         const actionId = ev.currentTarget.dataset.action;
 
         await game.matcore.runAction(moduleId, actionId);
-    });    
+    });
+
+    html.find("[data-action='vn-recharge']").on("click", async event => {
+    event.preventDefault();
+    if (!game.user.isGM) return;
+
+    const actorId = event.currentTarget.dataset.actorId;
+    await game.vnWidget?.recharge?.(actorId);
+
+    this.render();
+    });
+
+    html.find("[data-action='vn-empty']").on("click", async event => {
+    event.preventDefault();
+    if (!game.user.isGM) return;
+
+    const actorId = event.currentTarget.dataset.actorId;
+    await game.vnWidget?.empty?.(actorId);
+
+    this.render();
+    });
+
+    html.find("[data-action='vn-transfer']").on("click", async event => {
+    event.preventDefault();
+
+    const sourceActorId = event.currentTarget.dataset.actorId;
+    const source = game.actors.get(sourceActorId);
+
+    if (!source?.testUserPermission(game.user, "OWNER")) {
+        ui.notifications.warn("Tu ne contrôles pas ce Mystic.");
+        return;
+    }
+
+    const target = Array.from(game.user.targets)[0]?.actor;
+
+    if (!target) {
+        ui.notifications.warn("Cible un token à soigner.");
+        return;
+    }
+
+    const amount = await askVitalityTransferAmount(source, target);
+
+    if (!amount) return;
+
+    await game.vnWidget?.transferVitalityToTarget?.(source.id, target.id, amount);
+
+    this.render();
+    });
   }
+}
+
+async function askVitalityTransferAmount(source, target) {
+  const sourceData = game.vnWidget.getVitalityData(source);
+  const hp = target.system?.attributes?.hp;
+
+  if (!hp) {
+    ui.notifications.warn("La cible n’a pas de PV valides.");
+    return null;
+  }
+
+  const missing = Math.max(0, Number(hp.max ?? 0) - Number(hp.value ?? 0));
+  const maxAmount = Math.min(sourceData.value, missing);
+
+  if (maxAmount <= 0) {
+    ui.notifications.warn("Aucun transfert possible.");
+    return null;
+  }
+
+  return new Promise(resolve => {
+    new Dialog({
+      title: "Transfer Vitality",
+      content: `
+        <form>
+          <p>
+            <strong>${source.name}</strong> peut transférer jusqu’à
+            <strong>${maxAmount}</strong> point${maxAmount > 1 ? "s" : ""}.
+          </p>
+
+          <p>
+            Cible : <strong>${target.name}</strong><br>
+            PV manquants : <strong>${missing}</strong><br>
+            Vitality disponible : <strong>${sourceData.value}</strong>
+          </p>
+
+          <div class="form-group">
+            <label>Montant</label>
+            <input type="number" name="amount" min="1" max="${maxAmount}" value="${maxAmount}" />
+          </div>
+        </form>
+      `,
+      buttons: {
+        confirm: {
+          label: "Transférer",
+          callback: html => {
+            const root = html instanceof HTMLElement ? html : html[0];
+            const input = root.querySelector("input[name='amount']");
+            const raw = Number(input?.value ?? 0);
+
+            if (!Number.isFinite(raw) || raw <= 0) {
+              resolve(null);
+              return;
+            }
+
+            resolve(Math.max(1, Math.min(Math.floor(raw), maxAmount)));
+          }
+        },
+        cancel: {
+          label: "Annuler",
+          callback: () => resolve(null)
+        }
+      },
+      default: "confirm",
+      close: () => resolve(null)
+    }).render(true);
+  });
 }

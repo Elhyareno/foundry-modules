@@ -108,32 +108,17 @@ export function collectHeroStats() {
 }
 
 export function collectVitalityActors() {
-  const actors = game.actors.filter(actor => {
-    if (actor.type !== "character") return false;
+  if (!game.vnWidget?.getVitalityActors) {
+    return [];
+  }
 
-    const classItem = actor.items?.find(item => item.type === "class");
-    const classSlug = String(
-      actor.class?.slug ??
-      classItem?.slug ??
-      classItem?.system?.slug ??
-      classItem?.name ??
-      ""
-    ).toLowerCase();
-
-    return classSlug === "mystic";
-  });
-
-  return actors.map(actor => {
-    const flag = actor.getFlag("world", "vitalityNetwork") ?? {};
-    const level = Number(actor.system?.details?.level?.value ?? 1);
-    const max = 6 + level * 4;
-    const value = Math.max(0, Math.min(Number(flag.value ?? 0), max));
+  return game.vnWidget.getVitalityActors().map(actor => {
+    const data = game.vnWidget.getVitalityData(actor);
 
     return {
-      id: actor.id,
-      name: actor.name,
-      value,
-      max
+      ...data,
+      canUseAbilities: actor.testUserPermission(game.user, "OWNER"),
+      canAdmin: game.user.isGM
     };
   });
 }
