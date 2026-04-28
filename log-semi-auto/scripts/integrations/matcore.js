@@ -1,3 +1,4 @@
+const MODULE_ID = "log-semi-auto";
 let registered = false;
 
 export function registerLogSemiAutoInMatCore() {
