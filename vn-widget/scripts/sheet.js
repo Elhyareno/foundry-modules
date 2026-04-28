@@ -65,7 +65,11 @@ export async function renderVitalityWidget(app, html) {
     const action = btn.dataset.action;
 
     if (action === "transfer") {
-      await transferVitalityToTarget(actor, pfsPanel);
+      const target = Array.from(game.user.targets)[0]?.actor;
+      if (!target) return ui.notifications.warn("Aucune cible sélectionnée.");
+
+      const amount = Number(pfsPanel.querySelector(".vn-amount-input")?.value ?? 0);
+      await game.vnWidget.transferVitalityToTarget(actor.id, target.id, amount);
       updatePanel(pfsPanel, actor);
     }
 
@@ -75,7 +79,10 @@ export async function renderVitalityWidget(app, html) {
     }
 
     if (action === "heal-max") {
-      await transferMaxVitalityToTarget(actor);
+      const target = Array.from(game.user.targets)[0]?.actor;
+      if (!target) return ui.notifications.warn("Aucune cible sélectionnée.");
+
+      await game.vnWidget.transferVitalityToTarget(actor.id, target.id, null);
       updatePanel(pfsPanel, actor);
     }
   });

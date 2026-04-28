@@ -75,7 +75,7 @@ function exposeApi() {
       return game.vnWidget.getVitalityData(actor);
     },
 
-    transferVitalityToTarget: async (sourceActorId, targetActorId, amount) => {
+    transferVitalityToTarget: async (sourceActorId, targetActorId, amount = null) => {
       const source = game.actors.get(sourceActorId);
       const target = game.actors.get(targetActorId);
 
@@ -115,6 +115,33 @@ function registerSocket() {
     // Le joueur doit au moins posséder la source.
     if (!source.testUserPermission(user, "OWNER")) {
       ui.notifications.warn(`${user.name} a tenté un transfert sans droit sur la source.`);
+      return;
+    }
+
+    if (!isVitalityActor(source)) return;
+
+    await transferVitalityToActor(source, target, data.amount);
+  });
+}
+
+function getResponsibleGM() {
+  return game.users.find(u => u.active && u.isGM);
+}
+
+function registerSocket() {
+  game.socket.on(SOCKET_NAME, async data => {
+    if (!game.user.isGM) return;
+    if (game.user.id !== getResponsibleGM()?.id) return;
+    if (data?.type !== "TRANSFER_VITALITY") return;
+
+    const user = game.users.get(data.userId);
+    const source = game.actors.get(data.sourceActorId);
+    const target = game.actors.get(data.targetActorId);
+
+    if (!user || !source || !target) return;
+
+    if (!source.testUserPermission(user, "OWNER")) {
+      ui.notifications.warn(`${user.name} ne contrôle pas ${source.name}.`);
       return;
     }
 
