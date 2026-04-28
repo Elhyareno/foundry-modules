@@ -1,3 +1,6 @@
+import { FCoreChat } from "../../lib-foundry-core/scripts/index.js";
+import { PF2eResources } from "../../lib-pf2e-tools/scripts/index.js";
+
 import {
   createDefaultHeroLog,
   getSetting,
@@ -12,10 +15,6 @@ import {
 const HERO_POINTS_PATH = "system.resources.heroPoints.value";
 const HERO_POINTS_MAX_PATH = "system.resources.heroPoints.max";
 
-/* =========================
-   Initialisation
-========================= */
-
 export function initHeroPoints() {
   const current = getHeroPointLog();
 
@@ -25,10 +24,6 @@ export function initHeroPoints() {
 
   setupHeroPointActorListener();
 }
-
-/* =========================
-   Accès aux données
-========================= */
 
 export function getHeroPointLog() {
   return getSetting("heroPointLog") ?? createDefaultHeroLog();
@@ -42,25 +37,17 @@ export function getHeroPointsLog() {
   return getHeroPointLog().entries ?? [];
 }
 
-/* =========================
-   Lecture points d'héroïsme
-========================= */
-
 export function getHeroPoints(actor) {
-  return Number(foundry.utils.getProperty(actor, HERO_POINTS_PATH) ?? 0);
+  return Number(PF2eResources.get(actor, HERO_POINTS_PATH) ?? 0);
 }
 
 export function getMaxHeroPoints(actor) {
-  return Number(foundry.utils.getProperty(actor, HERO_POINTS_MAX_PATH) ?? 3);
+  return Number(PF2eResources.get(actor, HERO_POINTS_MAX_PATH) ?? 3);
 }
 
 export function hasHeroPoints(actor) {
-  return foundry.utils.getProperty(actor, HERO_POINTS_PATH) !== undefined;
+  return PF2eResources.get(actor, HERO_POINTS_PATH) !== undefined;
 }
-
-/* =========================
-   Listener acteur
-========================= */
 
 function setupHeroPointActorListener() {
   Hooks.on("updateActor", async (actor, changes, options, _userId) => {
@@ -93,10 +80,6 @@ function setupHeroPointActorListener() {
   });
 }
 
-/* =========================
-   Enregistrement
-========================= */
-
 export async function recordHeroPointChange(actor, amount = 1, type = "change", reason = "") {
   if (!actor) return;
 
@@ -114,14 +97,9 @@ export async function recordHeroPointChange(actor, amount = 1, type = "change", 
   await setHeroPointLog(data);
 }
 
-// Compatibilité avec l'ancien nom utilisé par chat-listeners/report
 export async function recordHeroPointUse(actor, amount = 1, reason = "Point d'héroïsme utilisé") {
   return recordHeroPointChange(actor, amount, "spend", reason);
 }
-
-/* =========================
-   Modification des points
-========================= */
 
 export async function addHeroPoint(actor, amount = 1, reason = "Gain manuel") {
   if (!actor || !hasHeroPoints(actor)) return 0;
@@ -134,10 +112,10 @@ export async function addHeroPoint(actor, amount = 1, reason = "Gain manuel") {
   if (delta <= 0) return 0;
 
   await actor.update({
-      [HERO_POINTS_PATH]: next
-    }, {
-      heroStatsHandled: true
-    });
+    [HERO_POINTS_PATH]: next
+  }, {
+    heroStatsHandled: true
+  });
 
   await recordHeroPointChange(actor, delta, "gain", reason);
 
@@ -190,16 +168,11 @@ export async function setHeroPoints(actor, value, reason = "Ajustement manuel") 
   return delta;
 }
 
-/* =========================
-   Groupe
-========================= */
-
 export function getPartyCharacters() {
   return game.actors.filter(actor => {
     if (actor.type !== "character") return false;
     if (!hasHeroPoints(actor)) return false;
 
-    // On privilégie les personnages possédés par au moins un joueur.
     const hasPlayerOwner = game.users.some(user => {
       if (user.isGM) return false;
       return actor.testUserPermission(user, "OWNER");
@@ -241,16 +214,15 @@ export async function giveOneHeroPointToParty() {
     }
   }
 
-  await ChatMessage.create({
-    content: `
-      <section class="hero-stats-report summary">
-        <h3>⭐ Points d'héroïsme</h3>
-        <p>Les braises du destin se rallument.</p>
-        <ul>${lines.join("")}</ul>
-        <p>Total distribué : <strong>${totalGiven}</strong></p>
-      </section>
-    `,
-    whisper: ChatMessage.getWhisperRecipients("GM")
+  await FCoreChat.send(`
+    <section class="hero-stats-report summary">
+      <h3>⭐ Points d'héroïsme</h3>
+      <p>Les braises du destin se rallument.</p>
+      <ul>${lines.join("")}</ul>
+      <p>Total distribué : <strong>${totalGiven}</strong></p>
+    </section>
+  `, {
+    whisper: FCoreChat.getGMIds()
   });
 
   return totalGiven;
@@ -282,23 +254,18 @@ export async function resetPartyHeroPoints(value = 0) {
     }
   }
 
-  await ChatMessage.create({
-    content: `
-      <section class="hero-stats-report summary">
-        <h3>⭐ Remise des points d'héroïsme</h3>
-        <ul>${lines.join("")}</ul>
-        <p>Modifications totales : <strong>${totalChanged}</strong></p>
-      </section>
-    `,
-    whisper: ChatMessage.getWhisperRecipients("GM")
+  await FCoreChat.send(`
+    <section class="hero-stats-report summary">
+      <h3>⭐ Remise des points d'héroïsme</h3>
+      <ul>${lines.join("")}</ul>
+      <p>Modifications totales : <strong>${totalChanged}</strong></p>
+    </section>
+  `, {
+    whisper: FCoreChat.getGMIds()
   });
 
   return totalChanged;
 }
-
-/* =========================
-   Lecture stats héroïsme
-========================= */
 
 export function getHeroPointsUsedByActor(actorId) {
   return getHeroPointsLog()
@@ -323,10 +290,6 @@ export function getTotalHeroPointsGained() {
     .filter(entry => entry.type === "gain")
     .reduce((total, entry) => total + entry.amount, 0);
 }
-
-/* =========================
-   Reset
-========================= */
 
 export async function resetHeroPointsLog() {
   await setHeroPointLog(createDefaultHeroLog());

@@ -1,3 +1,4 @@
+import { FCoreUI } from "../../lib-foundry-core/scripts/index.js";
 import { registerSettings, MODULE_ID } from "./settings.js";
 import { setupChatListeners } from "./chat-listeners.js";
 
@@ -39,7 +40,7 @@ Hooks.once("ready", () => {
 
   exposeApi();
 
-  ui.notifications.info("PF2e/SF2e Hero Stats loaded.");
+  FCoreUI.info("PF2e/SF2e Hero Stats loaded.");
 });
 
 function exposeApi() {
@@ -64,24 +65,24 @@ function exposeApi() {
 
     resetDiceStats: async () => {
       await resetDiceStats();
-      ui.notifications.info("Statistiques de dés réinitialisées.");
+      FCoreUI.info("Statistiques de dés réinitialisées.");
     },
 
     resetHeroPointsLog: async () => {
       await resetHeroPointsLog();
-      ui.notifications.info("Journal des points d'héroïsme réinitialisé.");
+      FCoreUI.info("Journal des points d'héroïsme réinitialisé.");
     },
 
     resetAwardData: async () => {
       await resetAwardData();
-      ui.notifications.info("Mémoire des propositions d'héroïsme réinitialisée.");
+      FCoreUI.info("Mémoire des propositions d'héroïsme réinitialisée.");
     },
 
     resetAll: async () => {
       await resetDiceStats();
       await resetHeroPointsLog();
       await resetAwardData();
-      ui.notifications.info("PF2e/SF2e Hero Stats : toutes les données ont été réinitialisées.");
+      FCoreUI.info("PF2e/SF2e Hero Stats : toutes les données ont été réinitialisées.");
     }
   };
 

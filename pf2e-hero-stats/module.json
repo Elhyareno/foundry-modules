@@ -28,12 +28,16 @@
           "minimum": "0.0.1"
         }
       }
+    ],
+    "requires": [
+      {
+        "id": "lib-foundry-core",
+        "type": "module"
+      },
+      {
+        "id": "lib-pf2e-tools",
+        "type": "module"
+      }
     ]
-  },
-  "esmodules": [
-    "scripts/main.js"
-  ],
-  "styles": [
-    "styles/hero-stats.css"
-  ]
+  }
 }
