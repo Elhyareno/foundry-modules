@@ -12,6 +12,26 @@
     "minimum": "14",
     "verified": "14"
   },
+
+  "relationships": {
+    "requires": [
+      {
+        "id": "lib-foundry-core",
+        "type": "module"
+      },
+      {
+        "id": "lib-pf2e-tools",
+        "type": "module"
+      }
+    ],
+    "optional": [
+      {
+        "id": "matcore-system",
+        "type": "module"
+      }
+    ]
+  },
+
   "esmodules": [
     "scripts/main.js"
   ],

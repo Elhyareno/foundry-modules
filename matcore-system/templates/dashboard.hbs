@@ -220,8 +220,67 @@
 
   {{#if (eq activeTab 'gaia')}}
     <section class="matcore-panel">
-      <h2>Gaïa Exploration Tools</h2>
-      <p>Vue prête pour biomes, curiosités, ressources et exploration.</p>
+      <div class="matcore-panel-header">
+        <div>
+          <h2>Gaïa Exploration Tools</h2>
+          <p class="matcore-lead">
+            Console d’exploration, curiosités, ressources et traces de factions.
+          </p>
+        </div>
+      </div>
+
+      {{#if gaia.available}}
+        <div class="matcore-stats">
+          <div>
+            <span>Entrées</span>
+            <strong>{{gaia.totalEntries}}</strong>
+          </div>
+
+          <div>
+            <span>Entrées personnalisées</span>
+            <strong>{{gaia.customEntriesCount}}</strong>
+          </div>
+
+          <div>
+            <span>Entrées retirées</span>
+            <strong>{{gaia.excludedEntriesCount}}</strong>
+          </div>
+        </div>
+
+        {{#if isGM}}
+          <div class="matcore-actions">
+            <button
+              type="button"
+              data-module="gaia-exploration-tools"
+              data-action="openRollDialog">
+              Tirage aléatoire
+            </button>
+
+            <button
+              type="button"
+              data-module="gaia-exploration-tools"
+              data-action="openEntryPickerDialog">
+              Lancer une entrée
+            </button>
+
+            <button
+              type="button"
+              data-module="gaia-exploration-tools"
+              data-action="openEntryDialog">
+              Ajouter une entrée
+            </button>
+
+            <button
+              type="button"
+              data-module="gaia-exploration-tools"
+              data-action="listBiomes">
+              Lister les biomes
+            </button>
+          </div>
+        {{/if}}
+      {{else}}
+        <p>Gaïa Exploration Tools n’est pas actif ou n’expose pas encore son API.</p>
+      {{/if}}
     </section>
   {{/if}}
 </section>

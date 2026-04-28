@@ -3,6 +3,7 @@ import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { GaiaExplorationService } from "./services/GaiaExplorationService.js";
 import { GaiaEntryDialog } from "./ui/GaiaEntryDialog.js";
 import { GaiaEntryPickerDialog } from "./ui/GaiaEntryPickerDialog.js";
+import { registerGaiaInMatCore } from "./integrations/matcore.js";
 
 Hooks.once("init", () => {
   game.settings.register("gaia-exploration-tools", "excludedEntries", {
@@ -35,9 +36,10 @@ Hooks.once("ready", () => {
 
   service.openEntryPickerDialog = function () {
     new GaiaEntryPickerDialog().render(true);
-  };  
+  };
 
   game.gaiaExploration = service;
+  registerGaiaInMatCore();
 
   ui.notifications.info("Gaïa Exploration Tools chargé.");
 });

@@ -24,6 +24,7 @@ export class MatCoreDashboard extends Application {
 
     async getData() {
     const registeredModules = await game.matcore.registry.collectAll();
+    const gaiaModule = registeredModules.find(module => module.id === "gaia-exploration-tools");
 
     const modules = collectModuleStatus();
     const activeCount = modules.filter(module => module.active).length;
@@ -36,7 +37,8 @@ export class MatCoreDashboard extends Application {
         activeCount,
         totalCount: modules.length,
         heroStats: collectHeroStats(),
-        vitalityActors: collectVitalityActors()
+        vitalityActors: collectVitalityActors(),
+        gaia: gaiaModule?.data ?? { available: false }
     };
     }
 
