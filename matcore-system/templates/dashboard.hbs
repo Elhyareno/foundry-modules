@@ -206,8 +206,68 @@
 
   {{#if (eq activeTab 'combat')}}
     <section class="matcore-panel">
-      <h2>Combat Log</h2>
-      <p>Vue prête pour les derniers combats, les résumés et l’accès au journal.</p>
+      <div class="matcore-panel-header">
+        <div>
+          <h2>Combat Log</h2>
+          <p class="matcore-lead">
+            Lecture rapide des archives de bataille.
+          </p>
+        </div>
+      </div>
+
+      {{#if combatLog.available}}
+        <div class="matcore-stats">
+          <div>
+            <span>Journal</span>
+            <strong>{{combatLog.journalName}}</strong>
+          </div>
+
+          <div>
+            <span>Pages archivées</span>
+            <strong>{{combatLog.pageCount}}</strong>
+          </div>
+
+          <div>
+            <span>Combats en mémoire</span>
+            <strong>{{combatLog.activeCombatLogCount}}</strong>
+          </div>
+        </div>
+
+        {{#if combatLog.pages.length}}
+          <div class="form-group">
+            <label>Archive à consulter</label>
+            <select data-action="select-combat-log-page">
+              {{#each combatLog.pages}}
+                <option value="{{id}}" {{#if (eq id ../selectedCombatLogPage.id)}}selected{{/if}}>
+                  {{name}}
+                </option>
+              {{/each}}
+            </select>
+          </div>
+
+          <article class="matcore-combat-log-preview">
+            <h3>{{selectedCombatLogPage.name}}</h3>
+            <div class="matcore-journal-content">
+              {{{selectedCombatLogPage.content}}}
+            </div>
+          </article>
+        {{else}}
+          <p>Aucune archive de combat dans le journal pour l’instant.</p>
+        {{/if}}
+
+        {{#if combatLog.canOpenJournal}}
+          <div class="matcore-actions">
+            <button
+              type="button"
+              data-module="log-semi-auto"
+              data-action="openCombatJournal">
+              Ouvrir le journal Foundry
+            </button>
+          </div>
+        {{/if}}
+      {{else}}
+        <p>Combat Log n’est pas actif ou n’expose pas encore ses archives.</p>
+      {{/if}}
     </section>
   {{/if}}
 

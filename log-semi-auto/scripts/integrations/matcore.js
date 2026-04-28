@@ -1,4 +1,5 @@
 const MODULE_ID = "log-semi-auto";
+
 let registered = false;
 
 export function registerLogSemiAutoInMatCore() {
@@ -22,16 +23,30 @@ export function registerLogSemiAutoInMatCore() {
     },
 
     getData: () => {
-      const journalName = game.settings.get(MODULE_ID, "journalName");
-      const journal = game.journal.find(j => j.name === journalName);
+    const journalName = game.settings.get(MODULE_ID, "journalName");
+    const journal = game.journal.find(j => j.name === journalName);
+    const pages = journal?.pages?.contents ?? [];
 
-      return {
+    const persistedCombatLogs =
+        game.settings.get(MODULE_ID, "persistedCombatLogs") ?? {};
+
+    return {
+        available: true,
         journalName,
         journalId: journal?.id ?? null,
         journalExists: Boolean(journal),
+        pageCount: pages.length,
+        activeCombatLogCount: Object.keys(persistedCombatLogs).length,
+
+        pages: pages.map(page => ({
+        id: page.id,
+        name: page.name,
+        content: page.text?.content ?? ""
+        })),
+
         canOpenJournal: Boolean(journal),
         canConfigure: game.user.isGM
-      };
+    };
     },
 
     actions: {

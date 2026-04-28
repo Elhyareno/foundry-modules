@@ -20,6 +20,7 @@ export class MatCoreDashboard extends Application {
   constructor(options = {}) {
     super(options);
     this.activeTab = "home";
+    this.selectedCombatLogPageId = null;
   }
 
   async getData() {
@@ -27,6 +28,19 @@ export class MatCoreDashboard extends Application {
 
     const gaiaModule = registeredModules.find(module => module.id === "gaia-exploration-tools");
     const eventForgeModule = registeredModules.find(module => module.id === "event-forge");
+    const combatLogModule = registeredModules.find(module => module.id === "log-semi-auto");
+
+    const combatLog = combatLogModule?.data ?? { available: false };
+    const combatPages = combatLog.pages ?? [];
+
+    if (!this.selectedCombatLogPageId && combatPages.length) {
+      this.selectedCombatLogPageId = combatPages[0].id;
+    }
+
+    const selectedCombatLogPage =
+      combatPages.find(page => page.id === this.selectedCombatLogPageId) ??
+      combatPages[0] ??
+      null;
 
     const modules = collectModuleStatus();
     const activeCount = modules.filter(module => module.active).length;
@@ -41,7 +55,9 @@ export class MatCoreDashboard extends Application {
       heroStats: collectHeroStats(),
       vitalityActors: collectVitalityActors(),
       gaia: gaiaModule?.data ?? { available: false },
-      eventForge: eventForgeModule?.data ?? { available: false }
+      eventForge: eventForgeModule?.data ?? { available: false },
+      combatLog: combatLog,
+      selectedCombatLogPage
     };
   }
 
@@ -159,6 +175,13 @@ export class MatCoreDashboard extends Application {
       ui.notifications.info(`Transfert de ${amount} point${amount > 1 ? "s" : ""} de Vitality Network effectué.`);
       this.render(false);
     });
+
+    html.find("[data-action='select-combat-log-page']").on("change", event => {
+      event.preventDefault();
+
+      this.selectedCombatLogPageId = event.currentTarget.value;
+      this.render(false);
+    });    
   }
 }
 

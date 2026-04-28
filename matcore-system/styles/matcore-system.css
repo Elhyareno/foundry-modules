@@ -459,3 +459,43 @@
   border-color: #5ab8ff !important;
   box-shadow: 0 0 0 1px rgba(90, 184, 255, 0.45) !important;
 }
+
+.matcore-combat-log-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(120, 140, 170, 0.35);
+  border-radius: 10px;
+  background: rgba(5, 10, 20, 0.35);
+  max-height: 420px;
+  overflow: auto;
+}
+
+.matcore-combat-log-preview h3 {
+  margin-top: 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(180, 80, 70, 0.65);
+}
+
+.matcore-journal-content {
+  line-height: 1.35;
+}
+
+.matcore-journal-content h1,
+.matcore-journal-content h2,
+.matcore-journal-content h3 {
+  margin-top: 10px;
+}
+
+.matcore-journal-content p {
+  margin: 6px 0;
+}
+
+.matcore-panel select {
+  width: 100%;
+  min-height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(120, 140, 170, 0.55);
+  background: rgba(5, 10, 20, 0.75);
+  color: #f4f7ff;
+  padding: 4px 8px;
+}
