@@ -22,19 +22,22 @@ export class MatCoreDashboard extends Application {
     this.activeTab = "home";
   }
 
-  getData() {
+    async getData() {
+    const registeredModules = await game.matcore.registry.collectAll();
+
     const modules = collectModuleStatus();
     const activeCount = modules.filter(module => module.active).length;
 
     return {
-      activeTab: this.activeTab,
-      modules,
-      activeCount,
-      totalCount: modules.length,
-      heroStats: collectHeroStats(),
-      vitalityActors: collectVitalityActors()
+        activeTab: this.activeTab,
+        modules,
+        registeredModules,
+        activeCount,
+        totalCount: modules.length,
+        heroStats: collectHeroStats(),
+        vitalityActors: collectVitalityActors()
     };
-  }
+    }
 
   activateListeners(html) {
     super.activateListeners(html);
