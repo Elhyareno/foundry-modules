@@ -57,3 +57,28 @@
 .vn-transfer-dialog input::placeholder {
   color: #aeb8cc;
 }
+
+/* Transfer Vitality dialog, ciblage Foundry robuste */
+.app.window-app.dialog input[name="amount"],
+.app.window-app.dialog input[type="number"],
+.app.window-app.dialog input[type="text"],
+.app.window-app.dialog input {
+  color: #f4f7ff !important;
+  -webkit-text-fill-color: #f4f7ff !important;
+  background-color: #0b1220 !important;
+  border: 1px solid #7f8ca8 !important;
+  caret-color: #ffffff !important;
+}
+
+.app.window-app.dialog input:focus {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: #111c31 !important;
+  border-color: #5ab8ff !important;
+  box-shadow: 0 0 0 1px rgba(90, 184, 255, 0.45) !important;
+}
+
+.app.window-app.dialog input::placeholder {
+  color: #aeb8cc !important;
+  -webkit-text-fill-color: #aeb8cc !important;
+}
