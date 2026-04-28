@@ -155,7 +155,7 @@ export class MatCoreDashboard extends Application {
         amount
       });
 
-      await game.vnWidget.transferVitalityToTarget(source.id, target.id, amount);
+      await game.vnWidget.transferVitalityToTarget(source.uuid, target.uuid, amount);
 
       this.render();
     });
