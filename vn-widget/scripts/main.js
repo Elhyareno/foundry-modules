@@ -1,8 +1,11 @@
-import { MODULE_ID } from "./constants.js";
+import { MODULE_ID, SOCKET_NAME } from "./constants.js";
 import { renderVitalityWidget } from "./sheet.js";
 import { handleCombatUpdate } from "./combat.js";
 import { handlePreUpdateActorForRest } from "./rest.js";
-import { handleSpotHealingTrigger, registerSpotHealingChatListener } from "./reactions.js";
+import {
+  handleSpotHealingTrigger,
+  registerSpotHealingChatListener
+} from "./reactions.js";
 import {
   getVitalityMax,
   getVitalityValue,
@@ -11,7 +14,6 @@ import {
 } from "./resource.js";
 import { transferVitalityToActor } from "./healing.js";
 import { isVitalityActor } from "./actor.js";
-import { SOCKET_NAME } from "./constants.js";
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | Initialisation`);
@@ -35,6 +37,36 @@ Hooks.on("preUpdateActor", async (actor, changed, options, userId) => {
   await handlePreUpdateActorForRest(actor, changed, options, userId);
   await handleSpotHealingTrigger(actor, changed, options, userId);
 });
+
+function getResponsibleGM() {
+  return game.users.find(user => user.active && user.isGM);
+}
+
+function registerSocket() {
+  game.socket.on(SOCKET_NAME, async data => {
+    if (!game.user.isGM) return;
+
+    const responsibleGM = getResponsibleGM();
+    if (responsibleGM && game.user.id !== responsibleGM.id) return;
+
+    if (data?.type !== "TRANSFER_VITALITY") return;
+
+    const user = game.users.get(data.userId);
+    const source = game.actors.get(data.sourceActorId);
+    const target = game.actors.get(data.targetActorId);
+
+    if (!user || !source || !target) return;
+
+    if (!source.testUserPermission(user, "OWNER")) {
+      ui.notifications.warn(`${user.name} ne contrôle pas ${source.name}.`);
+      return;
+    }
+
+    if (!isVitalityActor(source)) return;
+
+    await transferVitalityToActor(source, target, data.amount);
+  });
+}
 
 function exposeApi() {
   game.vnWidget = {
@@ -99,54 +131,4 @@ function exposeApi() {
   };
 
   console.log(`${MODULE_ID} | API exposée sur game.vnWidget`);
-}
-
-function registerSocket() {
-  game.socket.on(SOCKET_NAME, async data => {
-    if (!game.user.isGM) return;
-    if (data.type !== "TRANSFER_VITALITY") return;
-
-    const user = game.users.get(data.userId);
-    const source = game.actors.get(data.sourceActorId);
-    const target = game.actors.get(data.targetActorId);
-
-    if (!user || !source || !target) return;
-
-    // Le joueur doit au moins posséder la source.
-    if (!source.testUserPermission(user, "OWNER")) {
-      ui.notifications.warn(`${user.name} a tenté un transfert sans droit sur la source.`);
-      return;
-    }
-
-    if (!isVitalityActor(source)) return;
-
-    await transferVitalityToActor(source, target, data.amount);
-  });
-}
-
-function getResponsibleGM() {
-  return game.users.find(u => u.active && u.isGM);
-}
-
-function registerSocket() {
-  game.socket.on(SOCKET_NAME, async data => {
-    if (!game.user.isGM) return;
-    if (game.user.id !== getResponsibleGM()?.id) return;
-    if (data?.type !== "TRANSFER_VITALITY") return;
-
-    const user = game.users.get(data.userId);
-    const source = game.actors.get(data.sourceActorId);
-    const target = game.actors.get(data.targetActorId);
-
-    if (!user || !source || !target) return;
-
-    if (!source.testUserPermission(user, "OWNER")) {
-      ui.notifications.warn(`${user.name} ne contrôle pas ${source.name}.`);
-      return;
-    }
-
-    if (!isVitalityActor(source)) return;
-
-    await transferVitalityToActor(source, target, data.amount);
-  });
 }
