@@ -37,3 +37,23 @@
   opacity: 0.8;
   font-size: 0.9em;
 }
+
+/* Dialog de transfert Vitality Network */
+.vn-transfer-dialog input,
+.vn-transfer-dialog input[type="number"],
+.vn-transfer-dialog input[type="text"] {
+  color: #f4f7ff;
+  background: #0b1220;
+  border: 1px solid #7f8ca8;
+}
+
+.vn-transfer-dialog input:focus {
+  color: #ffffff;
+  background: #111c31;
+  border-color: #5ab8ff;
+  box-shadow: 0 0 0 1px rgba(90, 184, 255, 0.45);
+}
+
+.vn-transfer-dialog input::placeholder {
+  color: #aeb8cc;
+}
