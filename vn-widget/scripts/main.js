@@ -44,6 +44,11 @@ function getResponsibleGM() {
 
 function registerSocket() {
   game.socket.on(SOCKET_NAME, async data => {
+    console.log(`${MODULE_ID} | Socket reçu`, {
+      isGM: game.user.isGM,
+      data
+    });
+
     if (!game.user.isGM) return;
 
     const responsibleGM = getResponsibleGM();
@@ -56,7 +61,7 @@ function registerSocket() {
     const target = await fromUuid(data.targetUuid);
 
     console.log(`${MODULE_ID} | Socket transfert reçu côté MJ`, {
-      userId: data.userId,
+      user: user?.name,
       source: source?.name,
       target: target?.name,
       amount: data.amount
@@ -71,7 +76,9 @@ function registerSocket() {
 
     if (!isVitalityActor(source)) return;
 
-    await transferVitalityToActor(source, target, data.amount);
+    const result = await transferVitalityToActor(source, target, data.amount);
+
+    console.log(`${MODULE_ID} | Résultat transfert socket MJ`, result);
   });
 }
 
@@ -130,19 +137,25 @@ function exposeApi() {
       if (!source || !target) return null;
       if (!isVitalityActor(source)) return null;
 
-      if (game.user.isGM || target.testUserPermission(game.user, "OWNER")) {
-        return transferVitalityToActor(source, target, amount);
+      if (!game.user.isGM) {
+        console.log(`${MODULE_ID} | Envoi socket transfert vers MJ`);
+
+        game.socket.emit(SOCKET_NAME, {
+          type: "TRANSFER_VITALITY",
+          userId: game.user.id,
+          sourceUuid,
+          targetUuid,
+          amount
+        });
+
+        return true;
       }
 
-      game.socket.emit(SOCKET_NAME, {
-        type: "TRANSFER_VITALITY",
-        userId: game.user.id,
-        sourceUuid,
-        targetUuid,
-        amount
-      });
+      const result = await transferVitalityToActor(source, target, amount);
 
-      return true;
+      console.log(`${MODULE_ID} | Résultat transfert direct MJ`, result);
+
+      return result;
     }
   };
 
