@@ -35,3 +35,32 @@ export async function logEventCreation(data) {
     content
   });
 }
+
+export async function logEventResult({ eventId, title, actorName, total, dc, degree }) {
+  const journal = await FCoreJournal.getOrCreate(JOURNAL_NAME);
+
+  const page = journal.pages.find(p =>
+    p.name === title && p.text.content.includes(eventId)
+  );
+
+  if (!page) {
+    FCoreUI.warn("Page de journal introuvable pour cet événement.");
+    return;
+  }
+
+  let content = page.text.content;
+
+  content = content.replace(
+    `<li><em>Aucun jet pour le moment.</em></li>`,
+    ""
+  );
+
+  content = content.replace(
+    `</ul>`,
+    `<li><strong>${actorName}</strong> : ${total} vs ${dc} — ${degree}</li></ul>`
+  );
+
+  await page.update({
+    "text.content": content
+  });
+}
