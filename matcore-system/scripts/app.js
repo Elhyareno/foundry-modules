@@ -156,13 +156,11 @@ export class MatCoreDashboard extends Application {
         amount
       });
 
-      await game.vnWidget.transferVitalityToTarget(
-        source.uuid,
-        targetToken.document.uuid,
-        amount
-      );
+      await game.vnWidget.transferVitalityToTarget(source.uuid, targetToken.document.uuid, amount);
 
-      this.render();
+      setTimeout(() => {
+        this.render(false);
+      }, 100);
     });
   }
 }
