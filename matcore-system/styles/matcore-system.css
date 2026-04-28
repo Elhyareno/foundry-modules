@@ -441,3 +441,21 @@
 .matcore-dialog-window .dialog-button {
   width: 100%;
 }
+
+/* MatCore - champ montant du transfert Vitality Network */
+.matcore-dashboard input[name="amount"],
+.matcore-dashboard input[type="number"],
+.matcore-dashboard .vn-transfer-dialog input {
+  color: #f4f7ff !important;
+  background: #0b1220 !important;
+  border: 1px solid #7f8ca8 !important;
+}
+
+.matcore-dashboard input[name="amount"]:focus,
+.matcore-dashboard input[type="number"]:focus,
+.matcore-dashboard .vn-transfer-dialog input:focus {
+  color: #ffffff !important;
+  background: #111c31 !important;
+  border-color: #5ab8ff !important;
+  box-shadow: 0 0 0 1px rgba(90, 184, 255, 0.45) !important;
+}
