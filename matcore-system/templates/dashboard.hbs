@@ -165,3 +165,36 @@
     </section>
   {{/if}}
 </section>
+<section class="matcore-section">
+  <h2>Modules enregistrés</h2>
+
+  <div class="matcore-modules">
+    {{#each registeredModules}}
+      <div class="matcore-module {{status}}">
+        <div class="module-header">
+          <i class="{{icon}}"></i>
+          <strong>{{label}}</strong>
+          <span class="type">{{type}}</span>
+        </div>
+
+        <div class="module-status">
+          État : {{status}}
+        </div>
+
+        <div class="module-data">
+          {{#if data}}
+            <pre>{{json data}}</pre>
+          {{/if}}
+        </div>
+
+        <div class="module-actions">
+          {{#each actions}}
+            <button data-module="{{../id}}" data-action="{{@key}}">
+              {{@key}}
+            </button>
+          {{/each}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</section>

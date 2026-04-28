@@ -77,5 +77,11 @@ export class MatCoreDashboard extends Application {
       await game.heroStats.resetAll();
       this.render();
     });
+    html.find("button[data-module]").click(async ev => {
+        const moduleId = ev.currentTarget.dataset.module;
+        const actionId = ev.currentTarget.dataset.action;
+
+        await game.matcore.runAction(moduleId, actionId);
+    });    
   }
 }

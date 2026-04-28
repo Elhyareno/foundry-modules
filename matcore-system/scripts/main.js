@@ -20,6 +20,9 @@ Hooks.once("ready", () => {
   };
 
   registerCoreModules();
+    Handlebars.registerHelper("json", function(context) {
+    return JSON.stringify(context, null, 2);
+    });  
 
   console.log(`${MODULE_ID} | API exposée sur game.matcore`);
 });
