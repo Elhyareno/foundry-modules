@@ -1,6 +1,6 @@
+import { FCoreChat } from "../../lib-foundry-core/scripts/index.js";
 import { getVitalityMax, getVitalityValue, setVitality } from "./resource.js";
 import { isVitalityActor, getSpellcastingDCRank } from "./actor.js";
-
 
 export async function handleCombatUpdate(combat, changed, options, userId) {
   if (!game.user.isGM) return;
@@ -19,12 +19,6 @@ export async function handleCombatUpdate(combat, changed, options, userId) {
   await regenerateVitality(actor);
 }
 
-
-/**
- * Regenerate Vitality Network for an actor.
- *
- * @param {Actor} actor - The actor to regenerate
- */
 async function regenerateVitality(actor) {
   const max = getVitalityMax(actor);
   const current = getVitalityValue(actor, max);
@@ -37,34 +31,24 @@ async function regenerateVitality(actor) {
 
   await setVitality(actor, next);
 
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor }),
-    content: `
-      <div class="vn-chat">
-        <div class="vn-chat-title">⚡ Vitality Network</div>
-        <p>
-          <strong>${actor.name}</strong> récupère 
-          <strong>${gained}</strong> point${gained > 1 ? "s" : ""} de Vitality Network.
-        </p>
-        <p>
-          Maîtrise du DD de sort : <strong>${getProficiencyLabel(rank)}</strong>
-          <small>(rang ${rank}, régénération +${regen})</small>
-        </p>
-        <p>
-          Réserve actuelle : <strong>${next}/${max}</strong>
-        </p>
-      </div>
-    `
-  });
+  await FCoreChat.send(`
+    <div class="vn-chat">
+      <div class="vn-chat-title">⚡ Vitality Network</div>
+      <p>
+        <strong>${actor.name}</strong> récupère
+        <strong>${gained}</strong> point${gained > 1 ? "s" : ""} de Vitality Network.
+      </p>
+      <p>
+        Maîtrise du DD de sort : <strong>${getProficiencyLabel(rank)}</strong>
+        <small>(rang ${rank}, régénération +${regen})</small>
+      </p>
+      <p>
+        Réserve actuelle : <strong>${next}/${max}</strong>
+      </p>
+    </div>
+  `, { actor });
 }
 
-
-/**
- * Get Vitality Network regeneration amount from spellcasting DC proficiency rank.
- *
- * @param {number} rank - Proficiency rank
- * @returns {number}
- */
 function getVitalityRegenFromRank(rank) {
   if (rank >= 4) return 8;
   if (rank >= 3) return 6;
@@ -72,13 +56,6 @@ function getVitalityRegenFromRank(rank) {
   return 4;
 }
 
-
-/**
- * Get a readable proficiency label.
- *
- * @param {number} rank - Proficiency rank
- * @returns {string}
- */
 function getProficiencyLabel(rank) {
   if (rank >= 4) return "légendaire";
   if (rank >= 3) return "maître";

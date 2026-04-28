@@ -1,3 +1,4 @@
+import { FCoreChat, FCoreUI } from "../../lib-foundry-core/scripts/index.js";
 import { isVitalityActor } from "./actor.js";
 import { getVitalityValue } from "./resource.js";
 import { hasFeat } from "./feats.js";
@@ -33,7 +34,7 @@ export async function handleSpotHealingTrigger(actor, changed, options, userId) 
 }
 
 function getPartyMysticsWithSpotHealing() {
-  return game.actors.filter((actor) =>
+  return game.actors.filter(actor =>
     actor.type === "character" &&
     isPartyMember(actor) &&
     isVitalityActor(actor) &&
@@ -44,19 +45,20 @@ function getPartyMysticsWithSpotHealing() {
 function isPartyMember(actor) {
   if (!actor) return false;
 
-  const parties = game.actors.filter((a) => a.type === "party");
+  const parties = game.actors.filter(a => a.type === "party");
 
   if (parties.length === 0) {
     return actor.hasPlayerOwner;
   }
 
-  return parties.some((party) => {
-    const members = party.system?.details?.members
-      ?? party.system?.members
-      ?? party.members
-      ?? [];
+  return parties.some(party => {
+    const members =
+      party.system?.details?.members ??
+      party.system?.members ??
+      party.members ??
+      [];
 
-    const memberIds = Array.from(members).map((member) => {
+    const memberIds = Array.from(members).map(member => {
       if (typeof member === "string") return member;
       return member.id ?? member.uuid ?? member.actor?.id ?? member.actorId;
     });
@@ -124,9 +126,9 @@ function getTokenPixelBounds(token, gridSize) {
 
   return {
     left: x,
-    right: x + (width * gridSize),
+    right: x + width * gridSize,
     top: y,
-    bottom: y + (height * gridSize)
+    bottom: y + height * gridSize
   };
 }
 
@@ -139,38 +141,37 @@ function getActiveToken(actor) {
 async function createSpotHealingPrompt(mystic, damagedActor, damageTaken) {
   const users = getActorOwners(mystic);
   const whisper = users.length > 0
-    ? users.map((u) => u.id)
-    : ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+    ? users.map(user => user.id)
+    : FCoreChat.getGMIds();
 
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor: mystic }),
-    whisper,
-    content: `
-      <div class="vn-chat vn-spot-healing-card">
-        <div class="vn-chat-title">🩹 Spot Healing</div>
-        <p>
-          <strong>${damagedActor.name}</strong>, allié lié adjacent, vient de subir
-          <strong>${damageTaken}</strong> point${damageTaken > 1 ? "s" : ""} de dégâts.
-        </p>
-        <p>
-          <strong>${mystic.name}</strong> peut utiliser <em>Transfer Vitality</em>.
-        </p>
-        <button
-          type="button"
-          data-action="${SPOT_HEALING_ACTION}"
-          data-mystic-id="${mystic.id}"
-          data-target-id="${damagedActor.id}"
-          data-damage-taken="${damageTaken}"
-        >
-          Utiliser Transfer Vitality
-        </button>
-      </div>
-    `
+  await FCoreChat.send(`
+    <div class="vn-chat vn-spot-healing-card">
+      <div class="vn-chat-title">🩹 Spot Healing</div>
+      <p>
+        <strong>${damagedActor.name}</strong>, allié lié adjacent, vient de subir
+        <strong>${damageTaken}</strong> point${damageTaken > 1 ? "s" : ""} de dégâts.
+      </p>
+      <p>
+        <strong>${mystic.name}</strong> peut utiliser <em>Transfer Vitality</em>.
+      </p>
+      <button
+        type="button"
+        data-action="${SPOT_HEALING_ACTION}"
+        data-mystic-id="${mystic.id}"
+        data-target-id="${damagedActor.id}"
+        data-damage-taken="${damageTaken}"
+      >
+        Utiliser Transfer Vitality
+      </button>
+    </div>
+  `, {
+    actor: mystic,
+    whisper
   });
 }
 
 function getActorOwners(actor) {
-  return game.users.filter((user) => {
+  return game.users.filter(user => {
     if (user.isGM) return false;
     return actor.testUserPermission(user, "OWNER");
   });
@@ -182,7 +183,7 @@ export function registerSpotHealingChatListener() {
   if (spotHealingListenerRegistered) return;
   spotHealingListenerRegistered = true;
 
-  document.addEventListener("click", async (event) => {
+  document.addEventListener("click", async event => {
     const button = event.target.closest(`button[data-action="${SPOT_HEALING_ACTION}"]`);
     if (!button) return;
 
@@ -203,7 +204,7 @@ async function handleSpotHealingButtonClick(button) {
   const damageTaken = Number(button.dataset.damageTaken ?? 0);
 
   if (!mystic || !target) {
-    ui.notifications.warn("Spot Healing : acteur introuvable.");
+    FCoreUI.warn("Spot Healing : acteur introuvable.");
     return;
   }
 
@@ -214,32 +215,29 @@ async function handleSpotHealingButtonClick(button) {
   const result = await transferVitalityToActor(mystic, target, amount);
 
   if (!result) {
-    ui.notifications.warn("Spot Healing : transfert impossible.");
+    FCoreUI.warn("Spot Healing : transfert impossible.");
     return;
   }
 
   button.disabled = true;
   button.textContent = "Transfer Vitality utilisé";
 
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor: mystic }),
-    content: `
-      <div class="vn-chat">
-        <div class="vn-chat-title">🩹 Spot Healing</div>
-        <p>
-          <strong>${mystic.name}</strong> transfère
-          <strong>${result.healed}</strong> point${result.healed > 1 ? "s" : ""}
-          de Vitality Network à <strong>${target.name}</strong>.
-        </p>
-        <p>
-          ${target.name} : <strong>${result.targetHP}/${result.targetMaxHP}</strong> PV.
-        </p>
-        <p>
-          Vitality restante : <strong>${result.remainingVitality}</strong>.
-        </p>
-      </div>
-    `
-  });
+  await FCoreChat.send(`
+    <div class="vn-chat">
+      <div class="vn-chat-title">🩹 Spot Healing</div>
+      <p>
+        <strong>${mystic.name}</strong> transfère
+        <strong>${result.healed}</strong> point${result.healed > 1 ? "s" : ""}
+        de Vitality Network à <strong>${target.name}</strong>.
+      </p>
+      <p>
+        ${target.name} : <strong>${result.targetHP}/${result.targetMaxHP}</strong> PV.
+      </p>
+      <p>
+        Vitality restante : <strong>${result.remainingVitality}</strong>.
+      </p>
+    </div>
+  `, { actor: mystic });
 }
 
 async function askSpotHealingAmount(mystic, target, damageTaken) {
@@ -247,7 +245,7 @@ async function askSpotHealingAmount(mystic, target, damageTaken) {
   const hp = target.system?.attributes?.hp;
 
   if (!hp) {
-    ui.notifications.warn("Spot Healing : les PV de la cible sont introuvables.");
+    FCoreUI.warn("Spot Healing : les PV de la cible sont introuvables.");
     return null;
   }
 
@@ -256,11 +254,11 @@ async function askSpotHealingAmount(mystic, target, damageTaken) {
   const suggestedAmount = Math.max(0, Math.min(damageTaken, maxAmount));
 
   if (maxAmount <= 0) {
-    ui.notifications.warn("Spot Healing : aucun soin possible.");
+    FCoreUI.warn("Spot Healing : aucun soin possible.");
     return null;
   }
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     new Dialog({
       title: "Spot Healing",
       content: `
@@ -291,7 +289,7 @@ async function askSpotHealingAmount(mystic, target, damageTaken) {
         confirm: {
           icon: '<i class="fas fa-bolt"></i>',
           label: "Transférer",
-          callback: (html) => {
+          callback: html => {
             const root = html instanceof HTMLElement ? html : html[0];
             const input = root.querySelector('input[name="amount"]');
             const rawAmount = Number(input?.value ?? 0);
@@ -308,22 +306,16 @@ async function askSpotHealingAmount(mystic, target, damageTaken) {
         max: {
           icon: '<i class="fas fa-heart"></i>',
           label: "Maximum",
-          callback: () => {
-            resolve(maxAmount);
-          }
+          callback: () => resolve(maxAmount)
         },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
           label: "Annuler",
-          callback: () => {
-            resolve(null);
-          }
+          callback: () => resolve(null)
         }
       },
       default: "confirm",
-      close: () => {
-        resolve(null);
-      }
+      close: () => resolve(null)
     }).render(true);
   });
 }
