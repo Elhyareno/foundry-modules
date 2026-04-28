@@ -35,6 +35,7 @@ export class GaiaGenerator {
         <p><strong>Biome :</strong> ${biome}</p>
         <p>${event.description}</p>
         <p><strong>Danger :</strong> ${event.danger}</p>
+        ${event.xp > 0 ? `<p><strong>Récompense XP :</strong> ${event.xp}</p>` : ''}
         <p><strong>Tags :</strong> ${tags}</p>
       </div>
     `;
@@ -63,6 +64,7 @@ export class GaiaGenerator {
         <h2>${curiosity.title}</h2>
         <p><strong>Biome :</strong> ${biome}</p>
         <p>${curiosity.description}</p>
+        ${curiosity.xp > 0 ? `<p><strong>Récompense XP :</strong> ${curiosity.xp}</p>` : ''}
         <p><strong>Tags :</strong> ${tags}</p>
       </div>
     `;
@@ -93,6 +95,7 @@ export class GaiaGenerator {
         <p><strong>Biome :</strong> ${biome}</p>
         <p>${resource.description}</p>
         <p><strong>Valeur :</strong> ${resource.value}</p>
+        ${resource.xp > 0 ? `<p><strong>Récompense XP :</strong> ${resource.xp}</p>` : ''}
         <p><strong>Tags :</strong> ${tags}</p>
       </div>
     `;

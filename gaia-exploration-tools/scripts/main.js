@@ -2,6 +2,7 @@ import { GaiaGenerator } from "./classes/GaiaGenerator.js";
 import { GaiaExplorationDialog } from "./ui/GaiaExplorationDialog.js";
 import { GaiaExplorationService } from "./services/GaiaExplorationService.js";
 import { GaiaEntryDialog } from "./ui/GaiaEntryDialog.js";
+import { GaiaEntryPickerDialog } from "./ui/GaiaEntryPickerDialog.js";
 
 Hooks.once("init", () => {
   game.settings.register("gaia-exploration-tools", "excludedEntries", {
@@ -31,6 +32,10 @@ Hooks.once("ready", () => {
   service.openEntryDialog = function () {
     new GaiaEntryDialog().render(true);
   };
+
+  service.openEntryPickerDialog = function () {
+    new GaiaEntryPickerDialog().render(true);
+  };  
 
   game.gaiaExploration = service;
 

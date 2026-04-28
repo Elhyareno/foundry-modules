@@ -129,7 +129,7 @@ export class GaiaExplorationService {
 
     if (!config) return;
 
-    const entries = this.generator[this.typeToProperty[type]]?.[biome];
+    const entries = this.getMergedEntries(type, biome);
 
     const entry = entries?.find(e => e.id === entryId);
 
@@ -166,6 +166,7 @@ export class GaiaExplorationService {
           <p><em>${intro} ${dateLabel}. Les instruments hésitent encore, mais la découverte est indéniable.</em></p>
           <p><strong>Type :</strong> ${type}</p>
           <p><strong>Biome :</strong> ${biome}</p>
+          <p><strong>Récompense XP :</strong> ${entry.xp ?? 0}</p>
           <p>${entry.description}</p>
         `
       }
@@ -204,4 +205,102 @@ export class GaiaExplorationService {
 
     ui.notifications.info("Entrée ajoutée !");
   }
+
+  getMergedEntries(type, biome) {
+    const baseEntries = this.generator[this.typeToProperty[type]]?.[biome] ?? [];
+
+    const custom = game.settings.get("gaia-exploration-tools", "customEntries") ?? {};
+    const customEntries = custom[type]?.[biome] ?? [];
+
+    const uniqueEntries = new Map();
+
+    for (const entry of [...baseEntries, ...customEntries]) {
+      uniqueEntries.set(entry.id, entry);
+    }
+
+    return Array.from(uniqueEntries.values());
+  }
+
+  getAllEntriesForPicker() {
+    const typeLabels = {
+      event: "Événement",
+      curiosity: "Curiosité",
+      resource: "Ressource"
+    };
+
+    const result = [];
+
+    for (const [type, property] of Object.entries(this.typeToProperty)) {
+      const tablesByBiome = this.generator[property] ?? {};
+
+      for (const biome of Object.keys(tablesByBiome)) {
+        const entries = this.getMergedEntries(type, biome);
+
+        for (const entry of entries) {
+          result.push({
+            key: `${type}::${biome}::${entry.id}`,
+            id: entry.id,
+            type,
+            typeLabel: typeLabels[type] ?? type,
+            biome,
+            title: entry.title,
+            xp: entry.xp ?? 0
+          });
+        }
+      }
+    }
+
+    return result.sort((a, b) => {
+      return `${a.typeLabel} ${a.biome} ${a.title}`.localeCompare(
+        `${b.typeLabel} ${b.biome} ${b.title}`,
+        "fr"
+      );
+    });
+  }
+
+  async launchEntryByKey(entryKey, gmOnly = false) {
+    const [type, biome, entryId] = entryKey.split("::");
+
+    const config = this.rollTypes[type];
+
+    if (!config) {
+      ui.notifications.warn(`Type de tirage inconnu : ${type}`);
+      return null;
+    }
+
+    const entry = this.getMergedEntries(type, biome).find(e => e.id === entryId);
+
+    if (!entry) {
+      ui.notifications.warn("Entrée introuvable.");
+      return null;
+    }
+
+    const content = config.format(entry, biome);
+
+    const journalButton = `
+      <button
+        type="button"
+        class="gaia-add-journal"
+        data-roll-type="${type}"
+        data-biome="${biome}"
+        data-entry-id="${entry.id}">
+        Ajouter au journal
+      </button>
+    `;
+
+    const removeButton = `
+      <button
+        type="button"
+        class="gaia-remove-entry"
+        data-roll-type="${type}"
+        data-biome="${biome}"
+        data-entry-id="${entry.id}">
+        Retirer de la table
+      </button>
+    `;
+
+    await envoyerMessageChat(content + journalButton + removeButton, gmOnly);
+
+    return entry;
+  }  
 }
