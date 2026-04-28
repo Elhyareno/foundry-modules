@@ -156,50 +156,79 @@ async function askVitalityTransferAmount(source, target) {
   }
 
   return new Promise(resolve => {
-    new Dialog({
-      title: "Transfer Vitality",
-      content: `
-        <form>
-          <p>
-            <strong>${source.name}</strong> peut transférer jusqu’à
-            <strong>${maxAmount}</strong> point${maxAmount > 1 ? "s" : ""}.
-          </p>
+    new Dialog(
+      {
+        title: "Transfer Vitality",
+        content: `
+          <section class="matcore-dialog-body">
+            <header class="matcore-dialog-header">
+              <h2>Transfer Vitality</h2>
+              <p>Canalisation du réseau vital.</p>
+            </header>
 
-          <p>
-            Cible : <strong>${target.name}</strong><br>
-            PV manquants : <strong>${missing}</strong><br>
-            Vitality disponible : <strong>${sourceData.value}</strong>
-          </p>
+            <div class="matcore-dialog-card">
+              <p>
+                <strong>${source.name}</strong> peut transférer jusqu’à
+                <strong>${maxAmount}</strong> point${maxAmount > 1 ? "s" : ""}.
+              </p>
 
-          <div class="form-group">
-            <label>Montant</label>
-            <input type="number" name="amount" min="1" max="${maxAmount}" value="${maxAmount}" />
-          </div>
-        </form>
-      `,
-      buttons: {
-        confirm: {
-          label: "Transférer",
-          callback: html => {
-            const root = html instanceof HTMLElement ? html : html[0];
-            const input = root.querySelector("input[name='amount']");
-            const raw = Number(input?.value ?? 0);
+              <div class="matcore-dialog-stats">
+                <div>
+                  <span>Cible</span>
+                  <strong>${target.name}</strong>
+                </div>
 
-            if (!Number.isFinite(raw) || raw <= 0) {
-              resolve(null);
-              return;
+                <div>
+                  <span>PV manquants</span>
+                  <strong>${missing}</strong>
+                </div>
+
+                <div>
+                  <span>Vitality disponible</span>
+                  <strong>${sourceData.value}</strong>
+                </div>
+              </div>
+
+              <div class="form-group matcore-dialog-field">
+                <label>Montant</label>
+                <input
+                  type="number"
+                  name="amount"
+                  min="1"
+                  max="${maxAmount}"
+                  value="${maxAmount}"
+                />
+              </div>
+            </div>
+          </section>
+        `,
+        buttons: {
+          confirm: {
+            label: "Transférer",
+            callback: html => {
+              const root = html instanceof HTMLElement ? html : html[0];
+              const input = root.querySelector("input[name='amount']");
+              const raw = Number(input?.value ?? 0);
+
+              if (!Number.isFinite(raw) || raw <= 0) {
+                resolve(null);
+                return;
+              }
+
+              resolve(Math.max(1, Math.min(Math.floor(raw), maxAmount)));
             }
-
-            resolve(Math.max(1, Math.min(Math.floor(raw), maxAmount)));
+          },
+          cancel: {
+            label: "Annuler",
+            callback: () => resolve(null)
           }
         },
-        cancel: {
-          label: "Annuler",
-          callback: () => resolve(null)
-        }
+        default: "confirm",
+        close: () => resolve(null)
       },
-      default: "confirm",
-      close: () => resolve(null)
-    }).render(true);
+      {
+        classes: ["matcore-dialog-window"]
+      }
+    ).render(true);
   });
 }
