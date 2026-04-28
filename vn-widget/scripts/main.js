@@ -58,7 +58,7 @@ function registerSocket() {
 
     const user = game.users.get(data.userId);
     const source = await fromUuid(data.sourceUuid);
-    const target = await fromUuid(data.targetUuid);
+    const target = await resolveActorFromUuid(targetUuid);
 
     console.log(`${MODULE_ID} | Socket transfert reçu côté MJ`, {
       user: user?.name,
@@ -160,4 +160,18 @@ function exposeApi() {
   };
 
   console.log(`${MODULE_ID} | API exposée sur game.vnWidget`);
+}
+
+async function resolveActorFromUuid(uuid) {
+  const doc = await fromUuid(uuid);
+
+  if (!doc) return null;
+
+  // TokenDocument ciblé
+  if (doc.actor) return doc.actor;
+
+  // Actor classique
+  if (doc.documentName === "Actor") return doc;
+
+  return null;
 }

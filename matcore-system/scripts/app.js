@@ -139,7 +139,8 @@ export class MatCoreDashboard extends Application {
         return;
       }
 
-      const target = Array.from(game.user.targets)[0]?.actor;
+      const targetToken = Array.from(game.user.targets)[0];
+      const target = targetToken?.actor;
 
       if (!target) {
         ui.notifications.warn("Cible un token à soigner.");
@@ -155,7 +156,11 @@ export class MatCoreDashboard extends Application {
         amount
       });
 
-      await game.vnWidget.transferVitalityToTarget(source.uuid, target.uuid, amount);
+      await game.vnWidget.transferVitalityToTarget(
+        source.uuid,
+        targetToken.document.uuid,
+        amount
+      );
 
       this.render();
     });
