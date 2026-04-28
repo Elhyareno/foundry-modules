@@ -9,9 +9,7 @@ export class PF2eRolls {
 
     return roll;
   }
-}
 
-export class PF2eRolls {
   static getDegreeOfSuccess(d20, total, dc) {
     let degree = total >= dc + 10
       ? "criticalSuccess"
