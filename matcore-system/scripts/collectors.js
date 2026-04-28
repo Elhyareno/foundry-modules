@@ -56,21 +56,54 @@ export function collectHeroStats() {
       totalRolls: 0,
       natural20: 0,
       natural1: 0,
+      successRate: 0,
       heroGained: 0,
-      heroUsed: 0
+      heroUsed: 0,
+      actors: [],
+      bestActor: null,
+      worstActor: null
     };
   }
 
   const stats = game.heroStats.getStats?.();
   const hero = game.heroStats.getHeroSummary?.();
 
+  const actors = Array.from(stats?.actors ?? [])
+    .map(actor => ({
+      name: actor.name,
+      totalRolls: actor.totalRolls ?? 0,
+      averageD20: actor.averageD20 ?? 0,
+      successRate: actor.successRate ?? 0,
+      natural20: actor.natural20 ?? 0,
+      natural1: actor.natural1 ?? 0,
+      criticalSuccesses: actor.criticalSuccesses ?? 0,
+      criticalFailures: actor.criticalFailures ?? 0
+    }))
+    .sort((a, b) => b.totalRolls - a.totalRolls);
+
+  const actorsWithRolls = actors.filter(actor => actor.totalRolls > 0);
+
+  const bestActor = actorsWithRolls.length
+    ? [...actorsWithRolls].sort((a, b) => b.averageD20 - a.averageD20)[0]
+    : null;
+
+  const worstActor = actorsWithRolls.length
+    ? [...actorsWithRolls].sort((a, b) => a.averageD20 - b.averageD20)[0]
+    : null;
+
   return {
     available: true,
     totalRolls: stats?.total ?? stats?.totals?.rolls ?? 0,
     natural20: stats?.natural20 ?? stats?.totals?.natural20 ?? 0,
     natural1: stats?.natural1 ?? stats?.totals?.natural1 ?? 0,
+    successRate: stats?.successRate ?? 0,
+    criticalSuccesses: stats?.criticalSuccesses ?? stats?.totals?.criticalSuccesses ?? 0,
+    criticalFailures: stats?.criticalFailures ?? stats?.totals?.criticalFailures ?? 0,
     heroGained: hero?.gained ?? 0,
-    heroUsed: hero?.used ?? 0
+    heroUsed: hero?.used ?? 0,
+    actors,
+    bestActor,
+    worstActor
   };
 }
 
