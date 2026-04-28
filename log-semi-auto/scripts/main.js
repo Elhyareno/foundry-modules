@@ -33,8 +33,8 @@ Hooks.on("deleteCombat", async (combat) => {
   await finishCombatLog(combat);
 });
 
-Hooks.on("renderChatMessageHTML", (message, html) => {
-  html.querySelectorAll?.("[data-action='lsa-save-combat']").forEach(button => {
+Hooks.on("renderChatMessage", (message, html) => {
+  html[0]?.querySelectorAll?.("[data-action='lsa-save-combat']")?.forEach(button => {
     button.addEventListener("click", async () => {
       const log = message.getFlag(MODULE_ID, "combatLog");
 
