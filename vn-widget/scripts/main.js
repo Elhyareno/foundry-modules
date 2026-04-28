@@ -58,7 +58,7 @@ function registerSocket() {
 
     const user = game.users.get(data.userId);
     const source = await fromUuid(data.sourceUuid);
-    const target = await resolveActorFromUuid(targetUuid);
+    const target = await resolveActorFromUuid(data.targetUuid);
 
     console.log(`${MODULE_ID} | Socket transfert reçu côté MJ`, {
       user: user?.name,
