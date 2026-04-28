@@ -1,0 +1,21 @@
+{
+  "id": "lib-pf2e-tools",
+  "title": "Lib PF2e Tools",
+  "description": "Librairie utilitaire pour PF2e, SF2e et systèmes dérivés de PF2e.",
+  "version": "0.1.0",
+  "authors": [{ "name": "Mat" }],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": ["scripts/index.js"],
+  "relationships": {
+    "requires": [
+      {
+        "id": "lib-foundry-core",
+        "type": "module",
+        "compatibility": {}
+      }
+    ]
+  }
+}
