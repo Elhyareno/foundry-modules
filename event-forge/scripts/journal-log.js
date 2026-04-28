@@ -1,104 +1,37 @@
+import { FCoreJournal, FCoreUI } from "../../lib-foundry-core/scripts/index.js";
+
 const JOURNAL_NAME = "Event Forge - Journal des événements";
 
-export async function getOrCreateJournal() {
-  let journal = game.journal.find(j => j.name === JOURNAL_NAME);
+export async function logEventCreation(data) {
+  const journal = await FCoreJournal.getOrCreate(JOURNAL_NAME);
 
-  if (!journal) {
-    journal = await JournalEntry.create({
-      name: JOURNAL_NAME,
-      ownership: {
-        default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
-        [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
-      }
-    });
-  }
+  const content = `
+    <h1>${data.title}</h1>
+    <p><strong>ID :</strong> ${data.eventId}</p>
 
-  return journal;
-}
+    <p><strong>Compétence :</strong> ${data.skillLabel}</p>
+    <p><strong>Niveau :</strong> ${data.eventLevel}</p>
+    <p><strong>DD de base :</strong> ${data.baseDc}</p>
 
-export async function logEventCreation({
-  eventId,
-  title,
-  skillLabel,
-  dc,
-  fluff,
-  success,
-  failure,
-  criticalSuccess,
-  criticalFailure,
-  testDisplay,
-  difficultyLabel,
-  eventLevel,
-  baseDc,
-  difficultyAdjustment,
-  rarity
-}) {
-  const journal = await getOrCreateJournal();
+    <p><strong>Difficulté :</strong>
+      ${data.difficultyLabel}
+      (${data.difficultyAdjustment >= 0 ? "+" : ""}${data.difficultyAdjustment})
+    </p>
 
-  await JournalEntryPage.create({
-    name: title,
-    type: "text",
-    text: {
-      content: `
-        <h1>${title}</h1>
-        <p><strong>ID :</strong> ${eventId}</p>
-        <p><strong>Compétence :</strong> ${foundry.utils.escapeHTML(skillLabel)}</p>
-        <p><strong>Niveau de l’événement :</strong> ${eventLevel}</p>
-        <p><strong>DD de base :</strong> ${baseDc}</p>
-        <p><strong>Difficulté relative :</strong> ${foundry.utils.escapeHTML(difficultyLabel)} (${difficultyAdjustment >= 0 ? "+" : ""}${difficultyAdjustment})</p>
-        <p><strong>Rareté indicative :</strong> ${foundry.utils.escapeHTML(rarity)}</p>
-        <p><strong>DD final :</strong> ${dc}</p>
-        <p><strong>DD caché aux joueurs :</strong> ${hideDc ? "Oui" : "Non"}</p>
+    <p><strong>Rareté :</strong> ${data.rarity}</p>
+    <p><strong>DD final :</strong> ${data.dc}</p>
 
-        <h2>Ambiance</h2>
-        <p>${fluff}</p>
+    <h2>Ambiance</h2>
+    <p>${data.fluff}</p>
 
-        <h2>Réussite critique</h2>
-        <p>${foundry.utils.escapeHTML(criticalSuccess)}</p>
+    <h2>Résultats</h2>
+    <ul id="event-results-${data.eventId}">
+      <li><em>Aucun jet pour le moment.</em></li>
+    </ul>
+  `;
 
-        <h2>Réussite</h2>
-        <p>${foundry.utils.escapeHTML(success)}</p>
-
-        <h2>Échec</h2>
-        <p>${foundry.utils.escapeHTML(failure)}</p>
-
-        <h2>Échec critique</h2>
-        <p>${foundry.utils.escapeHTML(criticalFailure)}</p>
-
-        <h2>Résultats</h2>
-        <ul id="event-results-${eventId}">
-          <li><em>Aucun jet pour le moment.</em></li>
-        </ul>
-      `
-    }
-  }, { parent: journal });
-}
-
-export async function logEventResult({ eventId, title, actorName, total, dc, degree }) {
-  const journal = await getOrCreateJournal();
-
-  const page = journal.pages.find(p => {
-    return p.name === title && p.text.content.includes(eventId);
-  });
-
-  if (!page) {
-    ui.notifications.warn("Page de journal introuvable pour cet événement.");
-    return;
-  }
-
-  let content = page.text.content;
-
-  content = content.replace(
-    `<li><em>Aucun jet pour le moment.</em></li>`,
-    ""
-  );
-
-  content = content.replace(
-    `</ul>`,
-    `<li><strong>${actorName}</strong> : ${total} contre DD ${dc} — ${degree}</li></ul>`
-  );
-
-  await page.update({
-    "text.content": content
+  await FCoreJournal.addTextPage(journal, {
+    name: data.title,
+    content
   });
 }
