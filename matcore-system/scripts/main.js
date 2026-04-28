@@ -25,4 +25,5 @@ Hooks.once("ready", () => {
     });  
 
   console.log(`${MODULE_ID} | API exposée sur game.matcore`);
+  Hooks.callAll("matcoreReady", game.matcore);
 });

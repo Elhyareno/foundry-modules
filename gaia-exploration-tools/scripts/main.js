@@ -39,7 +39,14 @@ Hooks.once("ready", () => {
   };
 
   game.gaiaExploration = service;
-  registerGaiaInMatCore();
+
+  Hooks.once("matcoreReady", () => {
+    registerGaiaInMatCore();
+  });
+
+  if (game.matcore?.registerModule) {
+    registerGaiaInMatCore();
+  }
 
   ui.notifications.info("Gaïa Exploration Tools chargé.");
 });
