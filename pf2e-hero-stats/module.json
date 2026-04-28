@@ -39,5 +39,11 @@
         "type": "module"
       }
     ]
-  }
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/hero-stats.css"
+  ]
 }
