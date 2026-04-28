@@ -1,0 +1,109 @@
+<section class="matcore-shell">
+  <header class="matcore-header">
+    <div>
+      <h1>MatCore System</h1>
+      <p>Console visuelle de l’écosystème Foundry.</p>
+    </div>
+
+    <button type="button" class="matcore-button" data-action="refresh">
+      Rafraîchir
+    </button>
+  </header>
+
+  <nav class="matcore-tabs">
+    <button class="{{#if (eq activeTab 'home')}}active{{/if}}" data-tab="home">Accueil</button>
+    <button class="{{#if (eq activeTab 'hero')}}active{{/if}}" data-tab="hero">Hero Stats</button>
+    <button class="{{#if (eq activeTab 'vitality')}}active{{/if}}" data-tab="vitality">Vitality Network</button>
+    <button class="{{#if (eq activeTab 'combat')}}active{{/if}}" data-tab="combat">Combat Log</button>
+    <button class="{{#if (eq activeTab 'events')}}active{{/if}}" data-tab="events">Event Forge</button>
+    <button class="{{#if (eq activeTab 'gaia')}}active{{/if}}" data-tab="gaia">Gaïa</button>
+  </nav>
+
+  {{#if (eq activeTab 'home')}}
+    <section class="matcore-panel">
+      <h2>État de l’écosystème</h2>
+      <p class="matcore-lead">
+        {{activeCount}} module(s) actif(s) sur {{totalCount}} surveillé(s).
+      </p>
+
+      <div class="matcore-grid">
+        {{#each modules}}
+          <article class="matcore-card {{#if active}}active{{else}}inactive{{/if}}">
+            <div class="matcore-card-title">
+              <span>{{label}}</span>
+              {{#if active}}
+                <strong class="matcore-status ok">Actif</strong>
+              {{else}}
+                <strong class="matcore-status ko">Inactif</strong>
+              {{/if}}
+            </div>
+            <p>{{type}} · v{{version}}</p>
+          </article>
+        {{/each}}
+      </div>
+    </section>
+  {{/if}}
+
+  {{#if (eq activeTab 'hero')}}
+    <section class="matcore-panel">
+      <h2>Hero Stats</h2>
+
+      {{#if heroStats.available}}
+        <div class="matcore-stats">
+          <div><span>Jets</span><strong>{{heroStats.totalRolls}}</strong></div>
+          <div><span>20 naturels</span><strong>{{heroStats.natural20}}</strong></div>
+          <div><span>1 naturels</span><strong>{{heroStats.natural1}}</strong></div>
+          <div><span>Héroïsme gagné</span><strong>{{heroStats.heroGained}}</strong></div>
+          <div><span>Héroïsme dépensé</span><strong>{{heroStats.heroUsed}}</strong></div>
+        </div>
+
+        <div class="matcore-actions">
+          <button type="button" data-action="give-hero-point-party">Donner 1 point au groupe</button>
+          <button type="button" data-action="reset-hero-stats">Reset Hero Stats</button>
+        </div>
+      {{else}}
+        <p>Hero Stats n’est pas actif ou n’expose pas encore son API.</p>
+      {{/if}}
+    </section>
+  {{/if}}
+
+  {{#if (eq activeTab 'vitality')}}
+    <section class="matcore-panel">
+      <h2>Vitality Network</h2>
+
+      {{#if vitalityActors.length}}
+        <div class="matcore-list">
+          {{#each vitalityActors}}
+            <article class="matcore-line">
+              <strong>{{name}}</strong>
+              <span>{{value}} / {{max}}</span>
+            </article>
+          {{/each}}
+        </div>
+      {{else}}
+        <p>Aucun Mystic avec Vitality Network détecté.</p>
+      {{/if}}
+    </section>
+  {{/if}}
+
+  {{#if (eq activeTab 'combat')}}
+    <section class="matcore-panel">
+      <h2>Combat Log</h2>
+      <p>Vue prête pour les derniers combats, les résumés et l’accès au journal.</p>
+    </section>
+  {{/if}}
+
+  {{#if (eq activeTab 'events')}}
+    <section class="matcore-panel">
+      <h2>Event Forge</h2>
+      <p>Vue prête pour les derniers événements et raccourcis de création.</p>
+    </section>
+  {{/if}}
+
+  {{#if (eq activeTab 'gaia')}}
+    <section class="matcore-panel">
+      <h2>Gaïa Exploration Tools</h2>
+      <p>Vue prête pour biomes, curiosités, ressources et exploration.</p>
+    </section>
+  {{/if}}
+</section>

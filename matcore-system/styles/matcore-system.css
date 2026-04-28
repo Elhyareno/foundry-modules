@@ -1,0 +1,161 @@
+.matcore-system .window-content {
+  padding: 0;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+.matcore-shell {
+  padding: 18px;
+}
+
+.matcore-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+}
+
+.matcore-header h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+}
+
+.matcore-header p {
+  margin: 4px 0 0;
+  color: #cbd5e1;
+}
+
+.matcore-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.matcore-tabs button,
+.matcore-button,
+.matcore-actions button {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.matcore-tabs button.active {
+  background: rgba(59, 130, 246, 0.35);
+  border-color: rgba(96, 165, 250, 0.8);
+}
+
+.matcore-panel {
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.matcore-panel h2 {
+  margin-top: 0;
+}
+
+.matcore-lead {
+  color: #cbd5e1;
+}
+
+.matcore-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.matcore-card {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(30, 41, 59, 0.7);
+}
+
+.matcore-card.active {
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.matcore-card.inactive {
+  opacity: 0.65;
+}
+
+.matcore-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.matcore-card p {
+  margin-bottom: 0;
+  color: #cbd5e1;
+}
+
+.matcore-status {
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.matcore-status.ok {
+  background: rgba(22, 163, 74, 0.25);
+  color: #86efac;
+}
+
+.matcore-status.ko {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+}
+
+.matcore-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.matcore-stats div,
+.matcore-line {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.matcore-stats span {
+  display: block;
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.matcore-stats strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+}
+
+.matcore-list {
+  display: grid;
+  gap: 8px;
+}
+
+.matcore-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.matcore-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}

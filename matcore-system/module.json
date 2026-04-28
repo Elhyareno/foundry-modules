@@ -1,0 +1,27 @@
+{
+  "id": "matcore-system",
+  "title": "MatCore System",
+  "description": "Hub visuel pour monitorer les modules de l'écosystème MatCore.",
+  "version": "0.1.0",
+  "authors": [{ "name": "Mat" }],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "relationships": {
+    "requires": [
+      { "id": "lib-foundry-core", "type": "module" },
+      { "id": "lib-pf2e-tools", "type": "module" }
+    ],
+    "optional": [
+      { "id": "event-forge", "type": "module" },
+      { "id": "log-semi-auto", "type": "module" },
+      { "id": "vn-widget", "type": "module" },
+      { "id": "pf2e-hero-stats", "type": "module" },
+      { "id": "gaia-exploration-tools", "type": "module" }
+    ]
+  },
+  "esmodules": ["scripts/main.js"],
+  "styles": ["styles/matcore-system.css"],
+  "templates": ["templates/dashboard.hbs"]
+}
