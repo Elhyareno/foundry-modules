@@ -2,6 +2,7 @@ import { creerListeBiomesHtml, trouverBiome, creerMessageBiomeInconnuHtml } from
 import { envoyerMessageChat } from "../utils/chat.js";
 import { createRollTypes } from "../config/rollTypes.js";
 import { getWorldTimeLabel } from "../utils/worldTime.js";
+import { GaiaXpService } from "./GaiaXpService.js";
 
 export class GaiaExplorationService {
   constructor(generator) {
@@ -91,6 +92,9 @@ export class GaiaExplorationService {
     `;
 
     await envoyerMessageChat(content + rerollButton + journalButton + removeButton, gmOnly);
+    if(!gmOnly) {
+      await GaiaXpService.awardEntryXP(result, result.title);
+    }
     return result;
   }
 
@@ -300,6 +304,9 @@ export class GaiaExplorationService {
     `;
 
     await envoyerMessageChat(content + journalButton + removeButton, gmOnly);
+    if(!gmOnly) {
+      await GaiaXpService.awardEntryXP(entry, entry.title);
+    }
 
     return entry;
   }  

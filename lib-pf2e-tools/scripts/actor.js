@@ -143,4 +143,64 @@ export class PF2eActor {
 
     return ranks[textValue] ?? null;
   }
+ 
+  static getXP(actor) {
+    return Number(actor?.system?.details?.xp?.value ?? 0);
+  }
+
+  static getXPMax(actor) {
+    return Number(actor?.system?.details?.xp?.max ?? 1000);
+  }
+
+  static async addXP(actor, amount) {
+    const xp = Number(amount ?? 0);
+
+    if (!actor || !Number.isFinite(xp) || xp <= 0) {
+      return null;
+    }
+
+    const currentXP = this.getXP(actor);
+    const newXP = currentXP + xp;
+
+    return actor.update({
+      "system.details.xp.value": newXP
+    });
+  }
+
+  static getPlayerCharacters() {
+    return game.actors.filter(actor => {
+      if (actor.type !== "character") return false;
+
+      return game.users.some(user => {
+        if (user.isGM) return false;
+        if (!user.character) return false;
+
+        return user.character.id === actor.id;
+      });
+    });
+  }
+
+  static async addXPToParty(amount, reason = "Récompense d’exploration") {
+    const xp = Number(amount ?? 0);
+
+    if (!Number.isFinite(xp) || xp <= 0) {
+      return [];
+    }
+
+    const actors = this.getPlayerCharacters();
+
+    if (!actors.length) {
+      ui.notifications.warn("Aucun personnage joueur trouvé pour recevoir l’XP.");
+      return [];
+    }
+
+    const updated = [];
+
+    for (const actor of actors) {
+      await this.addXP(actor, xp);
+      updated.push(actor);
+    }
+
+    return updated;
+  }  
 }
