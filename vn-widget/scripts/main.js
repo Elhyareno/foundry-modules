@@ -51,20 +51,40 @@ async function resolveActorFromUuid(uuidOrId) {
   const doc = await fromUuid(uuidOrId);
   if (!doc) return null;
 
-  // TokenDocument ou token-like : l’acteur est porté par le token.
   if (doc.actor) return doc.actor;
-
-  // Actor classique.
   if (doc.documentName === "Actor") return doc;
 
   return null;
 }
 
+function getActorClassSlug(actor) {
+  const classItem = actor.items?.find(item => item.type === "class");
+  return String(classItem?.slug ?? classItem?.system?.slug ?? classItem?.name ?? "").toLowerCase();
+}
+
+function hasMysticClass(actor) {
+  const slug = getActorClassSlug(actor);
+  return slug.includes("mystic") || slug.includes("mystique");
+}
+
+function hasVitalityFlag(actor) {
+  const flag = actor.getFlag?.(MODULE_ID, "vitalityNetwork");
+  return flag !== undefined && flag !== null;
+}
+
 function hasVitalityNetwork(actor) {
   if (!actor || actor.type !== "character") return false;
 
-  const max = Number(getVitalityMax(actor) ?? 0);
-  return Number.isFinite(max) && max > 0;
+  // Détection officielle existante du module.
+  if (isVitalityActor(actor)) return true;
+
+  // Fallback : classe Mystic/Mystique.
+  if (hasMysticClass(actor)) return true;
+
+  // Fallback : acteur ayant déjà une ressource VN en flag.
+  if (hasVitalityFlag(actor)) return true;
+
+  return false;
 }
 
 function registerSocket() {
@@ -96,11 +116,14 @@ function registerSocket() {
 function exposeApi() {
   game.vnWidget = {
     isVitalityActor,
-
     hasVitalityNetwork,
 
     getVitalityActors: () => {
-      return game.actors.filter(actor => hasVitalityNetwork(actor));
+      const actors = game.actors.filter(actor => hasVitalityNetwork(actor));
+
+      console.log(`${MODULE_ID} | Mystics détectés`, actors.map(actor => actor.name));
+
+      return actors;
     },
 
     getVitalityData: actor => {

@@ -107,12 +107,36 @@ export function collectHeroStats() {
   };
 }
 
+function getActorClassSlug(actor) {
+  const classItem = actor.items?.find(item => item.type === "class");
+  return String(classItem?.slug ?? classItem?.system?.slug ?? classItem?.name ?? "").toLowerCase();
+}
+
+function looksLikeVitalityActor(actor) {
+  if (!actor || actor.type !== "character") return false;
+
+  if (game.vnWidget?.hasVitalityNetwork?.(actor)) return true;
+  if (game.vnWidget?.isVitalityActor?.(actor)) return true;
+
+  const slug = getActorClassSlug(actor);
+  if (slug.includes("mystic") || slug.includes("mystique")) return true;
+
+  const flag = actor.getFlag?.("vn-widget", "vitalityNetwork");
+  if (flag !== undefined && flag !== null) return true;
+
+  return false;
+}
+
 export function collectVitalityActors() {
-  if (!game.vnWidget?.getVitalityActors) {
+  if (!game.vnWidget?.getVitalityData) {
     return [];
   }
 
-  return game.vnWidget.getVitalityActors().map(actor => {
+  const actors = game.actors.filter(actor => looksLikeVitalityActor(actor));
+
+  console.log("matcore-system | Vitality actors collectés", actors.map(actor => actor.name));
+
+  return actors.map(actor => {
     const data = game.vnWidget.getVitalityData(actor);
 
     return {
