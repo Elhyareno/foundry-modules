@@ -13,4 +13,8 @@ export class PF2eSkills {
 
     return actor.rollSkill(skillSlug, options);
   }
+
+  static get(actor, skillSlug) {
+    return actor.system.skills?.[skillSlug] ?? null;
+  }
 }
