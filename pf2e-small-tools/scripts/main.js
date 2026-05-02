@@ -14,7 +14,10 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  registerSocket();
+  game.pf2eSmallTools = {
+    openRepairDialog: () => openRepairDialog(),
+    openQuickTestDialog: () => openQuickTestDialog()
+  };
 
   const tryRegisterMatCore = () => {
     if (game.matcore?.registerModule) {

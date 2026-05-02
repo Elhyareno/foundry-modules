@@ -46,8 +46,59 @@
         <strong>Gaïa</strong>
         <small>Exploration</small>
     </button>
+    <button class="matcore-tab-card {{#if (eq activeTab 'small-tools')}}active{{/if}}" data-tab="small-tools">
+      <span class="matcore-tab-close">×</span>
+      <strong>Small Tools</strong>
+      <small>Réparation & tests</small>
+    </button>
     </nav>
 
+  {{#if (eq activeTab 'small-tools')}}
+    <section class="matcore-panel">
+      <div class="matcore-panel-header">
+        <div>
+          <h2>PF2e Small Tools</h2>
+          <p class="matcore-lead">
+            Petits outils de table : réparation guidée d’objets et tests rapides.
+          </p>
+        </div>
+      </div>
+
+      {{#if smallTools.available}}
+        <div class="matcore-stats">
+          <div>
+            <span>Réparation</span>
+            <strong>{{#if smallTools.canRepair}}Active{{else}}Indisponible{{/if}}</strong>
+          </div>
+
+          <div>
+            <span>Tests rapides</span>
+            <strong>{{#if smallTools.canCreateQuickTest}}MJ{{else}}Verrouillé{{/if}}</strong>
+          </div>
+        </div>
+
+        <div class="matcore-actions">
+          <button
+            type="button"
+            data-module="pf2e-small-tools"
+            data-action="openRepairDialog">
+            Réparer un objet
+          </button>
+
+          {{#if isGM}}
+            <button
+              type="button"
+              data-module="pf2e-small-tools"
+              data-action="openQuickTestDialog">
+              Générer un test rapide
+            </button>
+          {{/if}}
+        </div>
+      {{else}}
+        <p>PF2e Small Tools n’est pas actif ou n’expose pas encore son API.</p>
+      {{/if}}
+    </section>
+  {{/if}}
   {{#if (eq activeTab 'home')}}
     <section class="matcore-panel">
       <h2>État de l’écosystème</h2>

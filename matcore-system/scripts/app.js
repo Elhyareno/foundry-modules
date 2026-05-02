@@ -29,6 +29,7 @@ export class MatCoreDashboard extends Application {
     const gaiaModule = registeredModules.find(module => module.id === "gaia-exploration-tools");
     const eventForgeModule = registeredModules.find(module => module.id === "event-forge");
     const combatLogModule = registeredModules.find(module => module.id === "log-semi-auto");
+    const smallToolsModule = registeredModules.find(module => module.id === "pf2e-small-tools");
 
     const combatLog = combatLogModule?.data ?? { available: false };
     const combatPages = combatLog.pages ?? [];
@@ -57,7 +58,8 @@ export class MatCoreDashboard extends Application {
       gaia: gaiaModule?.data ?? { available: false },
       eventForge: eventForgeModule?.data ?? { available: false },
       combatLog: combatLog,
-      selectedCombatLogPage
+      selectedCombatLogPage,
+      smallTools: smallToolsModule?.data ?? { available: false }
     };
   }
 
