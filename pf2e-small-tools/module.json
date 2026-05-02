@@ -1,0 +1,39 @@
+{
+  "id": "pf2e-small-tools",
+  "title": "PF2e Small Tools",
+  "description": "Petite boîte à outils pour PF2e / SF2e : réparation guidée d’objets et tests rapides MJ.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Mat"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "relationships": {
+    "requires": [
+      {
+        "id": "lib-foundry-core",
+        "type": "module"
+      },
+      {
+        "id": "lib-pf2e-tools",
+        "type": "module"
+      }
+    ],
+    "optional": [
+      {
+        "id": "matcore-system",
+        "type": "module"
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/pf2e-small-tools.css"
+  ]
+}
