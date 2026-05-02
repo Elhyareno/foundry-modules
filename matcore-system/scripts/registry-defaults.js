@@ -5,6 +5,7 @@ export function registerCoreModules() {
   registerModuleStatus("log-semi-auto", "Log Semi Auto", "Module", 40);
   registerModuleStatus("vn-widget", "Vitality Network Widget", "Module", 50);
   registerModuleStatus("gaia-exploration-tools", "Gaïa Exploration Tools", "Module", 60);
+  registerModuleStatus("pf2e-small-tools", "PF2e Small Tools", "Module", 70);
 
   game.matcore.registerModule("pf2e-hero-stats", {
     label: "PF2e/SF2e Hero Stats",
