@@ -94,6 +94,7 @@ function getOrCreateActorStats(data, actor) {
 ========================= */
 
 export async function recordDiceRoll(message, roll) {
+  if (!game.user.isGM) return;
   if (!getSetting("trackDiceStats")) return;
   if (!message || !roll) return;
 

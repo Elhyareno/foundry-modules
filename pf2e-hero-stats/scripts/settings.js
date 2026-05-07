@@ -182,5 +182,7 @@ export function getSetting(key) {
 }
 
 export async function setSetting(key, value) {
-  return FCoreSettings.set(MODULE_ID, key, value);
+  if (!game.user.isGM) return null;
+
+  return game.settings.set(MODULE_ID, key, value);
 }
