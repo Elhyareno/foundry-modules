@@ -47,23 +47,27 @@ Hooks.once("ready", async () => {
 });
 
 Hooks.on("combatStart", async (combat) => {
+  if (!game.user.isGM) return;
   await startCombatLog(combat);
 });
 
 Hooks.on("preUpdateActor", (actor, changes) => {
+  if (!game.user.isGM) return;
   trackHpChange(actor, changes);
 });
 
 Hooks.on("createChatMessage", (message) => {
+  if (!game.user.isGM) return;
   trackNotableAttack(message);
 });
 
 Hooks.on("deleteCombat", async (combat) => {
+  if (!game.user.isGM) return;
   await finishCombatLog(combat);
 });
 
-Hooks.on("renderChatMessage", (message, html) => {
-  html[0]?.querySelectorAll?.("[data-action='lsa-save-combat']")?.forEach(button => {
+Hooks.on("renderChatMessageHTML", (message, html) => {
+  html.querySelectorAll?.("[data-action='lsa-save-combat']").forEach(button => {
     button.addEventListener("click", async () => {
       const log = message.getFlag(MODULE_ID, "combatLog");
 
@@ -89,25 +93,28 @@ async function startCombatLog(combat) {
     if (!actor) continue;
 
     const hp = getHp(actor);
-    const disposition = combatant.token?.disposition ?? combatant.token?.object?.document?.disposition ?? 0;
+    const disposition =
+      combatant.token?.disposition ??
+      combatant.token?.object?.document?.disposition ??
+      0;
 
-    const log = {
-      id: combat.id,
-      sceneName: combat.scene?.name ?? "Lieu inconnu",
-      startedAt: new Date().toLocaleString(),
-      endedAt: null,
-      rounds: 0,
-      combatants,
-      notableAttacks: {
-        playerCrit: null,
-        enemyCrit: null
-      }
+    combatants[actor.id] = {
+      actorId: actor.id,
+      tokenId: combatant.tokenId,
+      name: actor.name,
+      img: actor.img,
+      type: actor.type,
+      alliance: disposition === 1 ? "ally" : disposition === -1 ? "enemy" : "neutral",
+      startHp: hp.value,
+      maxHp: hp.max,
+      endHp: hp.value,
+      damageTaken: 0,
+      healingReceived: 0,
+      dropped: false
     };
-
-    setCombatLog(combat.id, log);
   }
 
-  combatLogs[combat.id] = {
+  const log = {
     id: combat.id,
     sceneName: combat.scene?.name ?? "Lieu inconnu",
     startedAt: new Date().toLocaleString(),
@@ -119,4 +126,6 @@ async function startCombatLog(combat) {
       enemyCrit: null
     }
   };
+
+  await setCombatLog(combat.id, log);
 }
