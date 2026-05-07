@@ -1,6 +1,7 @@
 import { combatLogs, saveCombatLogs } from "./state.js";
 
 export function trackNotableAttack(message) {
+  if (!game.user.isGM) return;
   const combat = game.combat;
   if (!combat || !combatLogs[combat.id]) return;
 

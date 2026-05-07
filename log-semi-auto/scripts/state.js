@@ -12,15 +12,23 @@ export async function loadCombatLogs() {
 }
 
 export async function saveCombatLogs() {
+  if (!game.user.isGM) return;
+
   await game.settings.set(MODULE_ID, "persistedCombatLogs", combatLogs);
 }
 
 export async function setCombatLog(combatId, log) {
   combatLogs[combatId] = log;
+
+  if (!game.user.isGM) return;
+
   await saveCombatLogs();
 }
 
 export async function deleteCombatLog(combatId) {
   delete combatLogs[combatId];
+
+  if (!game.user.isGM) return;
+
   await saveCombatLogs();
 }
