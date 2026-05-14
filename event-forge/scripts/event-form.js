@@ -16,7 +16,9 @@ const FALLBACK_SKILLS = [
   { key: "society", label: "Society" },
   { key: "stealth", label: "Stealth" },
   { key: "survival", label: "Survival" },
-  { key: "thievery", label: "Thievery" }
+  { key: "thievery", label: "Thievery" },
+  { key: "piloting", label: "Piloting" },
+  { key: "computer", label: "Computer" }
 ];
 
 const DC_BY_LEVEL = {
