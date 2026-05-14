@@ -5,5 +5,10 @@ export const BIOMES = [
   "forêt tempérée",
   "plaine herbeuse",
   "montagne",
-  "marais"
+  "marais",
+  "ville",
+  "désert",
+  "côte rocheuse",
+  "côte sableuse",
+  "ruines"
 ];
