@@ -1,6 +1,6 @@
 export class PF2eSkills {
   static getModifier(actor, skillSlug) {
-    return actor.system.skills?.[skillSlug]?.mod ?? 0;
+    return actor.system.skills?.[skillSlug]?.totalModifier ?? 0;
   }
 
   static async roll(actor, skillSlug, options = {}) {
