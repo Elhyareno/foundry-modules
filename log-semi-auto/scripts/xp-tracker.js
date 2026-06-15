@@ -6,7 +6,13 @@ export async function handleEncounterXp(log) {
     return log.xp;
   }
 
-  const enemies = Object.values(log.combatants).filter(c => c.alliance === "enemy");
+  const enemies = Object.values(log.combatants).filter(c => {
+    const actor = game.actors.get(c.actorId) || c.actor;
+    const alliance = actor?.system?.details?.alliance;
+    const isHostile = c.token?.disposition === CONST.TOKEN_DISPOSITIONS?.HOSTILE || c.token?.document?.disposition === -1;
+    
+    return alliance === "opposition" || isHostile;
+  });
   const playerActors = getEligiblePlayerActors(log);
 
   if (!playerActors.length) {
@@ -63,10 +69,11 @@ function getEligiblePlayerActors(log) {
   const seen = new Set();
 
   return Object.values(log.combatants)
-    .filter(c => c.alliance === "ally")
-    .map(c => game.actors.get(c.actorId))
-    .filter(actor => actor && actor.type === "character")
+    .map(c => game.actors.get(c.actorId) || c.actor)
     .filter(actor => {
+      if (!actor || actor.type !== "character") return false;
+      
+      // Sécurité anti-doublons si un joueur a plusieurs tokens en combat
       if (seen.has(actor.id)) return false;
       seen.add(actor.id);
       return true;
