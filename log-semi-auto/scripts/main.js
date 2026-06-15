@@ -98,10 +98,12 @@ async function startCombatLog(combat) {
       combatant.token?.object?.document?.disposition ??
       0;
 
-    combatants[actor.id] = {
+    // KEY FIX: Utiliser combatant.id au lieu de actor.id
+    combatants[combatant.id] = {
+      combatantId: combatant.id, // Plus propre à suivre
       actorId: actor.id,
       tokenId: combatant.tokenId,
-      name: actor.name,
+      name: combatant.name || actor.name, // Prend le nom du token (ex: Adepte 2)
       img: actor.img,
       type: actor.type,
       alliance: disposition === 1 ? "ally" : disposition === -1 ? "enemy" : "neutral",

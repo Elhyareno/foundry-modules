@@ -9,7 +9,12 @@ export function trackHpChange(actor, changes) {
   if (hpChange === undefined) return;
 
   const log = combatLogs[combat.id];
-  const entry = log.combatants[actor.id];
+  
+  // KEY FIX: Trouver le combattant correspondant à cet actor dans le combat actuel
+  const combatant = combat.combatants.find(c => c.actorId === actor.id);
+  if (!combatant) return;
+
+  const entry = log.combatants[combatant.id];
   if (!entry) return;
 
   const oldHp = getHp(actor).value;

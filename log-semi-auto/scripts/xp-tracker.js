@@ -6,24 +6,27 @@ export async function handleEncounterXp(log) {
     return log.xp;
   }
 
-  // 1. On récupère le combat actif de Foundry
-  const activeCombat = game.combats.active;
-  if (!activeCombat) {
-    log.xp = buildEmptyXpResult("Aucun combat actif trouvé pour récupérer l'XP.");
-    return log.xp;
-  }
-
-  // 2. On extrait l'XP calculée par le tracker PF2e (avec un fallback à 0 au cas où)
-  const pf2eAwardedXp = activeCombat.system?.awards?.xp ?? 0;
-
-  // 3. Récupération des PJ éligibles depuis ton log
+  // 1. Récupération des PJ éligibles depuis le log
   const playerActors = getEligiblePlayerActors(log);
   if (!playerActors.length) {
     log.xp = buildEmptyXpResult("Aucun personnage joueur éligible trouvé.");
     return log.xp;
   }
 
-  // En PF2e, chaque PJ reçoit la valeur complète de la rencontre (pas de division)
+  // 2. Récupération des ennemis pour le récapitulatif et le fallback
+  const enemies = Object.values(log.combatants).filter(c => c.alliance === "enemy");
+
+  // 3. On tente de choper l'XP du tracker PF2e
+  const activeCombat = game.combats.active;
+  let pf2eAwardedXp = activeCombat?.system?.awards?.xp ?? 0;
+
+  // FALLBACK : Si l'XP du tracker vaut 0 (combat annulé, issue incertaine, etc.)
+  // mais qu'il y a des ennemis, on applique un forfait par monstre (ex: 20 XP par tête)
+  if (pf2eAwardedXp === 0 && enemies.length > 0) {
+    // Tu peux ajuster la valeur par défaut ici (20 XP par monstre par exemple)
+    pf2eAwardedXp = enemies.length * 20; 
+  }
+
   const totalXp = pf2eAwardedXp;
   const xpPerCharacter = pf2eAwardedXp;
 
@@ -43,23 +46,23 @@ export async function handleEncounterXp(log) {
     });
   }
 
-  // Pour garder l'affichage des sources dans ton template HTML sans bugger,
-  // on liste simplement les ennemis du log sans recalculer leur XP individuelle
-  const enemyXpDetails = Object.values(log.combatants)
-    .filter(c => c.alliance === "enemy")
-    .map(c => ({
+  // Génération propre de la liste des sources
+  const enemyXpDetails = enemies.map(c => {
+    const actor = c.actor || game.actors.get(c.actorId);
+    return {
       name: c.name,
       actorId: c.actorId,
-      level: getActorLevel(c.actor || game.actors.get(c.actorId)),
-      xp: "Inclus" // Texte cosmétique pour ton template
-    }));
+      level: getActorLevel(actor),
+      xp: activeCombat?.system?.awards?.xp ? "Inclus (Tracker)" : "20 (Forfait)"
+    };
+  });
 
   log.xp = {
     totalXp,
     xpPerCharacter,
     enemies: enemyXpDetails,
     awards,
-    note: null
+    note: activeCombat?.system?.awards?.xp ? null : "Calculé par forfait (Issue incertaine)"
   };
 
   await sendXpMessage(log.xp);
