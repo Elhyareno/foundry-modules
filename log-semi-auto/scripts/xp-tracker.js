@@ -112,12 +112,8 @@ function getLevelBasedXp(actor) {
 }
 
 function getActorLevel(actor) {
-  return Number(
-    foundry.utils.getProperty(actor, "system.details.level.value") ??
-    foundry.utils.getProperty(actor, "system.level.value") ??
-    foundry.utils.getProperty(actor, "system.details.level") ??
-    0
-  );
+  if (!actor) return 0;
+  return Number(foundry.utils.getProperty(actor, "system.details.level.value") ?? 0);
 }
 
 function getActorXp(actor) {
