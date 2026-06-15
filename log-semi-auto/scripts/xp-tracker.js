@@ -6,27 +6,25 @@ export async function handleEncounterXp(log) {
     return log.xp;
   }
 
+  // 1. On filtre les ennemis en utilisant l'instance unique du combattant (c.actor)
   const enemies = Object.values(log.combatants).filter(c => {
-    const actor = game.actors.get(c.actorId) || c.actor;
+    const actor = c.actor; // Plus robuste que game.actors.get(c.actorId)
     const alliance = actor?.system?.details?.alliance;
-    const isHostile = c.token?.disposition === CONST.TOKEN_DISPOSITIONS?.HOSTILE || c.token?.document?.disposition === -1;
+    const isHostile = c.token?.disposition === -1 || c.token?.document?.disposition === -1;
     
     return alliance === "opposition" || isHostile;
   });
-  const playerActors = getEligiblePlayerActors(log);
 
-  if (!playerActors.length) {
-    log.xp = buildEmptyXpResult("Aucun personnage joueur éligible trouvé.");
-    return log.xp;
-  }
+  // ...
 
+  // 2. On map en utilisant l'id unique du COMBATTANT (c.id) et non de l'acteur global
   const enemyXpDetails = enemies.map(c => {
-    const actor = game.actors.get(c.actorId);
+    const actor = c.actor;
     const xp = getEnemyXp(actor);
 
     return {
-      name: c.name,
-      actorId: c.actorId,
+      name: c.name,       // Prendra bien "Adepte", "Adepte 2", etc.
+      id: c.id,           // ID unique du combattant dans ce combat
       level: getActorLevel(actor),
       xp
     };
