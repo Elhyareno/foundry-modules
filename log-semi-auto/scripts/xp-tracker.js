@@ -14,13 +14,24 @@ export async function handleEncounterXp(log) {
     return log.xp;
   }
 
-  // 2. FILTRAGE DES ENNEMIS (Prend en compte les doublons/clones)
+  // FILTRAGE DES ENNEMIS AMÉLIORÉ
   const enemies = Object.values(log.combatants).filter(c => {
-    const actor = c.actor; 
-    const alliance = actor?.system?.details?.alliance;
-    const isHostile = c.token?.disposition === -1 || c.token?.document?.disposition === -1;
+    // 1. On tente de récupérer l'acteur par tous les moyens possibles
+    const actor = c.actor || game.actors.get(c.actorId) || game.actors.get(c.actor?.id);
     
-    return alliance === "opposition" || isHostile;
+    // 2. Récupération de l'alliance PF2e
+    const alliance = actor?.system?.details?.alliance;
+    
+    // 3. Récupération de la disposition (hostile = -1) avec plusieurs fallbacks
+    const disposition = c.token?.disposition ?? 
+                        c.token?.document?.disposition ?? 
+                        actor?.prototypeToken?.disposition;
+    const isHostile = disposition === -1;
+
+    // 4. Si le module a gardé une propriété "alliance" personnalisée à la racine du combattant
+    const directAlliance = c.alliance;
+
+    return alliance === "opposition" || directAlliance === "opposition" || directAlliance === "enemy" || isHostile;
   });
 
   // 3. ENREGISTREMENT DES MONSTRES
