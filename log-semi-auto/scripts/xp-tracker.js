@@ -6,29 +6,37 @@ export async function handleEncounterXp(log) {
     return log.xp;
   }
 
-  // 1. On filtre les ennemis en utilisant l'instance unique du combattant (c.actor)
+  // 1. DÉCLARATION CORRECTE DES PJ (L'erreur venait d'ici)
+  const playerActors = getEligiblePlayerActors(log);
+
+  if (!playerActors.length) {
+    log.xp = buildEmptyXpResult("Aucun personnage joueur éligible trouvé.");
+    return log.xp;
+  }
+
+  // 2. FILTRAGE DES ENNEMIS (Prend en compte les doublons/clones)
   const enemies = Object.values(log.combatants).filter(c => {
-    const actor = c.actor; // Plus robuste que game.actors.get(c.actorId)
+    const actor = c.actor; 
     const alliance = actor?.system?.details?.alliance;
     const isHostile = c.token?.disposition === -1 || c.token?.document?.disposition === -1;
     
     return alliance === "opposition" || isHostile;
   });
 
-  // ...
-
-  // 2. On map en utilisant l'id unique du COMBATTANT (c.id) et non de l'acteur global
+  // 3. ENREGISTREMENT DES MONSTRES
   const enemyXpDetails = enemies.map(c => {
     const actor = c.actor;
     const xp = getEnemyXp(actor);
 
     return {
-      name: c.name,       // Prendra bien "Adepte", "Adepte 2", etc.
-      id: c.id,           // ID unique du combattant dans ce combat
+      name: c.name, // "Adepte 1", "Adepte 2", etc.
+      id: c.id,     // ID unique du combattant
       level: getActorLevel(actor),
       xp
     };
   });
+
+  // ... le reste de ton code (calcul du total, boucle for des awards, message chat) reste identique
 
   const totalXp = enemyXpDetails.reduce((sum, e) => sum + e.xp, 0);
   const xpPerCharacter = totalXp;
