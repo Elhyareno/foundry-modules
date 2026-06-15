@@ -6,54 +6,28 @@ export async function handleEncounterXp(log) {
     return log.xp;
   }
 
-  // 1. DÉCLARATION CORRECTE DES PJ (L'erreur venait d'ici)
-  const playerActors = getEligiblePlayerActors(log);
+  // 1. On récupère le combat actif de Foundry
+  const activeCombat = game.combats.active;
+  if (!activeCombat) {
+    log.xp = buildEmptyXpResult("Aucun combat actif trouvé pour récupérer l'XP.");
+    return log.xp;
+  }
 
+  // 2. On extrait l'XP calculée par le tracker PF2e (avec un fallback à 0 au cas où)
+  const pf2eAwardedXp = activeCombat.system?.awards?.xp ?? 0;
+
+  // 3. Récupération des PJ éligibles depuis ton log
+  const playerActors = getEligiblePlayerActors(log);
   if (!playerActors.length) {
     log.xp = buildEmptyXpResult("Aucun personnage joueur éligible trouvé.");
     return log.xp;
   }
 
-  // FILTRAGE DES ENNEMIS AMÉLIORÉ
-  const enemies = Object.values(log.combatants).filter(c => {
-    // 1. On tente de récupérer l'acteur par tous les moyens possibles
-    const actor = c.actor || game.actors.get(c.actorId) || game.actors.get(c.actor?.id);
-    
-    // 2. Récupération de l'alliance PF2e
-    const alliance = actor?.system?.details?.alliance;
-    
-    // 3. Récupération de la disposition (hostile = -1) avec plusieurs fallbacks
-    const disposition = c.token?.disposition ?? 
-                        c.token?.document?.disposition ?? 
-                        actor?.prototypeToken?.disposition;
-    const isHostile = disposition === -1;
-
-    // 4. Si le module a gardé une propriété "alliance" personnalisée à la racine du combattant
-    const directAlliance = c.alliance;
-
-    return alliance === "opposition" || directAlliance === "opposition" || directAlliance === "enemy" || isHostile;
-  });
-
-  // 3. ENREGISTREMENT DES MONSTRES
-  const enemyXpDetails = enemies.map(c => {
-    const actor = c.actor;
-    const xp = getEnemyXp(actor);
-
-    return {
-      name: c.name, // "Adepte 1", "Adepte 2", etc.
-      id: c.id,     // ID unique du combattant
-      level: getActorLevel(actor),
-      xp
-    };
-  });
-
-  // ... le reste de ton code (calcul du total, boucle for des awards, message chat) reste identique
-
-  const totalXp = enemyXpDetails.reduce((sum, e) => sum + e.xp, 0);
-  const xpPerCharacter = totalXp;
+  // En PF2e, chaque PJ reçoit la valeur complète de la rencontre (pas de division)
+  const totalXp = pf2eAwardedXp;
+  const xpPerCharacter = pf2eAwardedXp;
 
   const awards = [];
-
   for (const actor of playerActors) {
     const before = getActorXp(actor);
     const after = before + xpPerCharacter;
@@ -69,6 +43,17 @@ export async function handleEncounterXp(log) {
     });
   }
 
+  // Pour garder l'affichage des sources dans ton template HTML sans bugger,
+  // on liste simplement les ennemis du log sans recalculer leur XP individuelle
+  const enemyXpDetails = Object.values(log.combatants)
+    .filter(c => c.alliance === "enemy")
+    .map(c => ({
+      name: c.name,
+      actorId: c.actorId,
+      level: getActorLevel(c.actor || game.actors.get(c.actorId)),
+      xp: "Inclus" // Texte cosmétique pour ton template
+    }));
+
   log.xp = {
     totalXp,
     xpPerCharacter,
@@ -78,7 +63,6 @@ export async function handleEncounterXp(log) {
   };
 
   await sendXpMessage(log.xp);
-
   return log.xp;
 }
 
